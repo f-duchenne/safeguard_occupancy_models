@@ -25,6 +25,9 @@ dat$LATITUDE=as.numeric(dat$LATITUDE)
 dat$LONGITUDE=as.numeric(dat$LONGITUDE)
 dat[,site:=do.call(paste,do.call(round,list(x=.SD,digits=1))),.SDcols = which(names(dat) %in% c("LATITUDE","LONGITUDE"))]
 
+#define what is a survey:
+dat[,survey:=do.call(paste,.SD),.SDcols = which(names(dat) %in% c("site","YEAR","MONTH_2","LOCALITY"))]
+
 # remove data without time_period (because year is missing)
 dat=subset(dat,!is.na(time_period))
 
@@ -42,3 +45,15 @@ dat %>% group_by(time_period) %>% summarise(richness=length(unique(TAXON)))
 
 #latitude of records per period:
 dat %>% group_by(time_period) %>% summarise(latitude_avg=mean(LATITUDE),longitude_avg=mean(LONGITUDE))
+
+
+
+#generating the detection/non-detections matrices, over sites and visits
+## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
+dat[,species:=TAXON]
+count_table=dat[, .N,by=species]
+dat[dat$species %in% subset(count_table,N<50)$species,species="others"]
+length(unique(dat$species))
+length(unique(dat$survey))
+mat=formatOccData(taxa=dat$TAXON,site=dat$site,survey=dat$survey,closure_period=dat$time_period)
+
