@@ -30,8 +30,8 @@ for(j in 1:Nc){
 country_period_det_mu[j] ~ dnorm(0,1/2)
 country_period_occ_mu[j] ~ dnorm(0,1/2)
 
-country_period_det[j,1] ~ dnorm(country_period_det_mu[j],tau.det)
-country_period_occ[j,1] ~ dnorm(country_period_occ_mu[j],tau.occ)
+country_period_det[j,1] <- 0
+country_period_occ[j,1] <- 0
 
 for(jj in 2:Nperiod){
 country_period_det[j,jj] ~ dnorm(country_period_det[j,jj-1],tau.det)
