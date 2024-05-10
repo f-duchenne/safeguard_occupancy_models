@@ -4,4 +4,6 @@ Occupancy models were fitted using an approach based on what was has been done i
 
 Script 1 is filtering the species with enough data to be analysed and put the data in the right format to fit the model.
 
-Script 2 is fitting the model for each species, independently, on a HPC.
+Script 2 is the script defining the statistical model in JAGS language.
+
+Script 3 is fitting the model for each species, independently, on a HPC.
