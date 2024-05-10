@@ -25,8 +25,20 @@ dat$LATITUDE=as.numeric(dat$LATITUDE)
 dat$LONGITUDE=as.numeric(dat$LONGITUDE)
 dat[,site:=do.call(paste,do.call(round,list(x=.SD,digits=1))),.SDcols = which(names(dat) %in% c("LATITUDE","LONGITUDE"))]
 
+# remove data without time_period (because year is missing)
+dat=subset(dat,!is.na(time_period))
+
 #use sparta tools to have a first look at the dataset
 results <- dataDiagnostics(taxa = dat$TAXON,
                            site = dat$site,
                            time_period = dat$time_period,
                            progress_bar = TRUE)
+
+#nb of records per period:
+dat %>% group_by(time_period) %>% count()
+
+#richness per period:
+dat %>% group_by(time_period) %>% summarise(richness=length(unique(TAXON)))
+
+#latitude of records per period:
+dat %>% group_by(time_period) %>% summarise(latitude_avg=mean(LATITUDE),longitude_avg=mean(LONGITUDE))
