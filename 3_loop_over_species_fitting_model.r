@@ -17,35 +17,46 @@ i=1
 index=i+6
 
 #import data:
-mat=fread("det_nondet_matrix_species_common.csv")
+dat=fread("det_nondet_matrix_species_common.csv")
+dat$Y=dat[,index,with=F]
+count_table=dat[,sum(Y),by=COUNTRY] #count number of records per country
+
+#exclude country without record of the focal species
+dat=subset(dat,COUNTRY %in% subset(count_table,V1>0)$COUNTRY)
 
 #det/nondet of the focal species
-Y=dat[,index]
+Y=dat$Y
 Y[Y>1]=1 #if many dets, put one
 
+N=nrow(dat)
 
-ParsStage <- c("country_period_det","country_period_det","alpha","site_effect",
-"site_eff")
+Nc=length(unique(dat$COUNTRY))
+
+Nperiod=length(unique(dat$time_period))
+
+period_num=as.numeric(as.factor(dat$time_period))
+
+country_num=as.numeric(as.factor(dat$COUNTRY))
+
+site_num=as.numeric(as.factor(dat$site))
+
+dat.model=list(Y=Y,N=N,Nc=Nc,Nperiod=Nperiod,time_period=dat$time_period,period_num=period_num,COUNTRY=dat$COUNTRY,country_num=country_num,list_length=dat$list_length,site=dat$site,site_num=site_num)
+
+ParsStage <- c("country_period_det","country_period_det","alpha","site_eff","sd.occ","sd.det","sd.site")
 
 Inits <- function(){list()}
 
 t1=Sys.time()
-results1 <- jags(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat,n.burnin = 50,  n.iter = 100, n.thin = 2,inits =Inits,jags.seed =2)
+results1 <- jags(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat.model,n.burnin = 50,  n.iter = 100, n.thin = 2,inits =Inits,jags.seed =2)
 t2=Sys.time()
 t2-t1
 
-save(results1,file=paste0("chain_model_ZI",j,".RData"))
 
 
-ParsStage <- c("barrier_infer","match_infer","Interceptpz","traitBarrier","Intercept","traitMismatch","pheno","abond","plant_effect","site_effect",
-"temp_effect","sitebird_effect","sd.plant","sd.bird","sd.site","sd.temp","r","edec","samp")
 
-Inits <- function(){list()}
 
-t1=Sys.time()
-results1 <- jags(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat,n.burnin = 50,  n.iter = 100, n.thin = 2,inits =Inits,jags.seed =2)
-t2=Sys.time()
-t2-t1
+
+
 
 save(results1,file=paste0("chain_model_ZI",j,".RData"))
 #
