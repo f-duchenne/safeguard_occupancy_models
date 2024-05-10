@@ -14,31 +14,31 @@ model{
 for(i in 1:N){
 
 	### Observation Model
-	Y[i] ~ dbern(Py[i])
+	Y[i] ~ dbern(min(Py[i]+0.00000000000000001,0.9999999999999999))
 	Py[i]<- z[i]*p[i]
-	logit(p[i]) <- country_period_det[country_num[i],period_num[i]]+alpha*log(list_length[i]) 
+	logit(p[i]) <- country.period.det[country.num[i],period.num[i]]+alpha*log(list.length[i]) 
 	
 	### State model
 	z[i] ~ dbern(muZ[i]) 
-	logit(muZ[i]) <- country_period_occ[country_num[i],period_num[i]]+site_eff[site_num[i]] 
+	logit(muZ[i]) <- country.period.occ[country.num[i],period.num[i]]+site.eff[site.num[i]] 
 }
 
 # PRIORS
 # Observation and State models priors
 for(j in 1:Nc){
-country_period_det[j,1] <- dnorm(0,0.5)
-country_period_occ[j,1] <- dnorm(0,0.5)
+country.period.det[j,1] ~ dnorm(0,0.5)
+country.period.occ[j,1] ~ dnorm(0,0.5)
 
 for(jj in 2:Nperiod){
-country_period_det[j,jj] ~ dnorm(country_period_det[j,jj-1],tau.det)
-country_period_occ[j,jj] ~ dnorm(country_period_occ[j,jj-1],tau.occ)
+country.period.det[j,jj] ~ dnorm(country.period.det[j,jj-1],tau.det)
+country.period.occ[j,jj] ~ dnorm(country.period.occ[j,jj-1],tau.occ)
 }
 }
 
 alpha ~ dnorm(0,0.5)
 
 for(j in 1:Nsite){
-site_eff[j] ~ dnorm(0,tau.site)
+site.eff[j] ~ dnorm(0,tau.site)
 }
 
 #HYPERPRIORS
