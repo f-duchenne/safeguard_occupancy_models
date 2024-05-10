@@ -55,21 +55,33 @@ dat=subset(dat,site %in% subset(count_table_sites,nperiods>1)$site)
 
 
 #generating the detection/non-detections matrices, over sites and visits
-## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
-dat[,species:=TAXON] #new species column
-count_table=dat[, .N,by=species] #count number of records per species
-dat[dat$species %in% subset(count_table,N<1000)$species,species:="others"] #all species with less than 50 records are classified as "others"
-
 length(unique(dat$species)) #number of species (ncol of the matrix)
 length(unique(dat$survey)) #number of survey (nrow of the matrix)
 
-#matrix is still way too big, needs to be splitted in two parts
+#matrix is way too big, needs to be splitted in two parts
+
 
 #focusing on common species first
-dat[dat$species %in% subset(count_table,N<1000)$species,species:="others"] #all species 
+## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
+dat[,species:=TAXON] #new species column
+count_table=dat[, .N,by=species] #count number of records per species
+dat[dat$species %in% subset(count_table,N<1000)$species,species:="others"] #all species with less than 1000 records are classified as "others"
 
 #create the matrix
 mat1=dcast(dat,survey+list_length+YEAR_2+time_period+site~species)
 
-mat=formatOccData(taxa=dat$TAXON,site=dat$site,survey=dat$survey,closure_period=dat$time_period)
+#export matrix
+fwrite(mat1,"det_nondet_matrix_species_common.csv")
+
+#focusing on rare species
+dat[,species:=TAXON] #new species column
+count_table=dat[, .N,by=species] #count number of records per species
+dat[dat$species %in% subset(count_table,N>=1000)$species,species:="others"] #all species with more than 999 records are classified as "others"
+
+#create the matrix
+mat2=dcast(dat,survey+list_length+YEAR_2+time_period+site~species)
+
+#export second matrix
+fwrite(mat2,"det_nondet_matrix_species_rare.csv")
+
 
