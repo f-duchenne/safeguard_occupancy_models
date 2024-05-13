@@ -50,14 +50,21 @@ site.num=as.numeric(as.factor(dat$site))
 
 dat.model=list(Y=Y,N=N,Nc=Nc,Nperiod=Nperiod,Nsite=Nsite,time_period=dat$time_period,period.num=period.num,COUNTRY=dat$COUNTRY,country.num=country.num,list.length=dat$list_length,site=dat$site,site.num=site.num)
 
+country_tab=unique(data.frame(COUNTRY=dat.model$COUNTRY,country.num=country.num))
+period_tab=unique(data.frame(time_period=dat.model$time_period,period.num=period.num))
+species=names(dat)[index]
+
+rm(dat)
+
 ParsStage <- c("country.period.det","country.period.occ","alpha","site.eff","sd.occ","sd.det","sd.site")
 
 Inits <- function(){list()}
 
 t1=Sys.time()
-results1 <- jags.parallel(model.file="model.txt", parameters.to.save=ParsStage, n.chains=3, data=dat.model,n.burnin = 10000,  n.iter = 30000, n.thin = 3,inits =Inits,jags.seed =2)
+results1 <- jags.parallel(model.file="model.txt", parameters.to.save=ParsStage, n.chains=3, data=dat.model,n.burnin = 20000,  n.iter = 30000, n.thin = 3,inits =Inits,jags.seed =2)
 t2=Sys.time()
 t2-t1
 
-save(results1,file=paste0("chain_model_",i,".RData"))
-#
+lili=list(results1,country_tab,period_tab,species)
+
+save(lili,file=paste0("model_",i,".RData"))
