@@ -24,6 +24,9 @@ index=i+6
 
 #import data:
 dat=fread("det_nondet_matrix_species_common.csv")
+bidon=subset(dat,COUNTRY=="France")
+bidon2=data.frame(long=sapply(strsplit(unique(bidon$site)," "),function(x){x[2]}),lat=sapply(strsplit(unique(bidon$site)," "),function(x){x[1]}))
+
 dat$Y=dat[,index,with=F]
 count.table=dat[,sum(Y),by=COUNTRY] #count number of records per country
 
