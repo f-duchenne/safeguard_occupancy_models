@@ -24,14 +24,12 @@ index=i+6
 
 #import data:
 dat=fread("det_nondet_matrix_species_common.csv")
-bidon=subset(dat,COUNTRY=="France")
-bidon2=data.frame(long=sapply(strsplit(unique(bidon$site)," "),function(x){x[2]}),lat=sapply(strsplit(unique(bidon$site)," "),function(x){x[1]}))
 
 dat$Y=dat[,index,with=F]
-count.table=dat[,sum(Y),by=COUNTRY] #count number of records per country
+count.table=dat[,sum(Y),by=COUNTRY2] #count number of records per country
 
 #exclude country without record of the focal species
-dat=subset(dat,COUNTRY %in% subset(count.table,V1>0)$COUNTRY)
+dat=subset(dat,COUNTRY2 %in% subset(count.table,V1>0)$COUNTRY2)
 
 #det/nondet of the focal species
 Y=dat$Y
@@ -39,7 +37,7 @@ Y[Y>1]=1 #if many dets, put one
 
 N=nrow(dat)
 
-Nc=length(unique(dat$COUNTRY))
+Nc=length(unique(dat$COUNTRY2))
 
 Nperiod=length(unique(dat$time_period))
 
@@ -47,24 +45,24 @@ Nsite=length(unique(dat$site))
 
 period.num=as.numeric(as.factor(dat$time_period))
 
-country.num=as.numeric(as.factor(dat$COUNTRY))
+country.num=as.numeric(as.factor(dat$COUNTRY2))
 
 site.num=as.numeric(as.factor(dat$site))
 
-dat.model=list(Y=Y,N=N,Nc=Nc,Nperiod=Nperiod,Nsite=Nsite,time_period=dat$time_period,period.num=period.num,COUNTRY=dat$COUNTRY,country.num=country.num,list.length=dat$list_length,site=dat$site,site.num=site.num)
+dat.model=list(Y=Y,N=N,Nc=Nc,Nperiod=Nperiod,Nsite=Nsite,time_period=dat$time_period,period.num=period.num,COUNTRY2=dat$COUNTRY2,country.num=country.num,list.length=dat$list_length,site=dat$site,site.num=site.num)
 
-country_tab=unique(data.frame(COUNTRY=dat.model$COUNTRY,country.num=country.num))
+country_tab=unique(data.frame(COUNTRY2=dat.model$COUNTRY2,country.num=country.num))
 period_tab=unique(data.frame(time_period=dat.model$time_period,period.num=period.num))
 species=names(dat)[index]
 
 rm(dat)
 
-ParsStage <- c("country.period.det","country.period.occ","alpha","site.eff","sd.occ","sd.det","sd.site")
+ParsStage <- c("country.period.det","country.period.occ","alpha","eu_eff","sd.occ","sd.det","sd.site")
 
 Inits <- function(){list()}
 
 t1=Sys.time()
-results1 <- jags.parallel(model.file="model.txt", parameters.to.save=ParsStage, n.chains=3, data=dat.model,n.burnin = 20000,  n.iter = 30000, n.thin = 3,inits =Inits,jags.seed =2)
+results1 <- jags.parallel(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat.model,n.burnin = 2,  n.iter = 20, n.thin = 1,inits =Inits,jags.seed =2)
 t2=Sys.time()
 t2-t1
 

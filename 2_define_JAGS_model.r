@@ -35,6 +35,11 @@ country.period.occ[j,jj] ~ dnorm(country.period.occ[j,jj-1],tau.occ)
 }
 }
 
+# EU occupancy
+for(jj in 1:Nperiod){
+eu_eff[jj]<-mean(country.period.occ[1:Nc,jj])
+}
+
 alpha ~ dnorm(0,0.5)
 
 for(j in 1:Nsite){
