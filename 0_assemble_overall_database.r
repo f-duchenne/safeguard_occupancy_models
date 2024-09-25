@@ -104,7 +104,7 @@ coords=as.data.table(st_coordinates(data4))
 names(coords)=c("LONGITUDE","LATITUDE")
 data4_filtered=cbind(as.data.table(data4),coords)
 
-data4_filtered=subset(data4,!is.na(region_20) & region_20!="outside" & !is.na(region_50) & !is.na(region_100) & !is.na(region_200))
+data4_filtered=subset(data4_filtered,!is.na(region_20) & region_20!="outside" & !is.na(region_50) & !is.na(region_100) & !is.na(region_200))
 
 filter3=nrow(data4)-nrow(data4_filtered)
 
