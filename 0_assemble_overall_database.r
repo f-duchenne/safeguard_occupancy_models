@@ -132,4 +132,12 @@ filters=data.frame(filters=c("year and coordinates","geographical extent","not i
 fwrite(filters,"nb_records_removed_during _filtering.csv")
 
 
-
+tab=data.frame(species=unique(dat$TAXON[!(dat$TAXON %in% taxi$TAXON)]),family=NA)
+for(i in 1:nrow(tab)){
+  obj=name_backbone(name=gsub("[^0-9A-Za-z///' ]","",tab$species[i],ignore.case=T),order ="Hymenoptera") #look for the given species
+  if(length(obj$rank)>0 & !is.na(tab$species[i])){  #if obj is not empty
+    tab$family[i]=ifelse(length(obj$family)>0,obj$family,NA) #family name according to the GBIF
+  }
+}
+names(tab)=names(taxi)
+taxi=rbind(taxi,tab)

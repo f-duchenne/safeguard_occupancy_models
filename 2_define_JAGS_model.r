@@ -20,39 +20,49 @@ for(i in 1:N){
 	
 	### State model
 	z[i] ~ dbern(muZ[i]) 
-	logit(muZ[i]) <- country.period.occ[country.num[i],period.num[i]]+site.eff[site.num[i]] 
+	logit(muZ[i]) <- region.period.occ[region.num[i],period.num[i]]+site.eff[site.num[i],region.num[i]] 
 }
 
 # PRIORS
 # Observation and State models priors
 for(j in 1:Nc){
 country.period.det[j,1] ~ dnorm(0,0.5)
-country.period.occ[j,1] ~ dnorm(0,0.5)
-
 for(jj in 2:Nperiod){
 country.period.det[j,jj] ~ dnorm(country.period.det[j,jj-1],tau.det)
-country.period.occ[j,jj] ~ dnorm(country.period.occ[j,jj-1],tau.occ)
 }
 }
+
+for(j in 1:Nr){
+region.period.occ[j,1] ~ dnorm(0,0.5)
+for(jj in 2:Nperiod){
+region.period.occ[j,jj] ~ dnorm(region.period.occ[j,jj-1],tau.occ)
+}
+}
+
+
 
 # EU occupancy
 for(jj in 1:Nperiod){
-eu_eff[jj]<-mean(country.period.occ[1:Nc,jj])
+eu_eff[jj]<-mean(region.period.occ[1:Nr,jj])
 }
 
 alpha ~ dnorm(0,0.5)
 
+#random site effect, with one variance per region
 for(j in 1:Nsite){
-site.eff[j] ~ dnorm(0,tau.site)
+site.eff[j] ~ dnorm(0,tau.site[region.site_num[j]])
 }
+
 
 #HYPERPRIORS
 tau.det <- 1/(sd.det * sd.det)
 sd.det ~ dt(0, 1, 1)T(0,)
 tau.occ <- 1/(sd.occ * sd.occ)
 sd.occ ~ dt(0, 1, 1)T(0,)
-tau.site <- 1/(sd.site * sd.site)
-sd.site ~ dt(0, 1, 1)T(0,)
+for(j in 1:Nr){
+sd.site[j] ~ dt(0, 1, 1)T(0,)
+tau.site[j] <- 1/(sd.site[j] * sd.site[j])
+}
 
 }
 "
