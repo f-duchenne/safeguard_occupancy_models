@@ -12,7 +12,7 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 
 # Loading data
-dat=readRDS("Safeguard_bee_df_final_v8_20240509.rds")
+dat=readRDS("Safeguard_bee_df_final_v9_20240902.rds")
 
 #convert data.frame to data.table for more faster subsequent manipulations
 dat=as.data.table(dat)
