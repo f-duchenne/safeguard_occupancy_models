@@ -100,6 +100,10 @@ data4=data3_filtered[!duplicated(data3_filtered$UUID),] #remove the duplicated v
 ############ SOME GRIDCELLS ALONG THE BORDER DO NOT HAVE A REGION; REATRRIBUTE THEM
 data4$region_20[is.na(data4$region_20) & !is.na(data4$region_50)]=data4$region_50[is.na(data4$region_20) & !is.na(data4$region_50)]
 
+coords=as.data.table(st_coordinates(data4))
+names(coords)=c("LONGITUDE","LATITUDE")
+data4_filtered=cbind(as.data.table(data4),coords)
+
 data4_filtered=subset(data4,!is.na(region_20) & region_20!="outside" & !is.na(region_50) & !is.na(region_100) & !is.na(region_200))
 
 filter3=nrow(data4)-nrow(data4_filtered)
