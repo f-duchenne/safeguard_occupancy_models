@@ -104,8 +104,27 @@ data4_filtered=subset(data4,!is.na(region_20) & region_20!="outside" & !is.na(re
 
 filter3=nrow(data4)-nrow(data4_filtered)
 
-fwrite(data4_filtered,"database_clean_filtered.csv")
-filters=data.frame(filters=c("year and coordinates","geographical extent","not in a region"),nb_removed=c(filter1,filter2,filter3))
+############ ATTRIBUTE TIME PERIOD
+## Time periods:
+#P1 <- 1921 - 1940 # Every 20 years.
+#P2 <- 1941 - 1960
+#P3 <- 1961 - 1980
+#P4 <- 1981 - 2000
+#P5 <- 2001 - 2020
+#define time periods
+data4_filtered$time_period=NA
+data4_filtered$time_period[data4_filtered$YEAR_2>=1921 & data4_filtered$YEAR_2<=1940]= "1921-1940"
+data4_filtered$time_period[data4_filtered$YEAR_2>=1941 & data4_filtered$YEAR_2<=1960]="1941-1960"
+data4_filtered$time_period[data4_filtered$YEAR_2>=1961 & data4_filtered$YEAR_2<=1980]="1961-1980"
+data4_filtered$time_period[data4_filtered$YEAR_2>=1981 & data4_filtered$YEAR_2<=2000]="1981-2000"
+data4_filtered$time_period[data4_filtered$YEAR_2>=2001 & data4_filtered$YEAR_2<=2020]="1961-1980"
+
+dataf=subset(data4_filtered,!is.na(time_period))
+
+filter4=nrow(data4_filtered)-nrow(dataf)
+
+fwrite(dataf,"database_clean_filtered.csv")
+filters=data.frame(filters=c("year and coordinates","geographical extent","not in a region","not in a period"),nb_removed=c(filter1,filter2,filter3,filter4))
 fwrite(filters,"nb_records_removed_during _filtering.csv")
 
 
