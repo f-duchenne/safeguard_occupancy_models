@@ -121,7 +121,7 @@ data4_filtered$time_period[data4_filtered$YEAR_2>=1921 & data4_filtered$YEAR_2<=
 data4_filtered$time_period[data4_filtered$YEAR_2>=1941 & data4_filtered$YEAR_2<=1960]="1941-1960"
 data4_filtered$time_period[data4_filtered$YEAR_2>=1961 & data4_filtered$YEAR_2<=1980]="1961-1980"
 data4_filtered$time_period[data4_filtered$YEAR_2>=1981 & data4_filtered$YEAR_2<=2000]="1981-2000"
-data4_filtered$time_period[data4_filtered$YEAR_2>=2001 & data4_filtered$YEAR_2<=2020]="1961-1980"
+data4_filtered$time_period[data4_filtered$YEAR_2>=2001 & data4_filtered$YEAR_2<=2020]="2001-2020"
 
 dataf=subset(data4_filtered,!is.na(time_period))
 

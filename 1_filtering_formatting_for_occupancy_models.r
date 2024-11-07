@@ -16,10 +16,10 @@ dat=fread("database_clean_filtered.csv")
 taxi=fread("species_family_table,.csv")
 dat=merge(dat,taxi,by="TAXON")
 
-dat=subset(dat,region_20 %in% c("alpine","boreal","atlantic","continental","mediterranean"))
+dat=subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean"))
 
 #roughly define sites
-dat$site=dat$gridID_20
+dat$site=dat$gridID_50
 
 #define what is a survey:
 dat[,survey:=do.call(paste,.SD),.SDcols = which(names(dat) %in% c("site","YEAR_2","MONTH_2"))]
@@ -50,15 +50,26 @@ length(unique(dat$survey)) #number of survey (nrow of the matrix)
 ## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
 dat[,species:=TAXON] #new species column
 count_table=dat[, .N,by=species] #count number of records per species
+
+b=dat %>% group_by(species) %>% summarise(nsite=length(unique(site)))
+# liste_denis=fread("WP2_3_Species.csv")
+# names(liste_denis)[1]="species"
+# liste_denis=subset(liste_denis,!is.na(species) & species!="")
+# b=merge(liste_denis,b,by=c("species"),all.x=TRUE,all.y=FALSE)
+# b$analyzed="not in dataset"
+# b$analyzed[b$nsite<10]="no"
+# b$analyzed[b$nsite>=10]="yes"
+# dim(b)
+
 dat[dat$species %in% subset(count_table,N<1000)$species,species:="others"] #all species with less than 1000 records are classified as "others"
 length(unique(dat$species))
 
 
 #create the matrix
-mat1=dcast(dat,survey+list_length+YEAR_2+time_period+site+COUNTRY+region_20~species)
+mat1=dcast(dat,survey+list_length+YEAR_2+time_period+site+COUNTRY+region_50~species)
 
 #export matrix
-fwrite(mat1,"det_nondet_matrix_species_common.csv")
+fwrite(mat1,"det_nondet_matrix_species_common_50.csv")
 
 #focusing on rare species
 dat[,species:=TAXON] #new species column

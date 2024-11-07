@@ -1,0 +1,49 @@
+# define Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: trial-bayes
+  namespace: francois-namespace
+spec:
+  completionMode: Indexed
+  parallelism: 21
+  completions: 42
+  template:
+    spec:
+      restartPolicy: Never
+      volumes:
+      - name: francois-nfs-storage
+        nfs:
+          server: 10.0.0.116
+          path: /nfs/bcb/francois
+      containers:
+      - name: r
+        image: fduchenne/hub_cluster
+        resources:
+          requests:
+            cpu: "1"
+            memory: "5Gi"
+          limits:
+            cpu: "1"
+            memory: "12Gi"
+        command:
+        - /bin/bash
+        - -c
+        - |
+          mkdir -p /scripts && cp -r /data/* /scripts/ && \
+          index=$(echo $MY_POD_NAME | awk -F'-' '{print $3}') && \
+          echo "$MY_POD_NAME --> $index" && \
+          R -e "args <- commandArgs(trailingOnly = TRUE); source('/scripts/models.r')" --args "$index"
+        volumeMounts:
+        - mountPath: "/data"
+          name: francois-nfs-storage
+        env:
+        - name: MY_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+  backoffLimit: 4

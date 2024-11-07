@@ -13,34 +13,33 @@ pkg.out <- lapply(pkgs, require, character.only = TRUE)
 # Collect command arguments
 # Capture the arguments passed from the command line
 args <- commandArgs(trailingOnly = TRUE)
-i <- as.numeric(args[1])+1
+i <- as.numeric(args[1])
+i=16
 print(i)
 
 #defining working folder:
-setwd(dir="/data/")
+setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 
 #import data:
-dat=fread("det_nondet_matrix_species_common_50.csv")
+dat=fread("det_nondet_matrix_species_common.csv")
 
 #combinations
-tab=expand.grid(chain=1:3,species=names(dat)[8:(which(names(dat)=="others")-1)])
+tab=expand.grid(chain=1:3,species=names(dat)[8:ncol(dat)])
 index=names(dat)[names(dat)==tab$species[i]]
 
 print(index)
 
 dat$Y=dat[,index,with=F]
-dat$Y[dat$Y>1]=1 #if many dets, put one
 #det/nondet of the focal species
 Y=dat$Y
-count.table=dat[,sum(Y),by=region_50] #count number of records per country
+Y[Y>1]=1 #if many dets, put one
+count.table=dat[,sum(Y),by=region_20] #count number of records per region
 
 nsurvey_tot=nrow(dat)
-#exclude country without record of the focal species
-dat=subset(dat,region_50 %in% subset(count.table,V1>0)$region_50)
+#exclude region without record of the focal species
+dat=subset(dat,region_20 %in% subset(count.table,V1>0)$region_20)
 nsurvey_used=nrow(dat)
 
-dat$log.list.length=log(dat$list_length)
-dat=dat %>% group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
 
 N=nrow(dat)
 
@@ -50,36 +49,31 @@ Nc=length(unique(dat$COUNTRY))
 
 Nperiod=length(unique(dat$time_period))
 
-Nr=length(unique(dat$region_50))
+Nr=length(unique(dat$region_20))
 
 Nsite=length(unique(dat$site))
 
-dat$time_period.num=1
-dat$time_period.num[dat$time_period=="1941-1960"]=2
-dat$time_period.num[dat$time_period=="1961-1980"]=3
-dat$time_period.num[dat$time_period=="1981-2000"]=4
-dat$time_period.num[dat$time_period=="2001-2020"]=5
-
-period.num=dat$time_period.num
+period.num=as.numeric(as.factor(dat$time_period))
 
 country.num=as.numeric(as.factor(dat$COUNTRY))
 
-region.num=as.numeric(as.factor(dat$region_50))
+region.num=as.numeric(as.factor(dat$region_20))
 
 site.num=as.numeric(as.factor(dat$site))
 
 region.site=unique(as.data.table(cbind(site.num,region.num)))
 region.site=region.site[order(region.site$site.num),]
 
-dat.model=list(Y=Y,N=N,Nc=Nc,Nperiod=Nperiod,Nsite=Nsite,Nr=Nr,time_period=dat$time_period,period.num=period.num,COUNTRY=dat$COUNTRY,region_50=dat$region_50,region.num=region.num,country.num=country.num,log.list.length.c=dat$log.list.length.c,site=dat$site,site.num=site.num,region.site_num=region.site$region.num)
+dat.model=list(Y=Y,N=N,Nc=Nc,Nperiod=Nperiod,Nsite=Nsite,Nr=Nr,time_period=dat$time_period,period.num=period.num,COUNTRY=dat$COUNTRY,region_20=dat$region_20,region.num=region.num,country.num=country.num,list.length=dat$list_length,site=dat$site,site.num=site.num,region.site_num=region.site$region.num)
+
 
 print(N)
 
 country_tab=unique(data.frame(COUNTRY=dat.model$COUNTRY,country.num=country.num))
 period_tab=unique(data.frame(time_period=dat.model$time_period,period.num=period.num))
-region_tab=unique(data.frame(region_50=dat.model$region_50,region.num=region.num))
+region_tab=unique(data.frame(region_20=dat.model$region_20,region.num=region.num))
 
-lili=list(country_tab,period_tab,region_tab,nsurvey_tot,nsurvey_used,region.site)
+lili=list(country_tab,period_tab,region_tab,nsurvey_tot,nsurvey_used)
 if(tab$chain[i]==1){
 save(lili,file=paste0("data_",tab$species[i],".RData"))
 }
@@ -93,7 +87,7 @@ ParsStage <- c("region.period.det","region.period.occ","alpha","eu_eff","sd.occ"
 Inits <- function(){list()}
 
 t1=Sys.time()
-results1 <- jags(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat.model,n.burnin = 200,  n.iter = 500, n.thin = 3,inits =Inits,jags.seed=i)
+results1 <- jags(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat.model,n.burnin = 70000,  n.iter = 80000, n.thin = 3,inits =Inits,jags.seed=i)
 t2=Sys.time()
 t2-t1
 
