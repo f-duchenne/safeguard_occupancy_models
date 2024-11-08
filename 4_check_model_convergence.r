@@ -8,12 +8,11 @@ dat=fread("det_nondet_matrix_species_common_50.csv")
 
 #combinations
 tab=expand.grid(species=names(dat)[8:(ncol(dat)-1)])
-tab=subset(tab,species!="Andrena bucephala")
 
 setwd(dir="C:/Users/Duchenne/Documents/safeguard/results_models")
 
 sumaf=NULL
-for(i in 1:100){
+for(i in 1:10){
 #combinations
 index=names(dat)[names(dat)==tab$species[i]]
 
@@ -37,7 +36,21 @@ suma$species=tab$species[i]
 sumaf=rbind(sumaf,suma)
 }
 
+sumaf$type=sumaf$vari
+sumaf$type[grep("det",sumaf$vari)]="detection"
+sumaf$type[grep("period.occ",sumaf$vari)]="occupancy"
+sumaf$type[grep("eu_eff",sumaf$vari)]="eu_eff"
+sumaf$country.num=sapply(strsplit(gsub("]","",sapply(strsplit(sumaf$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[1]})
+sumaf$period.num=sapply(strsplit(gsub("]","",sapply(strsplit(sumaf$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[2]})
+sumaf$period.num[sumaf$type=="eu_eff"]=sumaf$country.num[sumaf$type=="eu_eff"]
+sumaf$country.num[sumaf$type=="eu_eff"]=NA
+
 b= sumaf %>% group_by(species) %>% summarise(prop_bad_rhat=sum(Rhat>1.1)/length(Rhat),prop_bad_MCE=sum(MCEpc>5)/length(MCEpc))
+
+ggplot(data=subset(sumaf,type=="eu_eff"),aes(x=period.num,y=mean,group=species,color=species,fill=species))+geom_line()+geom_ribbon(aes(ymin=l95,ymax=u95),alpha=0.2,color=NA)+xlab("Periode")+theme_bw()+ylab("occupancy")+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA))
 
 
 dat$Y=dat[,index,with=F]

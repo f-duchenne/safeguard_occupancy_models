@@ -6,8 +6,8 @@ metadata:
   namespace: francois-namespace
 spec:
   completionMode: Indexed
-  parallelism: 21
-  completions: 42
+  parallelism: 30
+  completions: 1257
   template:
     spec:
       restartPolicy: Never
@@ -22,10 +22,10 @@ spec:
         resources:
           requests:
             cpu: "1"
-            memory: "5Gi"
+            memory: "3Gi"
           limits:
             cpu: "1"
-            memory: "12Gi"
+            memory: "5Gi"
         command:
         - /bin/bash
         - -c

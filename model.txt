@@ -1,16 +1,19 @@
 
 model{
 
-# MODEL
-for(i in 1:N){
-  ### Observation Model
-  Y[i] ~ dbern(min(Py[i]+0.00000000000000001,0.9999999999999999))
-  Py[i]<- z[i]*p[i]
-  logit(p[i]) <- region.period.det[region.num[i],period.num[i]]+alpha*log(list.length[i]) 
-  
-  ### State model
-  z[i] ~ dbern(muZ[i]) 
-  logit(muZ[i]) <- region.period.occ[region.num[i],period.num[i]]+site.eff[site.num[i]] 
+### State model
+for (i in 1:Nsite){
+for (t in 1:Nperiod){
+  z[i,t] ~ dbern(muZ[i,t]) 
+  logit(muZ[i,t]) <- region.period.occ[region.site_num[i],t]+site.eff[i] 
+}
+}
+
+### Observation Model
+for(j in 1:N){
+  Y[j] ~ dbern(min(Py[j]+0.00000000000000001,0.9999999999999999))
+  Py[j]<- z[site.num[j],period.num[j]]*p[j]
+  logit(p[j]) <- region.period.det[region.num[j],period.num[j]]+alpha*log.list.length.c[j]
 }
 
 # PRIORS
@@ -24,10 +27,9 @@ for(j in 1:Nr){
   }
 }
 
-
 # EU occupancy
 for(jj in 1:Nperiod){
-eu_eff[jj]<-mean(region.period.occ[1:Nr,jj])
+eu_eff[jj]<-mean(z[1:Nsite,jj])
 }
 
 alpha ~ dnorm(0,0.5)
@@ -36,7 +38,6 @@ alpha ~ dnorm(0,0.5)
 for(j in 1:Nsite){
 site.eff[j] ~ dnorm(0,tau.site)
 }
-
 
 #HYPERPRIORS
 tau.det <- 1/(sd.det * sd.det)

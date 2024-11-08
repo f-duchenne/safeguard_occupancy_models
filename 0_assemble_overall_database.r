@@ -37,9 +37,10 @@ filter1=(nrow(data_Spain)-nrow(data_Spain_subset))+(nrow(dat)-nrow(dat2)) #numbe
 
 #Select the columns that are common between both datasets and give them the right names
 Spain <- data_Spain_subset %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,Unique.identifier)
-names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","UUID")
+Spain$DATABASE_REFERENCE_CODE_2="BartomeusI_Iberia_2023"
+names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","UUID","DATABASE_REFERENCE_CODE_2")
 
-dat2 <- dat2 %>% select (TAXON,YEAR_2,MONTH_2,DAY_2,LONGITUDE,LATITUDE,COUNTRY,GENUS,UUID)
+dat2 <- dat2 %>% select (TAXON,YEAR_2,MONTH_2,DAY_2,LONGITUDE,LATITUDE,COUNTRY,GENUS,UUID,DATABASE_REFERENCE_CODE_2)
 
 ## Integrate Iberian database with the European dataset.
 data2 <- rbind(dat2, Spain)
