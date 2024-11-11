@@ -1,4 +1,4 @@
-pkgs <- c("randomForest","data.table", "dplyr", "lubridate","lme4","R2jags","mcmcOutput","mcmcplots","MCMCvis") 
+pkgs <- c("randomForest","data.table", "dplyr", "lubridate","lme4","R2jags","mcmcOutput","mcmcplots","MCMCvis","ggplot2") 
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
@@ -12,7 +12,7 @@ tab=expand.grid(species=names(dat)[8:(ncol(dat)-1)])
 setwd(dir="C:/Users/Duchenne/Documents/safeguard/results_models")
 
 sumaf=NULL
-for(i in 1:10){
+for(i in 1:46){
 #combinations
 index=names(dat)[names(dat)==tab$species[i]]
 
@@ -49,8 +49,14 @@ b= sumaf %>% group_by(species) %>% summarise(prop_bad_rhat=sum(Rhat>1.1)/length(
 
 ggplot(data=subset(sumaf,type=="eu_eff"),aes(x=period.num,y=mean,group=species,color=species,fill=species))+geom_line()+geom_ribbon(aes(ymin=l95,ymax=u95),alpha=0.2,color=NA)+xlab("Periode")+theme_bw()+ylab("occupancy")+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
-panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),legend.position="none",
+strip.background=element_rect(fill=NA,color=NA))+facet_wrap(~species)
+
+ggplot(data=subset(sumaf,type=="alpha"),aes(x=species,y=mean))+geom_pointrange(aes(ymin=l95,ymax=u95),alpha=0.2)+xlab("Periode")+theme_bw()+ylab("occupancy")+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),legend.position="none",
 strip.background=element_rect(fill=NA,color=NA))
+
 
 
 dat$Y=dat[,index,with=F]
