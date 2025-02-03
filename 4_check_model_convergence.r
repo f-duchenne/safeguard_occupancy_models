@@ -2,27 +2,25 @@ pkgs <- c("randomForest","data.table", "dplyr", "lubridate","lme4","R2jags","mcm
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
-setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
-#import data:
-dat=fread("det_nondet_matrix_species_common_50.csv")
-
-#combinations
-tab=expand.grid(species=names(dat)[8:(ncol(dat)-1)])
-
+path_data="C:/Users/Duchenne/Documents/safeguard/data/"
 setwd(dir="C:/Users/Duchenne/Documents/safeguard/results_models")
 
-sumaf=NULL
-for(i in 1:46){
+#import data:
+dat=fread(paste0(path_data,"det_nondet_matrix_species_common_50.csv"))
 #combinations
-index=names(dat)[names(dat)==tab$species[i]]
+tab1=expand.grid(species=names(dat)[8:(ncol(dat)-1)])
+
+sumaf=NULL
+for(i in 1:400){
+#combinations
+index=names(dat)[names(dat)==tab1$species[i]]
 
 print(index)
-vec=c("Andrena aeneiventris")
-load(paste0("model_",tab$species[i],"_chain_1.RData"))
+load(paste0("model_",tab1$species[i],"_chain_1.RData"))
 chain1=results1
-load(paste0("model_",tab$species[i],"_chain_2.RData"))
+load(paste0("model_",tab1$species[i],"_chain_2.RData"))
 chain2=results1
-load(paste0("model_",tab$species[i],"_chain_3.RData"))
+load(paste0("model_",tab1$species[i],"_chain_3.RData"))
 chain3=results1
 
 obj1=as.mcmc(chain1)
@@ -32,31 +30,151 @@ obj3=as.mcmc(chain3)
 mco <- mcmcOutput(mcmc.list(obj1,obj2,obj3))
 suma=summary(mco)
 suma$varia=rownames(suma)
-suma$species=tab$species[i]
+suma$species=tab1$species[i]
+suma$type=suma$vari
+suma$type[grep("det",suma$vari)]="detection"
+suma$type[grep("period.occ",suma$vari)]="occupancy"
+suma$type[grep("eu_eff",suma$vari)]="eu_eff"
+suma$region.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[1]})
+suma$period.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[2]})
+
+load(paste0("data_",tab1$species[i],".RData"))
+suma=merge(suma,lili[[2]],by="period.num")
+suma=merge(suma,lili[[3]],by="region.num")
+
+
+
+
 sumaf=rbind(sumaf,suma)
+
+
 }
 
-sumaf$type=sumaf$vari
-sumaf$type[grep("det",sumaf$vari)]="detection"
-sumaf$type[grep("period.occ",sumaf$vari)]="occupancy"
-sumaf$type[grep("eu_eff",sumaf$vari)]="eu_eff"
-sumaf$country.num=sapply(strsplit(gsub("]","",sapply(strsplit(sumaf$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[1]})
-sumaf$period.num=sapply(strsplit(gsub("]","",sapply(strsplit(sumaf$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[2]})
-sumaf$period.num[sumaf$type=="eu_eff"]=sumaf$country.num[sumaf$type=="eu_eff"]
-sumaf$country.num[sumaf$type=="eu_eff"]=NA
+#import data:
+dat2=fread(paste0(path_data,"det_nondet_matrix_species_rare_50.csv"))
+#combinations
+tab2=expand.grid(species=names(dat2)[8:(ncol(dat2)-1)])
+for(i in 1:length(unique(tab2$species))){
+#combinations
+index=names(dat2)[names(dat2)==tab2$species[i]]
 
-b= sumaf %>% group_by(species) %>% summarise(prop_bad_rhat=sum(Rhat>1.1)/length(Rhat),prop_bad_MCE=sum(MCEpc>5)/length(MCEpc))
+print(index)
+load(paste0("model_",tab2$species[i],"_chain_1.RData"))
+chain1=results1
+load(paste0("model_",tab2$species[i],"_chain_2.RData"))
+chain2=results1
+load(paste0("model_",tab2$species[i],"_chain_3.RData"))
+chain3=results1
 
-ggplot(data=subset(sumaf,type=="eu_eff"),aes(x=period.num,y=mean,group=species,color=species,fill=species))+geom_line()+geom_ribbon(aes(ymin=l95,ymax=u95),alpha=0.2,color=NA)+xlab("Periode")+theme_bw()+ylab("occupancy")+
+obj1=as.mcmc(chain1)
+obj2=as.mcmc(chain2)
+obj3=as.mcmc(chain3)
+#combine chains and get a summary:
+mco <- mcmcOutput(mcmc.list(obj1,obj2,obj3))
+suma=summary(mco)
+suma$varia=rownames(suma)
+suma$species=tab2$species[i]
+suma$type=suma$vari
+suma$type[grep("det",suma$vari)]="detection"
+suma$type[grep("period.occ",suma$vari)]="occupancy"
+suma$type[grep("eu_eff",suma$vari)]="eu_eff"
+suma$region.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[1]})
+suma$period.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[2]})
+
+load(paste0("data_",tab2$species[i],".RData"))
+suma=merge(suma,lili[[2]],by="period.num")
+suma=merge(suma,lili[[3]],by="region.num")
+
+sumaf=rbind(sumaf,suma)
+
+
+}
+sumaf$period.num[sumaf$type=="eu_eff"]=sumaf$region.num[sumaf$type=="eu_eff"]
+sumaf$region.num[sumaf$type=="eu_eff"]=NA
+
+fwrite(sumaf,paste0(path_data,"results_bayes.csv"))
+
+#################################################################
+pkgs <- c("randomForest","data.table", "dplyr", "lubridate","lme4","R2jags","mcmcOutput","mcmcplots","MCMCvis","ggplot2") 
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
+path_data="C:/Users/Duchenne/Documents/safeguard/data/"
+
+sumaf=fread(paste0(path_data,"results_bayes.csv"))
+
+#CONVERGENCE CHEKS:
+b= sumaf %>% group_by(species,region_50) %>% summarise(prop_bad_rhat=sum(Rhat>1.1)/length(Rhat),prop_bad_MCE=sum(MCEpc>5)/length(MCEpc))
+
+sumaf2=merge(sumaf,subset(b,prop_bad_rhat<0.05),by=c("species","region_50"))
+
+
+ggplot(data=subset(sumaf,type=="occupancy" & species=="Andrena agilissima"),aes(x=as.numeric(period.num),y=inv.logit(mean),color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("detection")+
+geom_line()+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
-panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),legend.position="none",
-strip.background=element_rect(fill=NA,color=NA))+facet_wrap(~species)
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA))+facet_wrap(~region_50,scales="free")
 
-ggplot(data=subset(sumaf,type=="alpha"),aes(x=species,y=mean))+geom_pointrange(aes(ymin=l95,ymax=u95),alpha=0.2)+xlab("Periode")+theme_bw()+ylab("occupancy")+
+
+
+#REGIONAL INDEXES:
+inv.logit=function(x){exp(x)/(1+exp(x))}
+sumaf2$estimate=sumaf2$mean
+b2=subset(sumaf2,type=="occupancy") %>% group_by(region_50,time_period,period.num) %>% summarise(global_index=mean(inv.logit(estimate)),global_dev=sd(estimate)/sqrt(length(estimate)))
+
+
+ggplot(data=b2,aes(x=as.numeric(period.num),y=global_index,color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("occupancy")+
+geom_line()+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
-panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),legend.position="none",
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
 strip.background=element_rect(fill=NA,color=NA))
 
+b3=subset(sumaf2,type=="detection") %>% group_by(region_50,time_period,period.num) %>% summarise(global_index=mean(inv.logit(estimate)),global_dev=sd(estimate)/sqrt(length(estimate)))
+
+ggplot(data=b3,aes(x=as.numeric(period.num),y=global_index,color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("detection")+
+geom_line()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA))
+
+
+
+
+
+#### SPECIES trends
+trends=NULL
+for(i in unique(b$species)){
+bidon=subset(sumaf2,type=="occupancy" & species==i)
+for(z in unique(bidon$region_50)){
+bidon2=subset(bidon,region_50==z)
+model=lm(mean~as.numeric(as.character(period.num)),data=bidon2,weight=1/sd)
+suma=summary(model)
+trends=rbind(trends,data.frame(species=i,trend=suma$coefficients[2,1],trend_se=suma$coefficients[2,2],region_50=z))
+}
+}
+
+ggplot(data=trends,aes(y=trend,x=region_50))+geom_boxplot()
+
+#### BELGIUM trendsliste2=read.table("yearly_estimates_of_occupancy.txt",sep="\t",header=T)
+liste=fread(paste0(path_data,"yearly_estimates_of_occupancy_BELGIUM.txt"))
+belg=NULL
+for(i in unique(liste$species)){
+bidon2=subset(liste,species==i)
+bidon2$Annee=bidon2$Annee-1950
+se=logit(bidon2$mean)-logit(bidon2$quant_025)
+model=lm(logit(mean)~Annee,data=bidon2,weights=1/se)
+belg=rbind(belg,data.frame(trend_effect=model$coeff["Annee"],
+trend_err=summary(model)$coefficient["Annee","Std. Error"],
+trend_pval=car::Anova(model)["Annee",4],
+prob50=bidon2[bidon2$Annee==0,"mean"],species=i))
+}
+
+bibi=merge(subset(trends,region_50=="atlantic"),belg,by="species")
+
+ggplot(data=bibi,aes(x=trend_effect,y=trend))+geom_point()+xlab("Trends in Belgium")+
+ylab("Trend from safeguard in atlantic region")
+
+subset(bibi,species=="Bombus terrestris")
 
 
 dat$Y=dat[,index,with=F]
@@ -96,3 +214,49 @@ obj3=as.mcmc(chain3)
 mco <- mcmcOutput(mcmc.list(obj1,obj2,obj3))
 suma=summary(mco)
 suma$varia=rownames(suma)
+
+
+
+
+sp_to_test=c("Andrena agilissima","Andrena strohmella","Halictus scabiosae","Lasioglossum minutulum","Bombus terrestris")
+sumaf=NULL
+for(gr in 1:2){
+for(i in sp_to_test){
+#combinations
+
+load(paste0("model_",i,"_chain_1_group_year_",gr,".RData"))
+chain1=results1
+load(paste0("model_",i,"_chain_2_group_year_",gr,".RData"))
+chain2=results1
+load(paste0("model_",i,"_chain_3_group_year_",gr,".RData"))
+chain3=results1
+
+obj1=as.mcmc(chain1)
+obj2=as.mcmc(chain2)
+obj3=as.mcmc(chain3)
+#combine chains and get a summary:
+mco <- mcmcOutput(mcmc.list(obj1,obj2,obj3))
+suma=summary(mco)
+suma$varia=rownames(suma)
+suma$species=i
+suma$type=suma$vari
+suma$type[grep("det",suma$vari)]="detection"
+suma$type[grep("period.occ",suma$vari)]="occupancy"
+suma$type[grep("eu_eff",suma$vari)]="eu_eff"
+suma$region.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[1]})
+suma$period.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[2]})
+suma$gr=gr
+
+load(paste0("data_",i,".RData"))
+suma=merge(suma,lili[[3]],by="region.num")
+
+sumaf=rbind(sumaf,suma)
+}}
+
+b= sumaf %>% group_by(species,region_50,gr) %>% summarise(prop_bad_rhat=sum(Rhat>1.1)/length(Rhat),prop_bad_MCE=sum(MCEpc>5)/length(MCEpc))
+
+ggplot(data=subset(sumaf,type=="detection"),aes(x=as.numeric(period.num),y=inv.logit(mean),color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("detection")+
+geom_line()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA))+facet_wrap(~region_50,scales="free")+facet_wrap(~species+gr)

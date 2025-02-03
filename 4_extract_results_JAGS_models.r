@@ -10,7 +10,7 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg.out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
-setwd(dir="C:/Users/Duchenne/Documents/safeguard/models")
+setwd(dir="C:/Users/Duchenne/Documents/safeguard/result_models")
 resf=NULL
 for(i in c(1,2,3,5)){
 
@@ -38,7 +38,7 @@ resf=rbind(resf,suma)
 
 
 
-ggplot()+geom_pointrange(data=subset(resf,type=="occupancy"),aes(x=time_period,y=est,color=COUNTRY2,ymin=low,ymax=high))+
+ggplot()+geom_pointrange(data=subset(resf,type=="occupancy"),aes(x=YEAR2,y=est,color=COUNTRY2,ymin=low,ymax=high))+
 geom_line(data=subset(resf,type=="occupancy"),aes(x=time_period,y=est,color=COUNTRY2),alpha=0.5)+
 geom_pointrange(data=subset(resf,type=="eu_eff"),aes(x=time_period,y=est,ymin=low,ymax=high),col="black")+
 geom_line(data=subset(resf,type=="eu_eff"),aes(x=time_period,y=est),col="black",size=1.3)+

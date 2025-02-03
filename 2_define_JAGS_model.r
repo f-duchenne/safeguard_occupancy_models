@@ -12,51 +12,69 @@ model{
 
 ### State model
 for (i in 1:Nsite){
-	for (t in 1:Nperiod){
-	  z[i,t] ~ dbern(muZ[i,t]) 
-	  logit(muZ[i,t]) <- region.period.occ[region.site_num[i],t]+site.eff[i] 
-	}
+for (t in 1:Nperiod){
+  z[i,t] ~ dbern(muZ[i,t]) 
+  logit(muZ[i,t]) <- region.period.occ[region.site_num[i],t]+site.eff[i]
+}
 }
 
 ### Observation Model
 for(j in 1:N){
   Y[j] ~ dbern(min(Py[j]+0.00000000000000001,0.9999999999999999))
-  Py[j]<- z[site.num[j],period.num[j]]*p[j]
-  logit(p[j]) <- region.period.det[region.num[j],period.num[j]]+alpha*log.list.length.c[j]
+  Py[j]<- p[j] #z[site.num[j],period.num[j]]
+  logit(p[j]) <- period.det[period.num[j]]+reg.month[region.num[j],month.num[j]]+alpha*log.list.length.c[j]+beta*log.list.count[j]
 }
 
 # PRIORS
-# Observation and State models priors
+## State models priors
 for(j in 1:Nr){
-  region.period.det[j,1] ~ dnorm(0,0.5)
-  region.period.occ[j,1] ~ dnorm(0,0.5)
+  region.period.occ[j,1] ~ dnorm(0,0.5) 
   for(jj in 2:Nperiod){
-    region.period.det[j,jj] ~ dnorm(region.period.det[j,jj-1],tau.det)
     region.period.occ[j,jj] ~ dnorm(region.period.occ[j,jj-1],tau.occ)
   }
 }
 
-# EU occupancy
-for(jj in 1:Nperiod){
-	eu_eff[jj]<-mean(z[1:Nsite,jj])
-}
-
-alpha ~ dnorm(0,0.5)
-
-#random site effect, with one variance per region
+### random site effect
 for(j in 1:Nsite){
 site.eff[j] ~ dnorm(0,tau.site)
 }
 
+### EU occupancy
+for(jj in 1:Nperiod){
+eu_eff[jj]<-mean(z[1:Nsite,jj])
+}
+
+## Observation model priors
+### temporal variation of detection probability
+period.det[1] ~ dnorm(0,0.5) 
+for(jj in 2:Nperiod){
+   period.det[jj] ~ dnorm(period.det[jj-1],tau.det)
+}
+
+### month:region random effect
+for(j in 1:Nr){
+  for(jjj in 1:Nmonth){
+    reg.month[j,jjj] ~ dnorm(0,tau.month)
+  }
+}
+
+### sampling effects
+alpha ~ dnorm(0,0.5)
+beta ~ dnorm(0,0.5)
+
+
 #HYPERPRIORS
 tau.det <- 1/(sd.det * sd.det)
-sd.det ~ dt(0, 1, 1)T(0.00001,20)
+sd.det ~ dt(0, 1, 1)T(0.00001,30)
 tau.occ <- 1/(sd.occ * sd.occ)
-sd.occ ~ dt(0, 1, 1)T(0.00001,20)
+sd.occ ~ dt(0, 1, 1)T(0.00001,30)
 tau.site <- 1/(sd.site * sd.site)
-sd.site ~ dt(0, 1, 1)T(0.00001,20)
+sd.site ~ dt(0, 1, 1)T(0.00001,30)
+tau.month <- 1/(sd.month * sd.month)
+sd.month ~ dt(0, 1, 1)T(0.00001,30)
 
 }
+
 "
 
 writeLines(model_string,con="model.txt")
