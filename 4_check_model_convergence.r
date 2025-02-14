@@ -8,10 +8,10 @@ setwd(dir="C:/Users/Duchenne/Documents/safeguard/results_models")
 #import data:
 dat=fread(paste0(path_data,"det_nondet_matrix_species_common_50.csv"))
 #combinations
-tab1=expand.grid(species=names(dat)[8:(ncol(dat)-1)])
+tab1=expand.grid(species=names(dat)[9:(ncol(dat)-1)])
 
 sumaf=NULL
-for(i in 1:400){
+for(i in 1:75){
 #combinations
 index=names(dat)[names(dat)==tab1$species[i]]
 
@@ -32,21 +32,22 @@ suma=summary(mco)
 suma$varia=rownames(suma)
 suma$species=tab1$species[i]
 suma$type=suma$vari
-suma$type[grep("det",suma$vari)]="detection"
+suma$type[grep("period.det",suma$vari)]="detection"
 suma$type[grep("period.occ",suma$vari)]="occupancy"
 suma$type[grep("eu_eff",suma$vari)]="eu_eff"
-suma$region.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[1]})
-suma$period.num=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[2]})
+first=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[1]})
+second=sapply(strsplit(gsub("]","",sapply(strsplit(suma$vari,"[",fixed=T),function(x){x[2]}),fixed=T),","),function(x){x[2]})
+suma$region.num=NA
+suma$region.num[grep("reg",suma$vari)]=first[grep("reg",suma$vari)]
+suma$period.num=NA
+suma$period.num[grep("reg",suma$vari)]=second[grep("reg",suma$vari)]
+suma$period.num[suma$type %in% c("detection","eu_eff")]=first[suma$type %in% c("detection","eu_eff")]
 
 load(paste0("data_",tab1$species[i],".RData"))
-suma=merge(suma,lili[[2]],by="period.num")
-suma=merge(suma,lili[[3]],by="region.num")
-
-
-
+suma=merge(suma,lili[[2]],by="period.num",all.x=TRUE,all.y=FALSE)
+suma=merge(suma,lili[[3]],by="region.num",all.x=TRUE,all.y=FALSE)
 
 sumaf=rbind(sumaf,suma)
-
 
 }
 
@@ -101,43 +102,37 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 path_data="C:/Users/Duchenne/Documents/safeguard/data/"
 
+inv.logit=function(x){exp(x)/(1+exp(x))}
+
 sumaf=fread(paste0(path_data,"results_bayes.csv"))
 
 #CONVERGENCE CHEKS:
 b= sumaf %>% group_by(species,region_50) %>% summarise(prop_bad_rhat=sum(Rhat>1.1)/length(Rhat),prop_bad_MCE=sum(MCEpc>5)/length(MCEpc))
 
-sumaf2=merge(sumaf,subset(b,prop_bad_rhat<0.05),by=c("species","region_50"))
-
-
-ggplot(data=subset(sumaf,type=="occupancy" & species=="Andrena agilissima"),aes(x=as.numeric(period.num),y=inv.logit(mean),color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("detection")+
+ggplot(data=subset(sumaf,type=="occupancy" & species=="Andrena agilissima"),aes(x=as.numeric(period.num),y=inv.logit(mean),color=species))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("detection")+
 geom_line()+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
 panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
-strip.background=element_rect(fill=NA,color=NA))+facet_wrap(~region_50,scales="free")
-
-
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+facet_wrap(~region_50,scales="free")
 
 #REGIONAL INDEXES:
-inv.logit=function(x){exp(x)/(1+exp(x))}
-sumaf2$estimate=sumaf2$mean
-b2=subset(sumaf2,type=="occupancy") %>% group_by(region_50,time_period,period.num) %>% summarise(global_index=mean(inv.logit(estimate)),global_dev=sd(estimate)/sqrt(length(estimate)))
+sumaf$estimate=sumaf$mean
+b2=subset(sumaf,type=="occupancy") %>% group_by(region_50,year_grouped,period.num) %>% summarise(global_index=mean(inv.logit(estimate)),global_dev=sd(estimate)/sqrt(length(estimate)))
 
 
-ggplot(data=b2,aes(x=as.numeric(period.num),y=global_index,color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("occupancy")+
+ggplot(data=b2,aes(x=as.numeric(year_grouped),y=global_index,color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("occupancy")+
 geom_line()+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
 panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
 strip.background=element_rect(fill=NA,color=NA))
 
-b3=subset(sumaf2,type=="detection") %>% group_by(region_50,time_period,period.num) %>% summarise(global_index=mean(inv.logit(estimate)),global_dev=sd(estimate)/sqrt(length(estimate)))
+b3=subset(sumaf,type=="detection") %>% group_by(region_50,year_grouped,period.num) %>% summarise(global_index=mean(inv.logit(estimate)),global_dev=sd(estimate)/sqrt(length(estimate)))
 
-ggplot(data=b3,aes(x=as.numeric(period.num),y=global_index,color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("detection")+
+ggplot(data=b3,aes(x=as.numeric(year_grouped),y=global_index,color=region_50))+geom_point(alpha=0.7)+xlab("Periode")+theme_bw()+ylab("detection")+
 geom_line()+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
 panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
 strip.background=element_rect(fill=NA,color=NA))
-
-
 
 
 
@@ -153,7 +148,17 @@ trends=rbind(trends,data.frame(species=i,trend=suma$coefficients[2,1],trend_se=s
 }
 }
 
-ggplot(data=trends,aes(y=trend,x=region_50))+geom_boxplot()
+ggplot(data=trends,aes(x=trend,color=region_50,fill=region_50))+geom_density(,alpha=0.4)+geom_vline(xintercept=0,linetype="dashed")+
+theme_bw()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA))
+
+ggplot(data=trends,aes(y=trend,x=region_50,color=region_50,fill=region_50))+ stat_summary(fun.data = "mean_cl_boot",linewidth = 1, size = 1)+geom_hline(yintercept=0,linetype="dashed")+
+theme_bw()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA))
 
 #### BELGIUM trendsliste2=read.table("yearly_estimates_of_occupancy.txt",sep="\t",header=T)
 liste=fread(paste0(path_data,"yearly_estimates_of_occupancy_BELGIUM.txt"))

@@ -62,7 +62,7 @@ dat$region.num=as.numeric(as.factor(dat$region_50))
 
 dat$site.num=as.numeric(as.factor(dat$site))
 
-Nperiod=length(unique(dat$time_period.num))
+Nperiod=length(unique(dat$period.num))
 
 Nr=length(unique(dat$region_50))
 

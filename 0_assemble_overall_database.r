@@ -14,38 +14,44 @@ setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 # Loading SAFEGUARD data
 dat=readRDS("Safeguard_bee_df_final_v9_20240902.rds")
 
-#removing data from spain
+## removing data from spain
 dat <- dat [ !dat$DATABASE_REFERENCE_CODE_2 == "BartomeusI_Iberia_2023",]
 
-#Loading more recent data from spain:
+dat2 <- dat %>% select (TAXON,YEAR_2,MONTH_2,DAY_2,LONGITUDE,LATITUDE,COUNTRY,GENUS,UUID,DATABASE_REFERENCE_CODE_2)
+
+# Loading more recent data from spain:
 data_Spain <- fread("iberian_bees.csv")
 
-# I include approximate coordinates for two villages that do not have but hold 2750 records together (Pina de Ebro and Castello de Vide).
+## I include approximate coordinates for two villages that do not have but hold 2750 records together (Pina de Ebro and Castello de Vide).
 data_Spain$Longitude[data_Spain$Locality == "Castello de Vide"] <- -7.45680
 data_Spain$Latitude[data_Spain$Locality == "Castello de Vide"] <- 39.41624
 
-# Assign coordinates for "Pina de Ebro"
+## Assign coordinates for "Pina de Ebro"
 data_Spain$Longitude[data_Spain$Locality == "Pina de Ebro"] <- -0.5261
 data_Spain$Latitude[data_Spain$Locality == "Pina de Ebro"] <- 41.4814 
 
-######################### FILTERS THE RECORDS TO KEEP ONLY THE ONE WITH YEAR AND COORDINATES
-data_Spain_subset=subset(data_Spain, !is.na(Year) & !is.na(Longitude) & !is.na(Latitude))
-
-dat2=subset(dat, !is.na(YEAR_2) & !is.na(LONGITUDE) & !is.na(LATITUDE))
-
-filter1=(nrow(data_Spain)-nrow(data_Spain_subset))+(nrow(dat)-nrow(dat2)) #number of records removed
-
-#Select the columns that are common between both datasets and give them the right names
-Spain <- data_Spain_subset %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,Unique.identifier)
+## Select the columns that are common between both datasets and give them the right names
+Spain <- data_Spain %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,Unique.identifier)
 Spain$DATABASE_REFERENCE_CODE_2="BartomeusI_Iberia_2023"
 names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","UUID","DATABASE_REFERENCE_CODE_2")
 
-dat2 <- dat2 %>% select (TAXON,YEAR_2,MONTH_2,DAY_2,LONGITUDE,LATITUDE,COUNTRY,GENUS,UUID,DATABASE_REFERENCE_CODE_2)
+# Adding data from Portugal (https://doi.org/10.15468/dl.7vqj99):
+data_port=fread("0000019-250214093936778.csv")
+data_port$Country="Portugal"
+
+## Select the columns that are common between both datasets and give them the right names
+Portugal <- data_port %>% select (species, year, month, day, decimalLongitude,decimalLatitude,Country,genus,occurrenceID,datasetKey)
+names(Portugal)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","UUID","DATABASE_REFERENCE_CODE_2")
 
 ## Integrate Iberian database with the European dataset.
-data2 <- rbind(dat2, Spain)
+data2 <- rbind(dat2, Spain,Portugal)
 
-############### LOAD SOME BASIC SHAPEFILES THAT WILL USE TO DEFINE THE AREA
+# FILTERS THE RECORDS TO KEEP ONLY THE ONE WITH YEAR AND COORDINATES
+data2_subset=subset(dat2, !is.na(YEAR_2) & !is.na(LONGITUDE) & !is.na(LATITUDE))
+
+filter1=(nrow(data2)-nrow(data2_subset)) #number of records removed
+
+# LOAD SOME BASIC SHAPEFILES THAT WILL USE TO DEFINE THE AREA
 # Define the UTM projection for a suitable UTM zone
 utm_crs <- st_crs("+proj=utm +zone=32 +ellps=WGS84")
 
@@ -53,9 +59,9 @@ utm_crs <- st_crs("+proj=utm +zone=32 +ellps=WGS84")
 bbox <- st_bbox(c(xmin = -1200000, xmax = 3500000, ymin = 3500000, ymax = 8000000), crs = utm_crs)
 bboxsf=st_as_sf(st_as_sfc(st_bbox(bbox)))
 
-######################### FILTERS THE RECORDS TO KEEP ONLY THE ONE IN THE DEFINED AREA
+# FILTERS THE RECORDS TO KEEP ONLY THE ONE IN THE DEFINED AREA
 # Set the CRS of data3 to be the same as that of the map
-data3 <- st_as_sf(data2,coords = c("LONGITUDE", "LATITUDE"), crs = 4326) %>% st_transform(crs = utm_crs)
+data3 <- st_as_sf(data2_subset,coords = c("LONGITUDE", "LATITUDE"), crs = 4326) %>% st_transform(crs = utm_crs)
   
 #crop to the extent of the map
 data3_filtered <- st_crop(data3, bbox)
@@ -66,6 +72,8 @@ filter2=nrow(data3)-nrow(data3_filtered)
 bioregions <- bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
 bioregions <- st_transform(bioregions, crs = utm_crs)
 resolutions=c(20000,50000,100000,200000)
+plot(st_geometry(bioregions))
+plot(st_geometry(st_as_sfc(bbox)),add=TRUE)
 
 for(i in resolutions){
 	# Create hexagonal grid cells
@@ -133,12 +141,18 @@ filters=data.frame(filters=c("year and coordinates","geographical extent","not i
 fwrite(filters,"nb_records_removed_during _filtering.csv")
 
 
-tab=data.frame(species=unique(dat$TAXON[!(dat$TAXON %in% taxi$TAXON)]),family=NA)
+
+library(rgbif)
+tab=data.frame(species=unique(dat$TAXON),family=NA)
 for(i in 1:nrow(tab)){
   obj=name_backbone(name=gsub("[^0-9A-Za-z///' ]","",tab$species[i],ignore.case=T),order ="Hymenoptera") #look for the given species
   if(length(obj$rank)>0 & !is.na(tab$species[i])){  #if obj is not empty
+    if(obj$status=="SYNONYM"){obj=name_backbone(name=name_usage(key=obj$acceptedUsageKey)$data$scientificName)}
+	tab$canon[i]=ifelse(length(obj$canonicalName)>0,obj$canonicalName,NA) 
     tab$family[i]=ifelse(length(obj$family)>0,obj$family,NA) #family name according to the GBIF
   }
 }
-names(tab)=names(taxi)
+vec=tab$species[duplicated(tab$canon)]
+dat$COUNTRY[dat$TAXON %in% vec] 
+
 taxi=rbind(taxi,tab)
