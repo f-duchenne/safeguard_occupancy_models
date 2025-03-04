@@ -14,17 +14,18 @@ setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 inv.logit=function(x){exp(x)/(1+exp(x))}
 
 Nperiod=30
-Nsite=10
-sites=data.frame(site=letters[1:10],region=rep(c(1,2),each=Nsite/2),site_eff=rnorm(Nsite,0,0.5))
+Nsite=20
+sites=data.frame(site=letters[1:Nsite],region=rep(c(1,2),each=Nsite/2),site_eff=rnorm(Nsite,0,0.5))
 
-years1=data.frame(year=1:Nperiod,detect=rnorm(Nperiod,-2.5,0.001),occupancy=sapply(seq(-2.5,-0.5,length.out=Nperiod),function(x){rnorm(1,x,0.001)}),region=1)
-years2=data.frame(year=1:Nperiod,detect=years1$detect,occupancy=sapply(seq(1.5,-0.5,length.out=Nperiod),function(x){rnorm(1,x,0.001)}),region=2)
+years1=data.frame(year=1:Nperiod,detect=rnorm(Nperiod,-2.5,0.6),occupancy=sapply(seq(-2.5,-0.5,length.out=Nperiod),function(x){rnorm(1,x,0.001)}),region=1)
+years2=data.frame(year=1:Nperiod,detect=years1$detect,occupancy=sapply(seq(0.5,-2.5,length.out=Nperiod),function(x){rnorm(1,x,0.001)}),region=2)
 years=rbind(years1,years2)
 years$detect[years$year>15]=years$detect[years$year>15]+1.5
 
 survey=expand.grid(site=unique(sites$site),month=1:12,year=1:Nperiod)
+survey$prob=sqrt(survey$year)/sum(sqrt(survey$year))
 
-survey2=survey[sample(1:nrow(survey),round(nrow(survey)/7),replace=FALSE),]
+survey2=survey[sample(1:nrow(survey),round(nrow(survey)/7),replace=FALSE,prob=survey$prob),]
 survey2$list.length=1+rnbinom(nrow(survey2),size=1,prob=0.3)
 survey2$nb.data=floor(runif(rep(1,nrow(survey2)),survey2$list.length,survey2$list.length*survey2$year))
 
@@ -45,8 +46,8 @@ prob_vec=dat$state*inv.logit(0.5+dat$detect-(dat$month-6)^2/10+list.length.effec
 dat$Y=sapply(prob_vec,function(x){rbinom(1,1,x)})
 dat$occ.proba=inv.logit(dat$occupancy+dat$site_eff)
 
-dat$year_grouped=dat$year
-dat$period.num=dat$year_grouped
+dat$year_grouped=plyr::round_any(dat$year,5,f=ceiling)
+dat$period.num=as.numeric(as.factor(dat$year_grouped))
 
 dat$month.num=dat$month
 
@@ -172,6 +173,17 @@ t2=Sys.time()
 t2-t1
 
 
+# fit1 <- stan(
+  # file = "model.stan",  # Stan program
+  # data = dat.model,    # named list of data
+  # chains = 3,             # number of Markov chains
+  # warmup = 20000,          # number of warmup iterations per chain
+  # iter = 30000,            # total number of iterations per chain
+  # cores = 1,              # number of cores (could use one per chain)
+  # refresh = 0             # no progress shown
+  # )
+
+
 suma=as.data.frame(results1$BUGSoutput$summary)
 suma$varia=rownames(suma)
 suma$type=suma$vari
@@ -191,13 +203,14 @@ subset(suma,varia=="beta")
 subset(suma,varia=="alpha")
 
 
-modelg=glmmTMB(Y~year*as.factor(region)+log.list.length.c+log.list.count+(1|site),family=binomial,data=dat)
+modelg=glmmTMB(Y~log.list.length.c+log.list.count+(1|year)+(1|region/month.num),family=binomial,data=dat,ziformula=~year*as.factor(region)+(1|site))
+
 summary(modelg)
 b=ggpredict(modelg,c("year","region"))
 b$region=b$group
 ggplot()+
-geom_point(data=subset(suma,type=="occupancy"),aes(x=as.numeric(period.num),y=inv.logit(mean)),alpha=0.7)+
-geom_line(data=subset(suma,type=="occupancy"),aes(x=as.numeric(period.num),y=inv.logit(mean)))+
+geom_point(data=subset(suma,type=="occupancy"),aes(x=as.numeric(period.num)*5,y=inv.logit(mean)),alpha=0.7)+
+geom_line(data=subset(suma,type=="occupancy"),aes(x=as.numeric(period.num)*5,y=inv.logit(mean)))+
 stat_summary(data=dat,aes(x=year,y=Y),fun.y = "mean",geom="line",linewidth = 1, size = 1,color="grey")+
 stat_summary(data=years,aes(x=year,y=inv.logit(occupancy)),fun.y = "mean",geom="line",linewidth = 1, size = 1,color="blue")+
 stat_summary(data=dat,aes(x=year,y=occ.proba),fun.y = "mean",geom="line",linewidth = 1, size = 1,color="orange")+

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2025-03-04">
+
+<title>Occupancy Trends of European Pollinators</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="trends_files/libs/clipboard/clipboard.min.js"></script>
+<script src="trends_files/libs/quarto-html/quarto.js"></script>
+<script src="trends_files/libs/quarto-html/popper.min.js"></script>
+<script src="trends_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="trends_files/libs/quarto-html/anchor.min.js"></script>
+<link href="trends_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="trends_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="trends_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="trends_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="trends_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul>
+  <li><a href="#sec-data" id="toc-sec-data" class="nav-link active" data-scroll-target="#sec-data"><span class="header-section-number">1</span> Dataset</a></li>
+  <li><a href="#sec-methods" id="toc-sec-methods" class="nav-link" data-scroll-target="#sec-methods"><span class="header-section-number">2</span> Methods to estimate occupancy trends</a>
+  <ul class="collapse">
+  <li><a href="#sec-infer" id="toc-sec-infer" class="nav-link" data-scroll-target="#sec-infer"><span class="header-section-number">2.1</span> Inference of non-detection events</a></li>
+  <li><a href="#sec-stat" id="toc-sec-stat" class="nav-link" data-scroll-target="#sec-stat"><span class="header-section-number">2.2</span> Statistical model</a>
+  <ul class="collapse">
+  <li><a href="#sec-stat_l" id="toc-sec-stat_l" class="nav-link" data-scroll-target="#sec-stat_l"><span class="header-section-number">2.2.1</span> Linear temporal changes in occupancy</a></li>
+  <li><a href="#sec-stat_nl" id="toc-sec-stat_nl" class="nav-link" data-scroll-target="#sec-stat_nl"><span class="header-section-number">2.2.2</span> Non-linear temporal changes in occupancy</a></li>
+  <li><a href="#sec-stat_imp" id="toc-sec-stat_imp" class="nav-link" data-scroll-target="#sec-stat_imp"><span class="header-section-number">2.2.3</span> Model implementation</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">3</span> Results</a>
+  <ul class="collapse">
+  <li><a href="#sec-res_conv" id="toc-sec-res_conv" class="nav-link" data-scroll-target="#sec-res_conv"><span class="header-section-number">3.1</span> Species with convergence problems</a></li>
+  <li><a href="#sec-res_l" id="toc-sec-res_l" class="nav-link" data-scroll-target="#sec-res_l"><span class="header-section-number">3.2</span> Linear occupancy trends</a></li>
+  <li><a href="#sec-res_nl" id="toc-sec-res_nl" class="nav-link" data-scroll-target="#sec-res_nl"><span class="header-section-number">3.3</span> Non-linear occupancy trends</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Occupancy Trends of European Pollinators</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Ignasi Bartomeus <a href="https://orcid.org/0000-0001-7893-4389" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Estación Biológica de Doñana
+          </p>
+      </div>
+      <div class="quarto-title-meta-contents">
+    <p class="author">François Duchenne <a href="https://orcid.org/0000-0002-6917-8013" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Estación Biológica de Doñana
+          </p>
+      </div>
+      <div class="quarto-title-meta-contents">
+    <p class="author">Carlos Martinez Nuñez <a href="https://orcid.org/0000-0001-7814-4985" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Estación Biológica de Doñana
+          </p>
+      </div>
+    </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 4, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="abstract-title">Abstract</div>
+    <p>This document present the dataset, methods and results of the SAFEGUARD project that aims to assess pollinator temporal trends at European level. First, we present the dataset and the associated challenges to succeed to unravel the population trends of european pollinators from opportunistic data that have not been collected for that. Second, we present how we used occupancy models to overcome possible bias. Third, we present the preliminary results of these model, showing the occupancy trends for XX species and comparing the 5 major biogeographic regions of Europe.</p>
+  </div>
+</div>
+
+</header>
+
+<section id="sec-data" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Dataset</h1>
+<p>The dataset is essentially composed from the database assembled by Natasha de Manincor <em>et al.</em> completed by a more recent version of the Iberian dataset (Bartomeus <em>comm. pers.</em>) and recently available dataset of bee occurrences from Portugal (<a href="https://doi.org/10.15468/2e4rap" class="uri">https://doi.org/10.15468/2e4rap</a>).</p>
+<p>The merged dataset contains 4,921,255 records of pollinator occurrences between 1921 and 2020, within the region symbolized by the colored region in <a href="#fig-regions">Figure&nbsp;1</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-regions" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-regions-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Geographic area of the study colored by the different biogeographic regions that composed it.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We focused on the 5 biogeographic regions gathering most of the occurrence records, removing 93,254 records, leading to a dataset of 4,828,001 pollinator occurrences.</p>
+</section>
+<section id="sec-methods" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Methods to estimate occupancy trends</h1>
+<section id="sec-infer" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="sec-infer"><span class="header-section-number">2.1</span> Inference of non-detection events</h2>
+<p>Because opportunistic data are composed only from presence data, we need to infer pseudo-absences, or non-detection events, to inform statistical models about potential absences. To do so, we need to define sites and survey events. Site were defined as grid cells, data being aggregated spatially using the hexagonal grid cells of side of 50km, which leads to grid cells of 6495km<sup>2</sup>. In a given site, records were grouped in survey events, by year and month. We defined a species’ detections in survey as the collection of the observed species at this location and during that survey. Conversely, we defined non-detections for a species if it was not observed at a given site during a given survey. This led to the exclusion of all records without information of the month of the collect (<em>n</em> = 1,919,779). We also removed the sites that had been surveyed only in one year (<em>n</em> = 325), because they do not bring temporal information, and their removal have been shown to improve modelling performance <span class="citation" data-cites="isaac2014">(<a href="#ref-isaac2014" role="doc-biblioref">Isaac et al. 2014</a>)</span>. This led to 133,413 survey across the study area, between 1921 and 2020 (<a href="#fig-data">Figure&nbsp;2</a>).</p>
+<p>This dataset is bias toward western Europe, Belgium and Soutern UK being the region with the better temporal coverage (<a href="#fig-data">Figure&nbsp;2</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-data" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-data-1.png" class="img-fluid figure-img" width="1536"></p>
+<figcaption class="figure-caption">Figure&nbsp;2: Sites that were included in the study and sampling pressure. (a) shows all sites (hexagons of 50km side) used to estimate occupancy trends. (b) shows the number of year that have been sampled (with at least one species detection) over the all periods, while (c) and (d) show the same things for the first and second half of the period, respectively.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The dataset is also strongly temporally biased, with a sampling pressure that increased a lot over time, in terms of number of records, sites sampled and number of survey per sampled site (<a href="#fig-samp-temp">Figure&nbsp;3</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-samp-temp" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-samp-temp-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;3: Temporal variation in sampling pressures within biogeographic regions. (a) Number of records per year for each region, (b) number of sites sampled per year for each region and (c) average number of surveys per sampled site across years.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-stat" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="sec-stat"><span class="header-section-number">2.2</span> Statistical model</h2>
+<p>The corrections of these bias require the use of statistical models that distinguish the observation processes and the population states. To do so we used occupancy models, which have been shown as one of the most powerful methods to estimate population trends from opportunistic data <span class="citation" data-cites="isaac2014 outhwaite_annual_2019 shirey_occupancydetection_2023">(<a href="#ref-isaac2014" role="doc-biblioref">Isaac et al. 2014</a>; <a href="#ref-outhwaite_annual_2019" role="doc-biblioref">Outhwaite et al. 2019</a>; <a href="#ref-shirey_occupancydetection_2023" role="doc-biblioref">Shirey et al. 2023</a>)</span>. This method accounts for temporal variation in detection probability, thereby considering changes over time in the species targeted by collectors. Temporal variation in occupancy measured at broad spatial scale is considered as a proxy of population trend, due to the close relationship between abundance and occupancy <span class="citation" data-cites="he_occupancy_2003">(<a href="#ref-he_occupancy_2003" role="doc-biblioref">He and Gaston 2003</a>)</span>.</p>
+<p>To see how model formulation could affect our results, we run two different models: one modelling linear temporal changes in occupancy and another one modelling non-linear temporal changes in occupancy. Linear trends are convenient because they allow to resume in one coefficient (the slope) if the direction and the magnitude of the population trend. However, summarizing non-linear variation to a linear trends can lead to biased trends <span class="citation" data-cites="duchenne_controversy_2022">(<a href="#ref-duchenne_controversy_2022" role="doc-biblioref">Duchenne et al. 2022</a>)</span>, which thus require to assess the linearity of the studied temporal changes to draw relevant conclusions.</p>
+<section id="sec-stat_l" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="sec-stat_l"><span class="header-section-number">2.2.1</span> Linear temporal changes in occupancy</h3>
+<p>The model was fitted independently for each species, and described by the following set of equations:</p>
+<p><strong>State model:</strong></p>
+<p><span id="eq-linear-state"><span class="math display">\[
+z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \tau_r \times year_j  + \Theta_i
+\tag{1}\]</span></span></p>
+<p><strong>Observation model:</strong></p>
+<p><span id="eq-obs"><span class="math display">\[ \begin{align} y_{rijv} | z_{rij} &amp;\sim Bernouilli(p_{rijv} \times z_{rij}); \\
+logit(p_{rijv}) &amp;=\beta_1 + \beta_2 \times sampling \space completeness_{ijv} + \Theta_{r,month_v}+ \Theta_{j}
+\end{align}
+\tag{2}\]</span></span></p>
+<p>The state model describes the true (unknown) occupancy of the species (<span class="math inline">\(z_{rij}=0\)</span>, absent or <span class="math inline">\(z_{rij}=1\)</span>, present). <span class="math inline">\(\Psi_{rij}\)</span> is the probability of occupancy in region <em>r</em>, grid cell <em>i</em> at year <em>j</em>. This probability is modeled using a logit link function, as a function of a global intercept <span class="math inline">\(\beta_0\)</span>, a fixed linear effect of the time for each region <em>r</em> (_r) and a random site effect (<span class="math inline">\(\Theta_{i}\)</span>).</p>
+<p>The observation model describes detection/non-detection events in region <em>r</em>, grid cell <em>i</em>, time period <em>j</em>, and survey <em>v</em> (<span class="math inline">\(y_{rijv}\)</span>), conditionally to the true occupancy state (<span class="math inline">\(z_{rij}\)</span>). It models the detection status of the focal species (1 or 0) . <span class="math inline">\(p_{rijv}\)</span> is the estimated detection probability, modelled as a function of an intercept <span class="math inline">\(\beta_1\)</span>, a fixed effect (<span class="math inline">\(\beta_2\)</span>) of the sampling completeness.Our measure of sampling completeness was simply the logarithm of the number of species detected during survey <em>v</em>. This index was centered per region to remove the correlation with regional species richness. Because we log transformed the number of species detected, this effect captures whether during a survey, one, few or more species were detected, which mainly depends on the sampling pressure <span class="citation" data-cites="isaac2014">(<a href="#ref-isaac2014" role="doc-biblioref">Isaac et al. 2014</a>)</span>.</p>
+<p>Finally, to the observation model, we added a nested random effect of the month on of the survey <em>v</em> within the region <em>r</em> (<span class="math inline">\(\Theta_{r,month_v}\)</span>) to model phenological variation in detection probability across months and regions, and a random effect of the year (<span class="math inline">\(\Theta_j\)</span>) to absorb temporal variation in detection probability of the focal species.</p>
+<p>When using a linear temporal trend and a logit function, it has been shown that the slope of that temporal trend (<span class="math inline">\(\theta_r\)</span>) is the logarithm of the growth rate (<span class="math inline">\(\rho\)</span>) <span class="citation" data-cites="duchenne_controversy_2022">(<a href="#ref-duchenne_controversy_2022" role="doc-biblioref">Duchenne et al. 2022</a>)</span>. Thus <span class="math inline">\(\rho_r=e^{\theta_r}\)</span>, where <span class="math inline">\(\rho=1\)</span> means a stale occupancy probability,<span class="math inline">\(\rho&lt;1\)</span> a decrease and <span class="math inline">\(\rho&gt;1\)</span> a temporal increase in occupancy probability. To get a more intuitive measure of growth rate, we decided to express this growth rate in <span class="math inline">\(\pm \%.year^{-1}\)</span> we used: <span class="math inline">\(\rho_r=100 \times (e^{\theta_r}-1)\)</span>.</p>
+</section>
+<section id="sec-stat_nl" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="sec-stat_nl"><span class="header-section-number">2.2.2</span> Non-linear temporal changes in occupancy</h3>
+<p>The non-linear model was exactly the same as the linear model presented in <a href="#eq-linear-state">Equation&nbsp;1</a> and <a href="#eq-obs">Equation&nbsp;2</a>, excepting that we replaced the linear temporal trend for each region <em>r</em> (<span class="math inline">\(\tau_r\)</span>) in <a href="#eq-linear-state">Equation&nbsp;1</a> by an autoregressive process of order 1 (AR1, <span class="math inline">\(\Theta_{rj}\)</span>), leading to the following state model:</p>
+<p><strong>State model:</strong></p>
+<p><span id="eq-nonlinear-state"><span class="math display">\[
+z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \Theta_{rj} + \Theta_i
+\tag{3}\]</span></span></p>
+</section>
+<section id="sec-stat_imp" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="sec-stat_imp"><span class="header-section-number">2.2.3</span> Model implementation</h3>
+<p>Considering the important size of our dataset, due to the broad spatio-temporal scales considered here, we decided to implement our model using the <em>R</em> package <em>glmmTMB</em> to take adavantage of the fast computation it offers, instead of heavier and slower bayesian implementations <span class="citation" data-cites="isaac2014">(<a href="#ref-isaac2014" role="doc-biblioref">Isaac et al. 2014</a>)</span>. To do so, we implemented the state model in the zero inflation formula. For example for the linear model, it was coded as follow:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>model<span class="ot">=</span><span class="fu">glmmTMB</span>(Y<span class="sc">~</span>sampling_completeness<span class="sc">+</span>(<span class="dv">1</span><span class="sc">|</span>year)<span class="sc">+</span>(<span class="dv">1</span><span class="sc">|</span>region<span class="sc">/</span>month),<span class="at">ziformula=</span><span class="sc">~</span>year<span class="sc">*</span>region<span class="sc">+</span>(<span class="dv">1</span><span class="sc">|</span>site),<span class="at">family=</span>binomial,<span class="at">data=</span>dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We fitted this model for all species with at least 10 records in Europe, and that have been detected in at least 5 surveys in a given region. For each species, we removed the biogeographic regions in which the species has been detected in less than 5 surveys. This led to a list of 1,332 species, over the 1,745 species in the dataset.</p>
+</section>
+</section>
+</section>
+<section id="sec-results" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Results</h1>
+<section id="sec-res_conv" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-res_conv"><span class="header-section-number">3.1</span> Species with convergence problems</h2>
+<p>For 854 species, occupancy trends could not be estimated properly because the model did not converge, regardless the algorithm used to optimize the model (“<em>nlimb</em>”, “<em>Nelder-Mead</em>”, “<em>BFGS</em>”, “<em>CG</em>” or “<em>L-BFGS-B</em>”). Most often these convergence problems are due to positive values in the Hessian Matrix, likely due to a flat likelihood profile. This means that a broad diversity of parameter combination are consistent with the observations, and thus that the data do not contain enough information to infer spatio-temporal patterns of occupancy in a reliable way. These problems of convergence tended to occur slightly more often when the occupancy of the species was detected in very few surveys (i.e.&nbsp;rare species, <a href="#fig-convergence">Figure&nbsp;4</a>). This is a bias that our study, and other similar studies have faced <span class="citation" data-cites="duchenne_long-term_2020">Powney et al. (<a href="#ref-powney_widespread_2019" role="doc-biblioref">2019</a>)</span>: we do not have enough historical data to model occupancy trends of the species that became rare or extinct before recent times. Thus our occupancy trends do not include these strong historical declines that are likely an important components when estimating the effect of past global change on biodiversity.This is a source of under-estimation of effects of global change on biodiversity that is important to keep in mind.</p>
+<p>These problems of convergence might be possible to solve in the future, by subsampling the dataset to focus on the core of the species area only, but it is for now a work in progress. It would also make the comparison across species slightly more difficult.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-convergence" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-convergence-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;4: Logit of of the frequency of species detection as a function of the convergence status of the occupancy model. We osberve that “common species” tended to converge more often.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-res_l" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-res_l"><span class="header-section-number">3.2</span> Linear occupancy trends</h2>
+<p>We were able to estimate the occupancy trends for 478 species, for a total number of 1493 population trends, for each possible species-region combinations. Among those combinations, 4 population trends were excluded from the dataset because they presented extreme values (positive or negative,<span class="math inline">\(|\tau_r|&gt;1\)</span>) that are likely to be erroneous trends.</p>
+<p>The occupancy trends estimated for the remaining 1489 combination of species and biogeographic regions show a mixture of winners (species significantly increasing in occupancy, 27.94%) and losers (species significantly decreasing in occupancy, 25.25%) of the past global change (<a href="#fig-histo">Figure&nbsp;5</a>).</p>
+<p>The distribution of occupancy trends tended to be skewed on the right, with few very positive occupancy trends, suggesting the colonization of new area by some species, which is a typical signature of global change-driven changes.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-histo" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-histo-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;5: Occupancy trends across 1921-2020 per biogeographic regions. Black bars represent the number of species with a significant occupancy trends (p-value &lt;0.05) while white bars represent the distribution of the non-significant occupancy trends.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Calculating the arithmetic mean of these occupancy trends per region we observe an average decline only in the Atlantic bio-geographic region (<a href="#fig-avg">Figure&nbsp;6</a>). It is however important to note the strong uncertainty around these average values, due to the heterogeneity in occupancy trends across species.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-avg" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-avg-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;6: Average occupancy trends (1921-2020) per biogeographic regions. Error bars are 95% confidence interval.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Moreover, although most of the region exhibit a positive average occupancy trend, this positive trend is driven by the right-skewness of the distribution (<a href="#fig-histo">Figure&nbsp;5</a>). When looking at the proportion of losers and winners per region, losers are often as common as winners. The only exception is the alpine biogeographic region, in which winners are strongly over-represented. This is consistent with the expectations under a climate warming scenario <span class="citation" data-cites="pradervand_functional_2014">(<a href="#ref-pradervand_functional_2014" role="doc-biblioref">Pradervand et al. 2014</a>)</span>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Porpotion of winners and losers per biogeogrpahic region</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Region</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion of losers</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion of Winners</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">alpine</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.31</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">atlantic</td>
+<td style="text-align: right;">0.39</td>
+<td style="text-align: right;">0.28</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">boreal</td>
+<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.30</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">continental</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mediterranean</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.22</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</section>
+<section id="sec-res_nl" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-res_nl"><span class="header-section-number">3.3</span> Non-linear occupancy trends</h2>
+<p>Using the second kind of occupancy model, accounting for non-linearity, described in <a href="#sec-stat_nl">Section&nbsp;2.2.2</a>,we could exemplify that occupancy trends are indeed rarely linear (<a href="#fig-exempl">Figure&nbsp;7</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-exempl" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-exempl-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;7: Predicted species occupancy across time when using a non-linear model (AR1 process). The different panels show different species. Error bars are 95% confidence intervals</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When looking at how the median of the occupancy probability varies over time, we notice an historical decline in the Boreal, Continental and Atlantic regions, followed by a recent increase in occupancy probability, in a “U” shaped pattern that is consistent with what we know from other studies <span class="citation" data-cites="duchenne_long-term_2020">Carvalheiro et al. (<a href="#ref-carvalheiro_species_2013" role="doc-biblioref">2013</a>)</span>. In contrast, alpine region shows a constant increase in median occupancy probability over-time. This is consistent with the displacement of species-rich lowlands bee communities towards higher elevation. Moreover, the fact that the Alpine region does not exhibit the “U” shaped temporal variation in occupancy observed in the Continental and Atlantic regions is consistent with the fact that this historical decline has been driven by agricultural intensification.</p>
+<p>Finally, Mediterranean region shows a slight increase in median occupancy probability but the temporal pattern is rather unclear and variation is weak, probably due to the lack of historical data in that region.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-median_nl" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-median_nl-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;8: Median of the predicted occupancy probability across species, as a function of biogeographic region and time, when using a non-linear model (AR1 process).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We can use this model to retrieve linear temporal trends in occupancy across 1921-2020, but accounting for the uncertainty due to non-linearity, to compare results with previous ones. When looking at average occupancy trends per biogeographic regions we observe a result slightly different results than those presented in <a href="#sec-res_l">Section&nbsp;3.2</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-avg-nl" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-avg-nl-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;9: Average occupancy trends (1921-2020) per biogeographic regions, when acocunting for non-linearity. Error bars are 95% confidence interval.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="references" class="level1 unnumbered" data-number="4">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">4 References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-carvalheiro_species_2013" class="csl-entry" role="listitem">
+Carvalheiro, Luísa Gigante, William E. Kunin, Petr Keil, Jesus Aguirre‐Gutiérrez, Willem Nicolaas Ellis, Richard Fox, Quentin Groom, et al. 2013. <span>“Species Richness Declines and Biotic Homogenisation Have Slowed down for <span>NW</span>-<span>European</span> Pollinators and Plants.”</span> <em>Ecology Letters</em> 16 (7): 870–78. <a href="https://doi.org/10.1111/ele.12121">https://doi.org/10.1111/ele.12121</a>.
+</div>
+<div id="ref-duchenne_controversy_2022" class="csl-entry" role="listitem">
+Duchenne, François, Emmanuelle Porcher, Jean-Baptiste Mihoub, Grégoire Loïs, and Colin Fontaine. 2022. <span>“Controversy over the Decline of Arthropods: A Matter of Temporal Baseline?”</span> <em>Peer Community Journal</em> 2. <a href="https://doi.org/10.24072/pcjournal.131">https://doi.org/10.24072/pcjournal.131</a>.
+</div>
+<div id="ref-duchenne_long-term_2020" class="csl-entry" role="listitem">
+Duchenne, François, Elisa Thébault, Denis Michez, Maxence Gérard, Céline Devaux, Pierre Rasmont, Nicolas J. Vereecken, and Colin Fontaine. 2020. <span>“Long-Term Effects of Global Change on Occupancy and Flight Period of Wild Bees in <span>Belgium</span>.”</span> <em>Global Change Biology</em> 26 (12): 6753–66. https://doi.org/<a href="https://doi.org/10.1111/gcb.15379">https://doi.org/10.1111/gcb.15379</a>.
+</div>
+<div id="ref-he_occupancy_2003" class="csl-entry" role="listitem">
+He, Fangliang, and Kevin J. Gaston. 2003. <span>“Occupancy, <span>Spatial</span> <span>Variance</span>, and the <span>Abundance</span> of <span>Species</span>.”</span> <em>The American Naturalist</em> 162 (3): 366–75. <a href="https://doi.org/10.1086/377190">https://doi.org/10.1086/377190</a>.
+</div>
+<div id="ref-isaac2014" class="csl-entry" role="listitem">
+Isaac, Nick JB, Arco J. van Strien, Tom A. August, Marnix P. de Zeeuw, and David B. Roy. 2014. <span>“Statistics for Citizen Science: Extracting Signals of Change from Noisy Ecological Data.”</span> <em>Methods in Ecology and Evolution</em> 5 (10): 10521060.
+</div>
+<div id="ref-outhwaite_annual_2019" class="csl-entry" role="listitem">
+Outhwaite, Charlotte L., Gary D. Powney, Tom A. August, Richard E. Chandler, Stephanie Rorke, Oliver L. Pescott, Martin Harvey, et al. 2019. <span>“Annual Estimates of Occupancy for Bryophytes, Lichens and Invertebrates in the <span>UK</span>, 1970–2015.”</span> <em>Scientific Data</em> 6 (1): 259. <a href="https://doi.org/10.1038/s41597-019-0269-1">https://doi.org/10.1038/s41597-019-0269-1</a>.
+</div>
+<div id="ref-powney_widespread_2019" class="csl-entry" role="listitem">
+Powney, Gary D., Claire Carvell, Mike Edwards, Roger K. A. Morris, Helen E. Roy, Ben A. Woodcock, and Nick J. B. Isaac. 2019. <span>“Widespread Losses of Pollinating Insects in <span>Britain</span>.”</span> <em>Nature Communications</em> 10 (1): 1018. <a href="https://doi.org/10.1038/s41467-019-08974-9">https://doi.org/10.1038/s41467-019-08974-9</a>.
+</div>
+<div id="ref-pradervand_functional_2014" class="csl-entry" role="listitem">
+Pradervand, Jean-Nicolas, Loïc Pellissier, Christophe F. Randin, and Antoine Guisan. 2014. <span>“Functional Homogenization of Bumblebee Communities in Alpine Landscapes Under Projected Climate Change.”</span> <em>Climate Change Responses</em> 1 (1): 1. <a href="https://doi.org/10.1186/s40665-014-0001-5">https://doi.org/10.1186/s40665-014-0001-5</a>.
+</div>
+<div id="ref-shirey_occupancydetection_2023" class="csl-entry" role="listitem">
+Shirey, Vaughn, Rassim Khelifa, Leithen K. M’Gonigle, and Laura Melissa Guzman. 2023. <span>“Occupancy–Detection Models with Museum Specimen Data: <span>Promise</span> and Pitfalls.”</span> <em>Methods in Ecology and Evolution</em> 14 (2): 402–14. <a href="https://doi.org/10.1111/2041-210X.13896">https://doi.org/10.1111/2041-210X.13896</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

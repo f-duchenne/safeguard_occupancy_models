@@ -14,16 +14,14 @@ pkg.out <- lapply(pkgs, require, character.only = TRUE)
 # Capture the arguments passed from the command line
 args <- commandArgs(trailingOnly = TRUE)
 i <- as.numeric(args[1])+1
-
-i=1
 print(i)
 
 #defining working folder:
 setwd(dir="/data/")
-setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
+
 
 #import data:
-dat=fread("det_nondet_matrix_species_common_50.csv")
+dat=fread("det_nondet_matrix_species_rare.csv")
 
 #combinations
 tab=expand.grid(chain=1:3,species=names(dat)[(which(names(dat)=="region_50")+1):(which(names(dat)=="others")-1)])
@@ -94,12 +92,12 @@ if(tab$chain[i]==1){
 
 rm(dat)
 
-ParsStage <- c("period.det","region.period.occ","alpha","beta","eu_eff","sd.occ","sd.det","sd.site","sd.month","reg.month")
+ParsStage <- c("period.det","region.period.occ","alpha","beta","eu_eff","sd.occ","sd.det","sd.site","sd.month","sd.reg","reg.month","period.det.mu")
 
 Inits <- function(){list()}
 
 t1=Sys.time()
-results1 <- jags(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat.model,n.burnin = 110,  n.iter = 120, n.thin = 3,inits =Inits,jags.seed=i)
+results1 <- jags(model.file="model.txt", parameters.to.save=ParsStage, n.chains=1, data=dat.model,n.burnin = 110000,  n.iter = 120000, n.thin = 3,inits =Inits,jags.seed=i)
 t2=Sys.time()
 t2-t1
 

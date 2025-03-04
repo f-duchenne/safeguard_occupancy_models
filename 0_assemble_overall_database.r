@@ -109,6 +109,7 @@ data4=data3_filtered[!duplicated(data3_filtered$UUID),] #remove the duplicated v
 ############ SOME GRIDCELLS ALONG THE BORDER DO NOT HAVE A REGION; REATRRIBUTE THEM
 data4$region_20[is.na(data4$region_20) & !is.na(data4$region_50)]=data4$region_50[is.na(data4$region_20) & !is.na(data4$region_50)]
 
+
 coords=as.data.table(st_coordinates(data4))
 names(coords)=c("LONGITUDE","LATITUDE")
 data4_filtered=cbind(as.data.table(data4),coords)
@@ -132,7 +133,7 @@ data4_filtered$time_period[data4_filtered$YEAR_2>=1961 & data4_filtered$YEAR_2<=
 data4_filtered$time_period[data4_filtered$YEAR_2>=1981 & data4_filtered$YEAR_2<=2000]="1981-2000"
 data4_filtered$time_period[data4_filtered$YEAR_2>=2001 & data4_filtered$YEAR_2<=2020]="2001-2020"
 
-dataf=subset(data4_filtered,!is.na(time_period))
+dataf=subset(data4_filtered,!is.na(time_period) & !is.na(region_50))
 
 filter4=nrow(data4_filtered)-nrow(dataf)
 

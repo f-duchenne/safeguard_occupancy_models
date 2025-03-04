@@ -27,12 +27,10 @@ for(j in 1:N){
 
 # PRIORS
 ## State models priors
+
 for(j in 1:Nr){
   sd.occ[j] ~ dt(0, 1, 1)T(0,) 
   tau.occ[j] <- 1/(sd.occ[j] * sd.occ[j])
-}
-
-for(j in 1:Nr){
   region.period.occ[j,1] ~ dnorm(0,0.5) 
   for(jj in 2:Nperiod){
     region.period.occ[j,jj] ~ dnorm(region.period.occ[j,jj-1],tau.occ[j])
@@ -41,19 +39,16 @@ for(j in 1:Nr){
 
 ### random site effect
 for(j in 1:Nsite){
-site.eff[j] ~ dnorm(0,tau.site)
+  site.eff[j] ~ dnorm(0,tau.site)
 }
 
-### EU occupancy
-for(jj in 1:Nperiod){
-eu_eff[jj]<-mean(z[1:Nsite,jj])
-}
 
 ## Observation model priors
 ### temporal variation of detection probability
 period.det.mu ~ dnorm(0,0.5) 
 for(jj in 1:Nperiod){
    period.det[jj] ~ dnorm(period.det.mu,tau.det)
+   eu_eff[jj]<-mean(z[1:Nsite,jj]) ### EU occupancy   
 }
 
 

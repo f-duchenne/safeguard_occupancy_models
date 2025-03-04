@@ -14,13 +14,19 @@ setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 # Loading data
 dat=fread("database_clean_filtered.csv")
 taxi=fread("species_family_table,.csv")
+nrow(dat)
 dat=merge(dat,taxi,by="TAXON")
+nb_records_initial=nrow(dat)
 
+n1=nrow(dat)
 dat=subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean"))
+nr_regions=n1-nrow(dat)
+nb_records=nrow(dat)
 
 #roughly define sites
 dat$site=dat$gridID_50
 
+nr_month=nrow(subset(dat,is.na(MONTH_2)))
 dat=subset(dat,!is.na(MONTH_2))
 
 #define what is a survey:
@@ -43,40 +49,61 @@ b=dat %>% group_by(year_grouped) %>% summarise(richness=length(unique(TAXON)),su
 
 #latitude of records per period:
 b=dat %>% group_by(year_grouped) %>% summarise(latitude_avg=mean(LATITUDE),longitude_avg=mean(LONGITUDE))
-boxplot(LATITUDE~year_grouped,data=dat)
+#boxplot(LATITUDE~year_grouped,data=dat)
 
 #removing the sites that have been visited only in one period
-count_table_sites=dat %>% group_by(site) %>% summarise(nperiods=length(unique(year_grouped))) #count number of records per species
+count_table_sites=dat %>% group_by(site) %>% summarise(nperiods=length(unique(year_grouped))) 
+nr_sites=nrow(subset(count_table_sites,nperiods<2))
 dat=subset(dat,site %in% subset(count_table_sites,nperiods>1)$site)
+nb_surveys=length(unique(dat$survey))
 
 #generating the detection/non-detections matrices, over sites and visits
 length(unique(dat$TAXON)) #number of species (ncol of the matrix)
 length(unique(dat$survey)) #number of survey (nrow of the matrix)
 
+
+###EXPORT NUMBERS AND TABLES THAT WILL BE USEFUL LATTER
+count_table=dat[, .N,by=c("TAXON","FAMILY")] #count number of records per species
+
+bb=dat %>% dplyr::group_by(gridID_50,region_50,TAXON,survey) %>% dplyr::summarise(occupied=length(TAXON))
+bb=bb %>% dplyr::group_by(region_50) %>% dplyr::mutate(nsurv=length(unique(survey)))
+
+b= bb %>% dplyr::group_by(region_50,TAXON) %>% dplyr::summarise(occupancy_obs=sum(occupied>0)/mean(nsurv),nb_records=sum(occupied),nb_detect=sum(occupied>0))
+b=b %>% group_by(TAXON) %>% mutate(nb_records_tot=sum(nb_records))
+
+fwrite(b,"species_nb_records.csv")
+
+nb_sp_common=nrow(subset(count_table,N>=1000))
+nb_sp=length(unique(subset(b,nb_records_tot>=10 & nb_detect>=5)$TAXON))
+nsp_tot=length(unique(b$TAXON))
+length(unique(dat$TAXON))
+
+list_filtering=list(nb_records_initial,nr_regions,nb_records,nr_month,nr_sites,nb_surveys,nb_sp_common,nb_sp,nsp_tot)
+save(list_filtering,file=paste0("list_filtering.RData"))
+
+b=dat %>% dplyr::group_by(gridID_50,region_50) %>% dplyr::summarise(nyear=length(unique(YEAR_2)),
+nyear_b70=sum(unique(YEAR_2)<=1970),nyear_a70=sum(unique(YEAR_2)>1970))
+
+fwrite(b,"sites_studied.csv")
+
+bb=dat %>% dplyr::group_by(region_50,YEAR_2,gridID_50) %>% dplyr::summarise(nsurveys=length(unique(survey)),nrec=length(survey))
+b=bb %>% dplyr::group_by(region_50,YEAR_2) %>% dplyr::summarise(nsites=length(unique(gridID_50)),mean_nsurv=mean(nsurveys),nrec=sum(nrec))
+
+fwrite(b,"regions_sampling.csv")
+
 #matrix is way too big, needs to be splitted in two parts
 #focusing on common species first
 ## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
+
 dat[,species:=TAXON] #new species column
-count_table=dat[, .N,by=species] #count number of records per species
-
-b=dat %>% group_by(species) %>% summarise(nsite=length(unique(site)))
-# liste_denis=fread("WP2_3_Species.csv")
-# names(liste_denis)[1]="species"
-# liste_denis=subset(liste_denis,!is.na(species) & species!="")
-# b=merge(liste_denis,b,by=c("species"),all.x=TRUE,all.y=FALSE)
-# b$analyzed="not in dataset"
-# b$analyzed[b$nsite<10]="no"
-# b$analyzed[b$nsite>=10]="yes"
-# dim(b)
-
-dat[dat$species %in% subset(count_table,N<1000)$species,species:="others"] #all species with less than 1000 records are classified as "others"
+dat[dat$species %in% subset(count_table,N<1000)$TAXON,species:="others"] #all species with less than 1000 records are classified as "others"
 # sp_to_test=c("Andrena agilissima","Andrena strohmella","Halictus scabiosae","Lasioglossum minutulum","Bombus terrestris")
 # dat[!(dat$species %in% sp_to_test),species:="others"]
 
-length(unique(dat$species))
-
 #create the matrix
 mat1=dcast(dat,survey+list_length+record_number+year_grouped+MONTH_2+time_period+site+region_50~species)
+
+1997 5 6368
 
 # mat1$log.list.length=log(mat1$list_length)
 # mat1=mat1 %>% dplyr::group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
@@ -87,10 +114,10 @@ mat1=dcast(dat,survey+list_length+record_number+year_grouped+MONTH_2+time_period
 fwrite(mat1,"det_nondet_matrix_species_common_50.csv")
 
 #focusing on rare species
+count_table=dat[, .N,by=c("TAXON","FAMILY")] #count number of records per species
 dat[,species:=TAXON] #new species column
-count_table=dat[, .N,by=species] #count number of records per species
-dat[dat$species %in% subset(count_table,N>=1000)$species,species:="others"] #all species with more than 999 records are classified as "others"
-dat[dat$species %in% subset(count_table,N<10)$species,species:="others"] #all species with less than 10 records are classified as "others"
+dat[dat$species %in% subset(count_table,N>=1000)$TAXON,species:="others"] #all species with more than 999 records are classified as "others"
+dat[dat$species %in% subset(count_table,N<10)$TAXON,species:="others"] #all species with less than 10 records are classified as "others"
 
 #create the matrix
 mat2=dcast(dat,survey+list_length+record_number+year_grouped+MONTH_2+time_period+site+region_50~species)
