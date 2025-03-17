@@ -11,17 +11,20 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 #defining working folder:
 setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 
-# Loading SAFEGUARD data
-dat=readRDS("Safeguard_bee_df_final_v9_20240902.rds")
+############################ LOADING AND ASSEMBLING BEE DATA
+dat=readRDS("Bee_DB.rds")
+dat2 <- dat %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
+names(dat2)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 
 ## removing data from spain
-dat <- dat [ !dat$DATABASE_REFERENCE_CODE_2 == "BartomeusI_Iberia_2023",]
-
-dat2 <- dat %>% select (TAXON,YEAR_2,MONTH_2,DAY_2,LONGITUDE,LATITUDE,COUNTRY,GENUS,UUID,DATABASE_REFERENCE_CODE_2)
+dat2 <- dat2[!(dat2$DATABASE_REFERENCE_CODE_2 %in% c("Ignasi Bartomeus","Nacho Bartomeus" ,"I. Bartomeus")),]
 
 # Loading more recent data from spain:
 data_Spain <- fread("iberian_bees.csv")
-
+taxi=fread("species_family_table,.csv")
+nrow(data_Spain)
+data_Spain=merge(data_Spain,taxi,by.x="Accepted_name",by.y="TAXON")
+nrow(data_Spain)
 ## I include approximate coordinates for two villages that do not have but hold 2750 records together (Pina de Ebro and Castello de Vide).
 data_Spain$Longitude[data_Spain$Locality == "Castello de Vide"] <- -7.45680
 data_Spain$Latitude[data_Spain$Locality == "Castello de Vide"] <- 39.41624
@@ -31,23 +34,33 @@ data_Spain$Longitude[data_Spain$Locality == "Pina de Ebro"] <- -0.5261
 data_Spain$Latitude[data_Spain$Locality == "Pina de Ebro"] <- 41.4814 
 
 ## Select the columns that are common between both datasets and give them the right names
-Spain <- data_Spain %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,Unique.identifier)
+Spain <- data_Spain %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,FAMILY,Unique.identifier)
 Spain$DATABASE_REFERENCE_CODE_2="BartomeusI_Iberia_2023"
-names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","UUID","DATABASE_REFERENCE_CODE_2")
+names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 
 # Adding data from Portugal (https://doi.org/10.15468/dl.7vqj99):
 data_port=fread("0000019-250214093936778.csv")
 data_port$Country="Portugal"
 
 ## Select the columns that are common between both datasets and give them the right names
-Portugal <- data_port %>% select (species, year, month, day, decimalLongitude,decimalLatitude,Country,genus,occurrenceID,datasetKey)
-names(Portugal)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","UUID","DATABASE_REFERENCE_CODE_2")
+Portugal <- data_port %>% select (species, year, month, day, decimalLongitude,decimalLatitude,Country,genus,family,occurrenceID,datasetKey)
+names(Portugal)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 
 ## Integrate Iberian database with the European dataset.
-data2 <- rbind(dat2, Spain,Portugal)
+data1 <- rbind(dat2, Spain,Portugal)
 
-# FILTERS THE RECORDS TO KEEP ONLY THE ONE WITH YEAR AND COORDINATES
-data2_subset=subset(dat2, !is.na(YEAR_2) & !is.na(LONGITUDE) & !is.na(LATITUDE))
+############################ LOADING AND ASSEMBLING HOVERFLIES DATA
+dath=readRDS("Hoverfly_DB.rds")
+dath <- dath %>% select (scientificName,startYear,startMonth,startDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
+names(dath)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
+dath$taxo_group="hoverflies"
+data1$taxo_group="bees"
+## Integrate hoverflies with bees
+data2 <- rbind(data1, dath)
+
+
+############################ FILTERS THE RECORDS TO KEEP ONLY THE ONE WITH YEAR AND COORDINATES
+data2_subset=subset(data2, !is.na(YEAR_2) & !is.na(LONGITUDE) & !is.na(LATITUDE))
 
 filter1=(nrow(data2)-nrow(data2_subset)) #number of records removed
 
@@ -75,17 +88,17 @@ resolutions=c(20000,50000,100000,200000)
 plot(st_geometry(bioregions))
 plot(st_geometry(st_as_sfc(bbox)),add=TRUE)
 
-for(i in resolutions){
-	# Create hexagonal grid cells
-	hex_grid <- hexagons(bboxsf, res = i)
-	hex_grid[,paste0("gridID")]=1:nrow(hex_grid)
-	hex_grid <- st_transform(hex_grid, crs = utm_crs)
-	hex_grid=st_join(hex_grid,bioregions,largest=TRUE)
-	names(hex_grid)=c("gridID","PK_UID","region","p2012","code","name","geometry")
-	ge=which(names(hex_grid)=="geometry")
-	names(hex_grid)[-ge]=paste0(names(hex_grid)[-ge],"_",i/1000)
-	st_write(hex_grid,paste0("grid_",i/1000,"KM.shp")) #export the grid to be able to access them latter and furnish them with the paper
-}
+# for(i in resolutions){
+	# # Create hexagonal grid cells
+	# hex_grid <- hexagons(bboxsf, res = i)
+	# hex_grid[,paste0("gridID")]=1:nrow(hex_grid)
+	# hex_grid <- st_transform(hex_grid, crs = utm_crs)
+	# hex_grid=st_join(hex_grid,bioregions,largest=TRUE)
+	# names(hex_grid)=c("gridID","PK_UID","region","p2012","code","name","geometry")
+	# ge=which(names(hex_grid)=="geometry")
+	# names(hex_grid)[-ge]=paste0(names(hex_grid)[-ge],"_",i/1000)
+	# st_write(hex_grid,paste0("grid_",i/1000,"KM.shp")) #export the grid to be able to access them latter and furnish them with the paper
+# }
 
 ######################### MERGE DATA AND GRIDS
 nbr=nrow(data3_filtered)

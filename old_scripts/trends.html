@@ -111,6 +111,7 @@ div.csl-indent {
   <li><a href="#sec-stat_nl" id="toc-sec-stat_nl" class="nav-link" data-scroll-target="#sec-stat_nl"><span class="header-section-number">2.2.2</span> Non-linear temporal changes in occupancy</a></li>
   <li><a href="#sec-stat_imp" id="toc-sec-stat_imp" class="nav-link" data-scroll-target="#sec-stat_imp"><span class="header-section-number">2.2.3</span> Model implementation</a></li>
   </ul></li>
+  <li><a href="#summarizing-trends-per-region" id="toc-summarizing-trends-per-region" class="nav-link" data-scroll-target="#summarizing-trends-per-region"><span class="header-section-number">2.3</span> Summarizing trends per region</a></li>
   </ul></li>
   <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">3</span> Results</a>
   <ul class="collapse">
@@ -118,7 +119,12 @@ div.csl-indent {
   <li><a href="#sec-res_l" id="toc-sec-res_l" class="nav-link" data-scroll-target="#sec-res_l"><span class="header-section-number">3.2</span> Linear occupancy trends</a></li>
   <li><a href="#sec-res_nl" id="toc-sec-res_nl" class="nav-link" data-scroll-target="#sec-res_nl"><span class="header-section-number">3.3</span> Non-linear occupancy trends</a></li>
   </ul></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
+  <li><a href="#sec-new.detection" id="toc-sec-new.detection" class="nav-link" data-scroll-target="#sec-new.detection"><span class="header-section-number">4</span> Adapting the observation model</a>
+  <ul class="collapse">
+  <li><a href="#sec-update" id="toc-sec-update" class="nav-link" data-scroll-target="#sec-update"><span class="header-section-number">4.1</span> Updating the model</a></li>
+  <li><a href="#sec-update.res" id="toc-sec-update.res" class="nav-link" data-scroll-target="#sec-update.res"><span class="header-section-number">4.2</span> Significant changes with previous trends</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
   </ul>
 </nav>
 </div>
@@ -176,7 +182,7 @@ div.csl-indent {
 <div>
   <div class="abstract">
     <div class="abstract-title">Abstract</div>
-    <p>This document present the dataset, methods and results of the SAFEGUARD project that aims to assess pollinator temporal trends at European level. First, we present the dataset and the associated challenges to succeed to unravel the population trends of european pollinators from opportunistic data that have not been collected for that. Second, we present how we used occupancy models to overcome possible bias. Third, we present the preliminary results of these model, showing the occupancy trends for XX species and comparing the 5 major biogeographic regions of Europe.</p>
+    <p>This document present the dataset, methods and results of the SAFEGUARD project that aims to assess pollinator temporal trends at European level. First, we present the dataset and the associated challenges to succeed to unravel the population trends of european pollinators from opportunistic data that have not been collected for that. Second, we present how we used occupancy models to overcome possible bias. Third, we present the preliminary results of these model, showing the occupancy trends for ~480 species and comparing the 5 major biogeographic regions of Europe.</p>
   </div>
 </div>
 
@@ -242,10 +248,10 @@ z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \tau_r \times y
 logit(p_{rijv}) &amp;=\beta_1 + \beta_2 \times sampling \space completeness_{ijv} + \Theta_{r,month_v}+ \Theta_{j}
 \end{align}
 \tag{2}\]</span></span></p>
-<p>The state model describes the true (unknown) occupancy of the species (<span class="math inline">\(z_{rij}=0\)</span>, absent or <span class="math inline">\(z_{rij}=1\)</span>, present). <span class="math inline">\(\Psi_{rij}\)</span> is the probability of occupancy in region <em>r</em>, grid cell <em>i</em> at year <em>j</em>. This probability is modeled using a logit link function, as a function of a global intercept <span class="math inline">\(\beta_0\)</span>, a fixed linear effect of the time for each region <em>r</em> (_r) and a random site effect (<span class="math inline">\(\Theta_{i}\)</span>).</p>
+<p>The state model describes the true (unknown) occupancy of the species (<span class="math inline">\(z_{rij}=0\)</span>, absent or <span class="math inline">\(z_{rij}=1\)</span>, present). <span class="math inline">\(\Psi_{rij}\)</span> is the probability of occupancy in region <em>r</em>, grid cell <em>i</em> at year <em>j</em>. This probability is modeled using a logit link function, as a function of a global intercept <span class="math inline">\(\beta_0\)</span>, a fixed linear effect of the time for each region <em>r</em> (<span class="math inline">\(\tau_r\)</span>) and a random site effect (<span class="math inline">\(\Theta_{i}\)</span>).</p>
 <p>The observation model describes detection/non-detection events in region <em>r</em>, grid cell <em>i</em>, time period <em>j</em>, and survey <em>v</em> (<span class="math inline">\(y_{rijv}\)</span>), conditionally to the true occupancy state (<span class="math inline">\(z_{rij}\)</span>). It models the detection status of the focal species (1 or 0) . <span class="math inline">\(p_{rijv}\)</span> is the estimated detection probability, modelled as a function of an intercept <span class="math inline">\(\beta_1\)</span>, a fixed effect (<span class="math inline">\(\beta_2\)</span>) of the sampling completeness.Our measure of sampling completeness was simply the logarithm of the number of species detected during survey <em>v</em>. This index was centered per region to remove the correlation with regional species richness. Because we log transformed the number of species detected, this effect captures whether during a survey, one, few or more species were detected, which mainly depends on the sampling pressure <span class="citation" data-cites="isaac2014">(<a href="#ref-isaac2014" role="doc-biblioref">Isaac et al. 2014</a>)</span>.</p>
 <p>Finally, to the observation model, we added a nested random effect of the month on of the survey <em>v</em> within the region <em>r</em> (<span class="math inline">\(\Theta_{r,month_v}\)</span>) to model phenological variation in detection probability across months and regions, and a random effect of the year (<span class="math inline">\(\Theta_j\)</span>) to absorb temporal variation in detection probability of the focal species.</p>
-<p>When using a linear temporal trend and a logit function, it has been shown that the slope of that temporal trend (<span class="math inline">\(\theta_r\)</span>) is the logarithm of the growth rate (<span class="math inline">\(\rho\)</span>) <span class="citation" data-cites="duchenne_controversy_2022">(<a href="#ref-duchenne_controversy_2022" role="doc-biblioref">Duchenne et al. 2022</a>)</span>. Thus <span class="math inline">\(\rho_r=e^{\theta_r}\)</span>, where <span class="math inline">\(\rho=1\)</span> means a stale occupancy probability,<span class="math inline">\(\rho&lt;1\)</span> a decrease and <span class="math inline">\(\rho&gt;1\)</span> a temporal increase in occupancy probability. To get a more intuitive measure of growth rate, we decided to express this growth rate in <span class="math inline">\(\pm \%.year^{-1}\)</span> we used: <span class="math inline">\(\rho_r=100 \times (e^{\theta_r}-1)\)</span>.</p>
+<p>When using a linear temporal trend and a logit function, it has been shown that the slope of that temporal trend (<span class="math inline">\(\theta_r\)</span>) is the logarithm of the growth rate (<span class="math inline">\(\rho\)</span>) <span class="citation" data-cites="duchenne_controversy_2022">(<a href="#ref-duchenne_controversy_2022" role="doc-biblioref">Duchenne et al. 2022</a>)</span>. Thus <span class="math inline">\(\rho_r=e^{\theta_r}\)</span>, where <span class="math inline">\(\rho=1\)</span> means a stale occupancy probability, <span class="math inline">\(\rho&lt;1\)</span> a decrease and <span class="math inline">\(\rho&gt;1\)</span> a temporal increase in occupancy probability. To get a more intuitive measure of growth rate, we decided to express this growth rate in <span class="math inline">\(\pm \%.year^{-1}\)</span> we used: <span class="math inline">\(\rho_r=100 \times (e^{\theta_r}-1)\)</span>.</p>
 </section>
 <section id="sec-stat_nl" class="level3" data-number="2.2.2">
 <h3 data-number="2.2.2" class="anchored" data-anchor-id="sec-stat_nl"><span class="header-section-number">2.2.2</span> Non-linear temporal changes in occupancy</h3>
@@ -262,14 +268,85 @@ z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \Theta_{rj} + \
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>model<span class="ot">=</span><span class="fu">glmmTMB</span>(Y<span class="sc">~</span>sampling_completeness<span class="sc">+</span>(<span class="dv">1</span><span class="sc">|</span>year)<span class="sc">+</span>(<span class="dv">1</span><span class="sc">|</span>region<span class="sc">/</span>month),<span class="at">ziformula=</span><span class="sc">~</span>year<span class="sc">*</span>region<span class="sc">+</span>(<span class="dv">1</span><span class="sc">|</span>site),<span class="at">family=</span>binomial,<span class="at">data=</span>dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We fitted this model for all species with at least 10 records in Europe, and that have been detected in at least 5 surveys in a given region. For each species, we removed the biogeographic regions in which the species has been detected in less than 5 surveys. This led to a list of 1,332 species, over the 1,745 species in the dataset.</p>
+<p>Since optimization of the model was tricky, to maxmimize the chance of convergence, we tried 4 different solvers compatible with <em>glmmTMB</em>: <em>nlimb</em>, <em>Nelder-Mead</em>, <em>BFGS</em> and <em>CG</em>. We also tried two different covariance structures for the temporal autocorrelation in the non-linear occupancy model: AR1 and the Ornstein-Uhlenbeck. We run models in the order listed in the <a href="#tbl-opti">Table&nbsp;1</a> and kept the first model that converged.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-opti" class="anchored">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table&nbsp;1: Order of run for the different combination of solvers and covariance structure during optimization of the model. For the linear we only tried the four different solvers in the order displayed here.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">solver</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">covariance structure</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">order of run</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">nlimb</td>
+<td style="text-align: left;">AR1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nelder-Mead</td>
+<td style="text-align: left;">AR1</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BFGS</td>
+<td style="text-align: left;">AR1</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CG</td>
+<td style="text-align: left;">AR1</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">nlimb</td>
+<td style="text-align: left;">Ornstein-Uhlenbeck</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nelder-Mead</td>
+<td style="text-align: left;">Ornstein-Uhlenbeck</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BFGS</td>
+<td style="text-align: left;">Ornstein-Uhlenbeck</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CG</td>
+<td style="text-align: left;">Ornstein-Uhlenbeck</td>
+<td style="text-align: right;">8</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
 </section>
+</section>
+<section id="summarizing-trends-per-region" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="summarizing-trends-per-region"><span class="header-section-number">2.3</span> Summarizing trends per region</h2>
+<p>To summarize results per region we study the proportion of species that exhibited a significantly (p-value &lt; 0.05) positive temporal trend in occupancy, henceforth winners, and the proportion of species that exhibited a significantly negative temporal trend in occupancy, henceforth losers.</p>
+<p>TO produce an average temporal trend in occupancy per region, while accounting for uncertainty of the associated trends, we used an approach developed for meta-analysis, in which the “true” trend of species <em>s</em> in region <em>r</em> (<span class="math inline">\(\tau_{rs}^*\)</span>) is unknown. However, we have the estimated trend (<span class="math inline">\(\tau_{rs}\)</span>), which is linked to the “true” trend as follow: <span class="math inline">\(\tau_{rs} \sim \mathcal{N}(\tau_{rs}^*,v_{rs})\)</span>, where <span class="math inline">\(v_{rs}\)</span> is the sampling variance, equals to the squared of the standard error associated with the observed trend.</p>
+<p>Then the linear model to summarize trends per region can be written as follow: <span id="eq-metafor"><span class="math display">\[
+\tau_{rs}^* = \beta_{r} + \mu_{rs} + \epsilon_{rs}
+\tag{4}\]</span></span></p>
+<p>where <span class="math inline">\(\beta_{r}\)</span> is an intercept for each region (average trend per region). <span class="math inline">\(\mu_{rs} \sim \mathcal{N}(0,\sigma^2)\)</span> where <span class="math inline">\(\sigma^2\)</span> is the residual variance in the “true” trends, while <span class="math inline">\(\epsilon_{rs} \sim \mathcal{N}(0,v_{rs})\)</span> describes the residual variation due to the error in the trend estimation.</p>
+<p>We used the <em>metafor</em> <em>R</em> package to implement this model.</p>
 </section>
 </section>
 <section id="sec-results" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Results</h1>
 <section id="sec-res_conv" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="sec-res_conv"><span class="header-section-number">3.1</span> Species with convergence problems</h2>
-<p>For 854 species, occupancy trends could not be estimated properly because the model did not converge, regardless the algorithm used to optimize the model (“<em>nlimb</em>”, “<em>Nelder-Mead</em>”, “<em>BFGS</em>”, “<em>CG</em>” or “<em>L-BFGS-B</em>”). Most often these convergence problems are due to positive values in the Hessian Matrix, likely due to a flat likelihood profile. This means that a broad diversity of parameter combination are consistent with the observations, and thus that the data do not contain enough information to infer spatio-temporal patterns of occupancy in a reliable way. These problems of convergence tended to occur slightly more often when the occupancy of the species was detected in very few surveys (i.e.&nbsp;rare species, <a href="#fig-convergence">Figure&nbsp;4</a>). This is a bias that our study, and other similar studies have faced <span class="citation" data-cites="duchenne_long-term_2020">Powney et al. (<a href="#ref-powney_widespread_2019" role="doc-biblioref">2019</a>)</span>: we do not have enough historical data to model occupancy trends of the species that became rare or extinct before recent times. Thus our occupancy trends do not include these strong historical declines that are likely an important components when estimating the effect of past global change on biodiversity.This is a source of under-estimation of effects of global change on biodiversity that is important to keep in mind.</p>
+<p>For 854 species, occupancy trends could not be estimated properly because the model did not converge, regardless the algorithm used to optimize the model (“<em>nlimb</em>”, “<em>Nelder-Mead</em>”, “<em>BFGS</em>” or “<em>CG</em>”). Most often these convergence problems are due to positive values in the Hessian Matrix, likely due to a flat likelihood profile. This means that a broad diversity of parameter combination are consistent with the observations, and thus that the data do not contain enough information to infer spatio-temporal patterns of occupancy in a reliable way. These problems of convergence tended to occur slightly more often when the species was detected in very few surveys (i.e.&nbsp;rare species, <a href="#fig-convergence">Figure&nbsp;4</a>). This is a bias that our study, and other similar studies have faced <span class="citation" data-cites="duchenne_long-term_2020 powney_widespread_2019">(<a href="#ref-duchenne_long-term_2020" role="doc-biblioref">Duchenne et al. 2020</a>; <a href="#ref-powney_widespread_2019" role="doc-biblioref">Powney et al. 2019</a>)</span>: we do not have enough historical data to model occupancy trends of the species that became rare or extinct before recent times. Thus our occupancy trends do not include these strong historical declines that are likely an important components when estimating the effect of past global change on biodiversity. This is a source of under-estimation of effects of global change on biodiversity that is important to keep in mind.</p>
 <p>These problems of convergence might be possible to solve in the future, by subsampling the dataset to focus on the core of the species area only, but it is for now a work in progress. It would also make the comparison across species slightly more difficult.</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -297,7 +374,7 @@ z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \Theta_{rj} + \
 </div>
 </div>
 </div>
-<p>Calculating the arithmetic mean of these occupancy trends per region we observe an average decline only in the Atlantic bio-geographic region (<a href="#fig-avg">Figure&nbsp;6</a>). It is however important to note the strong uncertainty around these average values, due to the heterogeneity in occupancy trends across species.</p>
+<p>Summarizing the occupancy trends per region, we observe an average decline only in the Atlantic bio-geographic region (<a href="#fig-avg">Figure&nbsp;6</a>). It is however important to note the strong uncertainty around these average values, due to the heterogeneity in occupancy trends across species.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-avg" class="quarto-figure quarto-figure-center anchored">
@@ -308,16 +385,17 @@ z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \Theta_{rj} + \
 </div>
 </div>
 </div>
-<p>Moreover, although most of the region exhibit a positive average occupancy trend, this positive trend is driven by the right-skewness of the distribution (<a href="#fig-histo">Figure&nbsp;5</a>). When looking at the proportion of losers and winners per region, losers are often as common as winners. The only exception is the alpine biogeographic region, in which winners are strongly over-represented. This is consistent with the expectations under a climate warming scenario <span class="citation" data-cites="pradervand_functional_2014">(<a href="#ref-pradervand_functional_2014" role="doc-biblioref">Pradervand et al. 2014</a>)</span>.</p>
+<p>Moreover, although most of the region exhibit a positive average occupancy trend, this positive trend is driven by the right-skewness of the distribution (<a href="#fig-histo">Figure&nbsp;5</a>). When looking at the proportion of losers and winners per region, losers are often as common as winners (<a href="#tbl-lw">Table&nbsp;2</a>). The only exception is the alpine biogeographic region, in which winners are strongly over-represented. This is consistent with the expectations under a climate warming scenario <span class="citation" data-cites="pradervand_functional_2014">(<a href="#ref-pradervand_functional_2014" role="doc-biblioref">Pradervand et al. 2014</a>)</span>.</p>
 <div class="cell">
 <div class="cell-output-display">
+<div id="tbl-lw" class="anchored">
 <table data-quarto-postprocess="true" class="table table-sm table-striped small">
-<caption>Porpotion of winners and losers per biogeogrpahic region</caption>
+<caption>Table&nbsp;2: Porpotion of winners and losers per biogeogrpahic region.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">Region</th>
 <th style="text-align: right;" data-quarto-table-cell-role="th">Proportion of losers</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion of Winners</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion of winners</th>
 </tr>
 </thead>
 <tbody>
@@ -348,6 +426,7 @@ z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \Theta_{rj} + \
 </tr>
 </tbody>
 </table>
+</div>
 
 
 </div>
@@ -366,45 +445,157 @@ z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \Theta_{rj} + \
 </div>
 </div>
 </div>
-<p>When looking at how the median of the occupancy probability varies over time, we notice an historical decline in the Boreal, Continental and Atlantic regions, followed by a recent increase in occupancy probability, in a “U” shaped pattern that is consistent with what we know from other studies <span class="citation" data-cites="duchenne_long-term_2020">Carvalheiro et al. (<a href="#ref-carvalheiro_species_2013" role="doc-biblioref">2013</a>)</span>. In contrast, alpine region shows a constant increase in median occupancy probability over-time. This is consistent with the displacement of species-rich lowlands bee communities towards higher elevation. Moreover, the fact that the Alpine region does not exhibit the “U” shaped temporal variation in occupancy observed in the Continental and Atlantic regions is consistent with the fact that this historical decline has been driven by agricultural intensification.</p>
-<p>Finally, Mediterranean region shows a slight increase in median occupancy probability but the temporal pattern is rather unclear and variation is weak, probably due to the lack of historical data in that region.</p>
+<p>To look at temporal variation at regional level, we computed the inverse-variance weighted average of the occupancy probability over time, which is an index often used in meta-analyses to account for the uncertainty of each values composing the mean <span class="citation" data-cites="https://doi.org/10.1111/j.2041-210X.2010.00056.x">(<a href="#ref-https://doi.org/10.1111/j.2041-210X.2010.00056.x" role="doc-biblioref">Harrison 2011</a>)</span>. We notice an average historical decline in all biogeographic regions but stronger in Continental and Atlantic regions (<a href="#fig-median_nl">Figure&nbsp;8</a>). However, we also observed a very recent increase in occupancy probability across species over the last years 2015-2020, which might be due to the increase in the number of records over last decades presented before (<a href="#fig-samp-temp">Figure&nbsp;3</a>).</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-median_nl" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="trends_files/figure-html/fig-median_nl-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;8: Median of the predicted occupancy probability across species, as a function of biogeographic region and time, when using a non-linear model (AR1 process).</figcaption>
+<figcaption class="figure-caption">Figure&nbsp;8: Inverse-variance weighted average of the predicted occupancy probability across species, as a function of biogeographic region and time, when using a non-linear model (AR1 process).</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>We can use this model to retrieve linear temporal trends in occupancy across 1921-2020, but accounting for the uncertainty due to non-linearity, to compare results with previous ones. When looking at average occupancy trends per biogeographic regions we observe a result slightly different results than those presented in <a href="#sec-res_l">Section&nbsp;3.2</a>.</p>
+<p>We can use this model to retrieve linear temporal trends on some specific periods, accounting for the uncertainty due to non-linearity, to compare results with previous ones. When looking at average occupancy trends per biogeographic regions and per periods, we observe that consistently with what we have seen in <a href="#fig-median_nl">Figure&nbsp;8</a>. Recent periods exhibit strongly positive trends, questioning the ability of our models to account for the recent increase in sampling pressure.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-avg-nl" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="trends_files/figure-html/fig-avg-nl-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Figure&nbsp;9: Average occupancy trends (1921-2020) per biogeographic regions, when acocunting for non-linearity. Error bars are 95% confidence interval.</figcaption>
+<figcaption class="figure-caption">Figure&nbsp;9: Average occupancy trends (1921-2020) per biogeographic regions and per time periods, from the non-linear model. Error bars are 95% confidence interval.</figcaption>
 </figure>
 </div>
 </div>
 </div>
 </section>
 </section>
-<section id="references" class="level1 unnumbered" data-number="4">
+<section id="sec-new.detection" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Adapting the observation model</h1>
+<p>The previous <a href="#sec-results">Section&nbsp;3</a> have highlighted to account for an exponentially growing sampling pressure over time when estimating occupancy trends. In this part we tried to improve the <em>Observation model</em> (<a href="#eq-obs">Equation&nbsp;2</a>) to better account for variation in sampling pressure.</p>
+<section id="sec-update" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="sec-update"><span class="header-section-number">4.1</span> Updating the model</h2>
+<p>In the version we used of the observation model, detection probability of each species was function of the completeness of the sampling, measured by the length of the species list detected during that survey, and a random effect of the year to absorb residual temporal variation. This composition of the <em>observation model</em> was inspired by previous work <span class="citation" data-cites="isaac2014">(<a href="#ref-isaac2014" role="doc-biblioref">Isaac et al. 2014</a>)</span>.</p>
+<p>However, this unique quantitative index (i.e.&nbsp;sampling completeness) is likely not enough to described the temporal changes in the way data have been collected over the period. Historical data (before 2000), are mostly from museum collections and have been collected by expert entomologists, that might have focused more on rare species. In contrast, modern data (after 2000) are more likely to come from more naive entomologists or researchers, often recording common species, easy to find and to identify. Thus, data collection is likely to have shifted from parsimonious collection with a preference for rare species, to a massive amounts of records focused on few common species. To better describe this temporal changes, in addition to sampling completness we also add an effect of the number of records to our <em>observation model</em>. We also removed the year random effect to avoid over-parametrization of our model. This led to the following final model:</p>
+<p><strong>State model:</strong></p>
+<p><span id="eq-linear-state2"><span class="math display">\[
+z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \tau_r \times year_j  + \Theta_i
+\tag{5}\]</span></span></p>
+<p><strong>Observation model:</strong></p>
+<p><span id="eq-obs2"><span class="math display">\[ \begin{align} y_{rijv} | z_{rij} &amp;\sim Bernouilli(p_{rijv} \times z_{rij}); \\
+logit(p_{rijv}) &amp;=\beta_1 + \beta_2 \times sampling \space completeness_{ijv}+ \color{red}{\beta_3 \times log(nb \space records)} + \Theta_{r,month_v}
+\end{align}
+\tag{6}\]</span></span></p>
+<p>As described in <a href="#sec-stat">Section&nbsp;2.2</a>, we can implement a linear or non-linear version of this model and solve it.</p>
+</section>
+<section id="sec-update.res" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="sec-update.res"><span class="header-section-number">4.2</span> Significant changes with previous trends</h2>
+<p>This new version of the model allowed us to estimate occupancy trends for 838 species, instead of 478 species previously.</p>
+<p>The new occupancy trends revealed a clear majority of declining species (losers) relative to winners (<a href="#tbl-lw2">Table&nbsp;3</a>), which was not the case before (<a href="#tbl-lw">Table&nbsp;2</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-lw2" class="anchored">
+<table data-quarto-postprocess="true" class="table table-sm table-striped small">
+<caption>Table&nbsp;3: Porpotion of winners and losers per biogeogrpahic region.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Region</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion of losers</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion of winners</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">alpine</td>
+<td style="text-align: right;">0.18</td>
+<td style="text-align: right;">0.26</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">atlantic</td>
+<td style="text-align: right;">0.47</td>
+<td style="text-align: right;">0.26</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">boreal</td>
+<td style="text-align: right;">0.41</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">continental</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">0.22</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mediterranean</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">0.17</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</div>
+</div>
+<p>The changes of results between the two models are also clearly visible when looking at the distribution of the occupancy trends: most of the significant trends are now negatives (<a href="#fig-histo2">Figure&nbsp;10</a>). However, note that we still observe the right-skewed distribution typical of colonization of new regions by low-abundant species.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-histo2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-histo2-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;10: Occupancy trends across 1921-2020 per biogeographic regions. Black bars represent the number of species with a significant occupancy trends (p-value &lt;0.05) while white bars represent the distribution of the non-significant occupancy trends.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Similarly, average trends per regions also shifted towards more negative values (<a href="#fig-avg2">Figure&nbsp;11</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-avg2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-avg2-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;11: Average occupancy trends (1921-2020) per biogeographic regions. Error bars are 95% confidence interval.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When looking at the temporal variation of the inverse-variance weighted average of the occupancy probability varies, we notice that the recent increased in the occupancy probability have been partially buffered by the inclusion of the number of records in the observation model (<a href="#fig-median_nl2">Figure&nbsp;12</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-median_nl2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-median_nl2-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;12: Inverse-variance weighted average of the predicted occupancy probability across species, as a function of biogeographic region and time, when using a non-linear model (AR1 process).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When using these non-linear variations in occupancy to focus on temporal trends per periods, we still observe that more recent trends tended to be more positive, excepting for mediterranean region. However, the most recent period does not exhibit any significant increase in occupancy anymore for the atlantic region (<a href="#fig-avg-nl2">Figure&nbsp;13</a>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-avg-nl2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="trends_files/figure-html/fig-avg-nl2-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Figure&nbsp;13: Average occupancy trends (1921-2020) per biogeographic regions and per time periods, from the non-linear model. Error bars are 95% confidence interval.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="references" class="level1 unnumbered" data-number="5">
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">4 References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
-<div id="ref-carvalheiro_species_2013" class="csl-entry" role="listitem">
-Carvalheiro, Luísa Gigante, William E. Kunin, Petr Keil, Jesus Aguirre‐Gutiérrez, Willem Nicolaas Ellis, Richard Fox, Quentin Groom, et al. 2013. <span>“Species Richness Declines and Biotic Homogenisation Have Slowed down for <span>NW</span>-<span>European</span> Pollinators and Plants.”</span> <em>Ecology Letters</em> 16 (7): 870–78. <a href="https://doi.org/10.1111/ele.12121">https://doi.org/10.1111/ele.12121</a>.
-</div>
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">5 References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-duchenne_controversy_2022" class="csl-entry" role="listitem">
 Duchenne, François, Emmanuelle Porcher, Jean-Baptiste Mihoub, Grégoire Loïs, and Colin Fontaine. 2022. <span>“Controversy over the Decline of Arthropods: A Matter of Temporal Baseline?”</span> <em>Peer Community Journal</em> 2. <a href="https://doi.org/10.24072/pcjournal.131">https://doi.org/10.24072/pcjournal.131</a>.
 </div>
 <div id="ref-duchenne_long-term_2020" class="csl-entry" role="listitem">
 Duchenne, François, Elisa Thébault, Denis Michez, Maxence Gérard, Céline Devaux, Pierre Rasmont, Nicolas J. Vereecken, and Colin Fontaine. 2020. <span>“Long-Term Effects of Global Change on Occupancy and Flight Period of Wild Bees in <span>Belgium</span>.”</span> <em>Global Change Biology</em> 26 (12): 6753–66. https://doi.org/<a href="https://doi.org/10.1111/gcb.15379">https://doi.org/10.1111/gcb.15379</a>.
+</div>
+<div id="ref-https://doi.org/10.1111/j.2041-210X.2010.00056.x" class="csl-entry" role="listitem">
+Harrison, Freya. 2011. <span>“Getting Started with Meta-Analysis.”</span> <em>Methods in Ecology and Evolution</em> 2 (1): 1–10. https://doi.org/<a href="https://doi.org/10.1111/j.2041-210X.2010.00056.x">https://doi.org/10.1111/j.2041-210X.2010.00056.x</a>.
 </div>
 <div id="ref-he_occupancy_2003" class="csl-entry" role="listitem">
 He, Fangliang, and Kevin J. Gaston. 2003. <span>“Occupancy, <span>Spatial</span> <span>Variance</span>, and the <span>Abundance</span> of <span>Species</span>.”</span> <em>The American Naturalist</em> 162 (3): 366–75. <a href="https://doi.org/10.1086/377190">https://doi.org/10.1086/377190</a>.

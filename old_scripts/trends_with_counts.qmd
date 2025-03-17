@@ -1,0 +1,490 @@
+---
+title: "Occupancy Trends of European Pollinators"
+date: 2025-03-04
+authors:
+  - name: Ignasi Bartomeus
+    orcid: 0000-0001-7893-4389
+    email: nacho.bartomeus@gmail.com
+    affiliation: 
+      - name: Estación Biológica de Doñana
+  - name: François Duchenne
+    orcid: 0000-0002-6917-8013
+    email: francois.duchenne.bio@gmail.com
+    affiliation: 
+      - name: Estación Biológica de Doñana
+  - name: Carlos Martinez Nuñez
+    orcid: 0000-0001-7814-4985
+    email: cmnunez@ujaen.es
+    affiliation: 
+      - name: Estación Biológica de Doñana
+abstract: >
+  This document present the dataset, methods and results of the SAFEGUARD project that aims to assess pollinator temporal trends at European level. First, we present the dataset and the associated challenges to succeed to unravel the population trends of european pollinators from opportunistic data that have not been collected for that. Second, we present how we used occupancy models to overcome possible bias. Third, we present the preliminary results of these model, showing the occupancy trends for ~480 species and comparing the 5 major biogeographic regions of Europe.
+  
+bibliography: references.bib
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: Contents
+execute: 
+  freeze: auto
+editor: visual
+number-sections: true
+---
+
+# Dataset {#sec-data}
+
+```{r loading data}
+#| echo: false
+#| warning: false
+#| include: false
+#| output: false
+rm(list=ls())
+pkgs <- c("data.table", "dplyr","ggplot2","sf","viridis","cowplot","ggeffects","lme4") 
+
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
+
+#defining working folder:
+path_data="C:/Users/Duchenne/Documents/safeguard/data/"
+
+# Loading data numbers
+load(paste0(path_data,"list_filtering.RData"))
+
+nb_records_initial=scales::comma(list_filtering[[1]])
+
+nr_regions=scales::comma(list_filtering[[2]])
+
+nb_records=scales::comma(list_filtering[[3]])
+
+nr_month=scales::comma(list_filtering[[4]])
+
+nr_sites=list_filtering[[5]]
+
+nb_surveys=scales::comma(list_filtering[[6]])
+
+nb_sp_common=list_filtering[[7]]
+
+nb_sp=scales::comma(list_filtering[[8]])
+
+nb_sp_tot=scales::comma(list_filtering[[9]])
+
+
+# Define the UTM projection for a suitable UTM zone
+utm_crs <- st_crs("+proj=utm +zone=32 +ellps=WGS84")
+
+# Define bounding box coordinates for Spain to northern Finland in the chosen UTM zone
+bbox <- st_bbox(c(xmin = -1200000, xmax = 3500000, ymin = 3500000, ymax = 8000000), crs = utm_crs)
+bboxsf=st_as_sf(st_as_sfc(st_bbox(bbox)))
+
+#shapefile of biogeogrpahic regions:
+bioregions <- bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
+bioregions <- st_transform(bioregions, crs = utm_crs)
+bioregions2=st_crop(bioregions,bbox)
+
+
+```
+
+The dataset is essentially composed from the database assembled by Natasha de Manincor *et al.* completed by a more recent version of the Iberian dataset (Bartomeus *comm. pers.*) and recently available dataset of bee occurrences from Portugal (<https://doi.org/10.15468/2e4rap>).
+
+The merged dataset contains `r nb_records_initial` records of pollinator occurrences between 1921 and 2020, within the region symbolized by the colored region in @fig-regions.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-regions
+#| fig-cap: Geographic area of the study colored by the different biogeographic regions that composed it.
+
+colo=c("dodgerblue3","orange","lightcyan","chartreuse3","black","darkslategray2","olivedrab1","gold3",NA,"purple","salmon")
+
+pl1=ggplot()+theme_bw()+
+  geom_sf(data=bioregions2,aes(fill=short_name),color=NA)+xlab("Longitude") + ylab("Latitude")+
+  geom_sf(data=bioregions,fill=NA)+
+  scale_fill_manual(values=colo,na.value =NA)+labs(fill="Bioregions")+scale_x_continuous(n.breaks=3)+coord_sf(ylim = c( 3210000,10008220),xlim = c(NA,4800000),clip = "on",expand = F)#+geom_sf(data=bboxsf,color="black",fill=NA)
+pl1
+
+```
+
+We focused on the 5 biogeographic regions gathering most of the occurrence records, removing `r nr_regions` records, leading to a dataset of `r nb_records` pollinator occurrences.
+
+# Methods to estimate occupancy trends {#sec-methods}
+
+## Inference of non-detection events {#sec-infer}
+
+Because opportunistic data are composed only from presence data, we need to infer pseudo-absences, or non-detection events, to inform statistical models about potential absences. To do so, we need to define sites and survey events. Site were defined as grid cells, data being aggregated spatially using the hexagonal grid cells of side of 50km, which leads to grid cells of 6495km^2^. In a given site, records were grouped in survey events, by year and month. We defined a species' detections in survey as the collection of the observed species at this location and during that survey. Conversely, we defined non-detections for a species if it was not observed at a given site during a given survey. This led to the exclusion of all records without information of the month of the collect (*n* = `r nr_month`). We also removed the sites that had been surveyed only in one year (*n* = `r nr_sites`), because they do not bring temporal information, and their removal have been shown to improve modelling performance [@isaac2014]. This led to `r nb_surveys` survey across the study area, between 1921 and 2020 (@fig-data).
+
+This dataset is bias toward western Europe, Belgium and Soutern UK being the region with the better temporal coverage (@fig-data).
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-data
+#| fig-cap: Sites that were included in the study and sampling pressure. (a) shows all sites (hexagons of 50km side) used to estimate occupancy trends. (b) shows the number of year that have been sampled (with at least one species detection) over the all periods, while (c) and (d) show the same things for the first and second half of the period, respectively.
+#| fig-width: 16
+#| fig-height: 14
+
+hex_grid=st_read(paste0(path_data,"grid_",50,"KM.shp"),crs=utm_crs,quiet =TRUE)
+
+sites=fread(paste0(path_data,"sites_studied.csv"))
+
+obj=merge(hex_grid,sites,by="gridID_50")
+
+
+colo2=c("dodgerblue3","chartreuse3","darkslategray2","olivedrab1","gold3")
+
+pl2a=ggplot()+theme_bw()+
+  geom_sf(data=bioregions,fill=NA)+
+  geom_sf(data=obj,aes(fill=region_50.y))+xlab("Longitude") + ylab("Latitude")+
+  scale_fill_manual(values=colo2,na.value=NA)+labs(fill="Bioregions")+
+  theme(plot.title=element_text(size=18,face="bold",hjust = 0),plot.subtitle=element_text(size=14))+scale_x_continuous(n.breaks=3)+ coord_sf(ylim = c( 3210000,10008220),xlim = c(NA,4800000),clip = "on",expand = F)+ggtitle("a",subtitle="sites and biogeographic regions")
+
+pl2b=ggplot()+theme_bw()+
+  geom_sf(data=bioregions,fill=NA)+
+  geom_sf(data=obj,aes(fill=nyear))+xlab("Longitude") + ylab("Latitude")+
+  scale_fill_viridis_c(option = "plasma")+labs(fill="Nb. of years sampled")+scale_x_continuous(n.breaks=3)+
+  coord_sf(ylim = c( 3210000,10008220),xlim = c(NA,4800000),clip = "on",expand = F)+theme(plot.title=element_text(size=18,face="bold",hjust = 0),plot.subtitle=element_text(size=14))+ggtitle("b",subtitle="sites and sampling pressure")
+
+pl2c=ggplot()+theme_bw()+
+  geom_sf(data=bioregions,fill=NA)+
+  geom_sf(data=obj,aes(fill=nyear_b70))+xlab("Longitude") + ylab("Latitude")+
+  scale_fill_viridis_c(option = "plasma")+labs(fill="Nb. of years sampled")+scale_x_continuous(n.breaks=3)+
+  coord_sf(ylim = c( 3210000,10008220),xlim = c(NA,4800000),clip = "on",expand = F)+theme(plot.title=element_text(size=18,face="bold",hjust = 0),plot.subtitle=element_text(size=14))+ggtitle("c",subtitle="sites and sampling pressure on 1921-1970")
+
+pl2d=ggplot()+theme_bw()+
+  geom_sf(data=bioregions,fill=NA)+
+  geom_sf(data=obj,aes(fill=nyear_a70))+xlab("Longitude") + ylab("Latitude")+
+  scale_fill_viridis_c(option = "plasma")+labs(fill="Nb. of years sampled")+scale_x_continuous(n.breaks=3)+
+  coord_sf(ylim = c( 3210000,10008220),xlim = c(NA,4800000),clip = "on",expand = F)+theme(plot.title=element_text(size=18,face="bold",hjust = 0),plot.subtitle=element_text(size=14))+ggtitle("d",subtitle="sites and sampling pressure on 1971-2020")
+
+plot_grid(pl2a,pl2b,pl2c,pl2d,ncol=2,align="hv")
+
+```
+
+The dataset is also strongly temporally biased, with a sampling pressure that increased a lot over time, in terms of number of records, sites sampled and number of survey per sampled site (@fig-samp-temp).
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-samp-temp
+#| fig-cap: Temporal variation in sampling pressures within biogeographic regions. (a) Number of records per year for each region, (b) number of sites sampled per year for each region and (c) average number of surveys per sampled site across years.
+#| fig-width: 7
+#| fig-height: 9
+
+
+reg_samp=fread(paste0(path_data,"regions_sampling.csv"))
+
+pl3a=ggplot(data=reg_samp,aes(x=YEAR_2,y=nrec,color=region_50))+geom_line(size=1.2)+
+  scale_color_manual(values=colo2)+theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12))+xlab("Years")+ylab("Number of records")+labs(color="region")+ggtitle("a")
+
+pl3b=ggplot(data=reg_samp,aes(x=YEAR_2,y=nsites,color=region_50))+geom_line(size=1.2)+
+  scale_color_manual(values=colo2)+theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12))+xlab("Years")+ylab("Number of sites sampled")+labs(color="region")+ggtitle("b")
+
+pl3c=ggplot(data=reg_samp,aes(x=YEAR_2,y=mean_nsurv,color=region_50))+geom_line(size=1.2)+
+  scale_color_manual(values=colo2)+theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12))+xlab("Years")+ylab("Average number of survey per sampled site")+labs(color="region")+ggtitle("c")
+
+plot_grid(pl3a,pl3b,pl3c,ncol=1,align="hv")
+
+```
+
+## Statistical model {#sec-stat}
+
+The corrections of these bias require the use of statistical models that distinguish the observation processes and the population states. To do so we used occupancy models, which have been shown as one of the most powerful methods to estimate population trends from opportunistic data [@isaac2014; @outhwaite_annual_2019; @shirey_occupancydetection_2023]. This method accounts for temporal variation in detection probability, thereby considering changes over time in the species targeted by collectors. Temporal variation in occupancy measured at broad spatial scale is considered as a proxy of population trend, due to the close relationship between abundance and occupancy [@he_occupancy_2003].
+
+To see how model formulation could affect our results, we run two different models: one modelling linear temporal changes in occupancy and another one modelling non-linear temporal changes in occupancy. Linear trends are convenient because they allow to resume in one coefficient (the slope) if the direction and the magnitude of the population trend. However, summarizing non-linear variation to a linear trends can lead to biased trends [@duchenne_controversy_2022], which thus require to assess the linearity of the studied temporal changes to draw relevant conclusions.
+
+### Linear temporal changes in occupancy {#sec-stat_l}
+
+The model was fitted independently for each species, and described by the following set of equations:
+
+**State model:**
+
+$$
+z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \tau_r \times year_j  + \Theta_i
+$$ {#eq-linear-state}
+
+**Observation model:**
+
+$$ \begin{align} y_{rijv} | z_{rij} &\sim Bernouilli(p_{rijv} \times z_{rij}); \\
+logit(p_{rijv}) &=\beta_1 + \beta_2 \times sampling \space completeness_{ijv} + \Theta_{r,month_v}+ \Theta_{j}
+\end{align} 
+$$ {#eq-obs}
+
+The state model describes the true (unknown) occupancy of the species ($z_{rij}=0$, absent or $z_{rij}=1$, present). $\Psi_{rij}$ is the probability of occupancy in region *r*, grid cell *i* at year *j*. This probability is modeled using a logit link function, as a function of a global intercept $\beta_0$, a fixed linear effect of the time for each region *r* ($\tau_r$) and a random site effect ($\Theta_{i}$).
+
+The observation model describes detection/non-detection events in region *r*, grid cell *i*, time period *j*, and survey *v* ($y_{rijv}$), conditionally to the true occupancy state ($z_{rij}$). It models the detection status of the focal species (1 or 0) . $p_{rijv}$ is the estimated detection probability, modelled as a function of an intercept $\beta_1$, a fixed effect ($\beta_2$) of the sampling completeness.Our measure of sampling completeness was simply the logarithm of the number of species detected during survey *v*. This index was centered per region to remove the correlation with regional species richness. Because we log transformed the number of species detected, this effect captures whether during a survey, one, few or more species were detected, which mainly depends on the sampling pressure [@isaac2014].
+
+Finally, to the observation model, we added a nested random effect of the month on of the survey *v* within the region *r* ($\Theta_{r,month_v}$) to model phenological variation in detection probability across months and regions, and a random effect of the year ($\Theta_j$) to absorb temporal variation in detection probability of the focal species.
+
+When using a linear temporal trend and a logit function, it has been shown that the slope of that temporal trend ($\theta_r$) is the logarithm of the growth rate ($\rho$) [@duchenne_controversy_2022]. Thus $\rho_r=e^{\theta_r}$, where $\rho=1$ means a stale occupancy probability, $\rho<1$ a decrease and $\rho>1$ a temporal increase in occupancy probability. To get a more intuitive measure of growth rate, we decided to express this growth rate in $\pm \%.year^{-1}$ we used: $\rho_r=100 \times (e^{\theta_r}-1)$.
+
+### Non-linear temporal changes in occupancy {#sec-stat_nl}
+
+The non-linear model was exactly the same as the linear model presented in @eq-linear-state and @eq-obs, excepting that we replaced the linear temporal trend for each region *r* ($\tau_r$) in @eq-linear-state by an autoregressive process of order 1 (AR1, $\Theta_{rj}$), leading to the following state model:
+
+**State model:**
+
+$$
+z_{rij} \sim Bernouilli(\Psi_{rij}); logit(\Psi_{rij})=\beta_0 + \Theta_{rj} + \Theta_i
+$$ {#eq-nonlinear-state}
+
+### Model implementation {#sec-stat_imp}
+
+Considering the important size of our dataset, due to the broad spatio-temporal scales considered here, we decided to implement our model using the *R* package *glmmTMB* to take adavantage of the fast computation it offers, instead of heavier and slower bayesian implementations [@isaac2014]. To do so, we implemented the state model in the zero inflation formula. For example for the linear model, it was coded as follow:
+
+```{r}
+#| echo: true
+#| eval: false
+model=glmmTMB(Y~sampling_completeness+(1|year)+(1|region/month),ziformula=~year*region+(1|site),family=binomial,data=dat)
+```
+
+We fitted this model for all species with at least 10 records in Europe, and that have been detected in at least 5 surveys in a given region. For each species, we removed the biogeographic regions in which the species has been detected in less than 5 surveys. This led to a list of `r nb_sp` species, over the `r nb_sp_tot` species in the dataset.
+
+Since optimization of the model was tricky, to maxmimize the chance of convergence, we tried 4 different solvers compatible with *glmmTMB*: *nlimb*, *Nelder-Mead*, *BFGS* and *CG*. We also tried two different covariance structures for the temporal autocorrelation in the non-linear occupancy model: AR1 and the Ornstein-Uhlenbeck. We run models in the order listed in the @tbl-opti and kept the first model that converged.
+
+```{r}
+#| echo: false
+#| eval: true
+#| label: tbl-opti
+#| tbl-cap: Order of run for the different combination of solvers and covariance structure during optimization of the model. For the linear we only tried the four different solvers in the order displayed here.
+tab=expand.grid(solver=c("nlimb","Nelder-Mead", "BFGS", "CG"),"covariance structure"=c("AR1","Ornstein-Uhlenbeck"))
+tab$"order of run"=1:nrow(tab)
+
+knitr::kable(tab,format = "html")
+
+```
+
+# Results {#sec-results}
+
+## Species with convergence problems {#sec-res_conv}
+
+```{r loading trends}
+#| echo: false
+#| warning: false
+#| include: false
+#| output: false
+
+inv.logit=function(x){exp(x)/(1+exp(x))}
+logit=function(x){log(x/(1-x))}
+
+tab_spec=fread(paste0(path_data,"species_nb_records.csv"))
+tab_spec=subset(tab_spec,nb_detect>=5 & nb_records_tot>=10) %>% group_by(TAXON) %>% mutate(nb_detect_tot=sum(nb_detect),occ_min=min(occupancy_obs))
+
+trendsf=fread(paste0(path_data,"results_TMB_trends_with_counts.csv"))
+trendsf=trendsf %>% group_by(species) %>% mutate(sde_det=sum(is.na(sde)))
+trendsf$convergence[trendsf$sde_det>0]=1
+nrow(trendsf)
+trendsf=merge(trendsf,tab_spec,by.x=c("species","region_50"),by.y=c("TAXON","region_50"))
+nrow(trendsf)
+
+b=unique(trendsf[,c("species","nb_records_tot","nb_detect_tot","convergence","occ_min")])
+
+trendsf=subset(trendsf,convergence==0)
+
+# species_to_repeat=data.frame(species=unique(tab_spec$TAXON)[!(unique(tab_spec$TAXON) %in% trendsf$species)])
+# fwrite(species_to_repeat,"species_to_repeat.csv")
+
+nb_not_converged=sum(!(unique(tab_spec$TAXON) %in% trendsf$species))
+nb_converged=length(unique(trendsf$species))
+nb_combi=nrow(trendsf)
+
+```
+
+For `r nb_not_converged` species, occupancy trends could not be estimated properly because the model did not converge, regardless the algorithm used to optimize the model ("*nlimb*", "*Nelder-Mead*", "*BFGS*" or "*CG*"). Most often these convergence problems are due to positive values in the Hessian Matrix, likely due to a flat likelihood profile. This means that a broad diversity of parameter combination are consistent with the observations, and thus that the data do not contain enough information to infer spatio-temporal patterns of occupancy in a reliable way. These problems of convergence tended to occur slightly more often when the species was detected in very few surveys (i.e. rare species, @fig-convergence). This is a bias that our study, and other similar studies have faced [@duchenne_long-term_2020; @powney_widespread_2019]: we do not have enough historical data to model occupancy trends of the species that became rare or extinct before recent times. Thus our occupancy trends do not include these strong historical declines that are likely an important components when estimating the effect of past global change on biodiversity. This is a source of under-estimation of effects of global change on biodiversity that is important to keep in mind.
+
+These problems of convergence might be possible to solve in the future, by subsampling the dataset to focus on the core of the species area only, but it is for now a work in progress. It would also make the comparison across species slightly more difficult.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-convergence
+#| fig-cap: Logit of of the frequency of species detection as a function of the convergence status of the occupancy model. We osberve that "common species" tended to converge more often.
+
+pl4=ggplot(data=b,aes(x=as.factor(convergence),y=logit(occ_min)))+geom_boxplot()+xlab("Convergence status")+scale_x_discrete(labels=c("Converged","Not converged"))+
+theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12))+ylab("Logit of of the frequency of species detection")#+scale_y_log10()
+
+
+pl4
+
+```
+
+## Linear occupancy trends {#sec-res_l}
+
+```{r select_converged}
+#| echo: false
+#| warning: false
+#| include: false
+#| output: false
+
+nb_weird=nrow(subset(trendsf,abs(trend)>=1))
+trendsf=subset(trendsf,abs(trend)<1)
+trendsf$significant="no"
+trendsf$significant[trendsf$trend<0 & (trendsf$trend+1.96*trendsf$sde)<0]="yes"
+trendsf$significant[trendsf$trend>0 & (trendsf$trend-1.96*trendsf$sde)>0]="yes"
+trendsf$significant2="no"
+trendsf$significant2[trendsf$trend<0 & (trendsf$x.trend+1.96*trendsf$SE)<0]="yes"
+trendsf$significant2[trendsf$trend>0 & (trendsf$x.trend-1.96*trendsf$SE)>0]="yes"
+
+trendsf$growth.rate=100*(exp(trendsf$trend)-1)
+trendsf$x.growth.rate=100*(exp(trendsf$x.trend)-1)
+
+winner_prop=round(100*nrow(subset(trendsf,trend>0 & significant=="yes"))/nrow(trendsf),2)
+looser_prop=round(100*nrow(subset(trendsf,trend<0 & significant=="yes"))/nrow(trendsf),2)
+
+```
+
+We were able to estimate the occupancy trends for `r nb_converged` species, for a total number of `r nb_combi` population trends, for each possible species-region combinations. Among those combinations, `r nb_weird` population trends were excluded from the dataset because they presented extreme values (positive or negative,$|\tau_r|>1$) that are likely to be erroneous trends.
+
+The occupancy trends estimated for the remaining `r nb_combi-nb_weird` combination of species and biogeographic regions show a mixture of winners (species significantly increasing in occupancy, `r winner_prop`%) and losers (species significantly decreasing in occupancy, `r looser_prop`%) of the past global change (@fig-histo).
+
+The distribution of occupancy trends tended to be skewed on the right, with few very positive occupancy trends, suggesting the colonization of new area by some species, which is a typical signature of global change-driven changes.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-histo
+#| fig-cap: Occupancy trends across 1921-2020 per biogeographic regions. Black bars represent the number of species with a significant occupancy trends (p-value <0.05) while white bars represent the distribution of the non-significant occupancy trends.
+#| fig-width: 7
+#| fig-height: 9
+
+pl5=ggplot(data=trendsf,aes(x=growth.rate,fill=significant))+geom_histogram(color="black")+xlab("Trends (% / year)")+theme_bw()+ylab("Number of species")+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),strip.text = element_text(size = 14),
+strip.background=element_rect(fill=NA,color=NA))+facet_wrap(~region_50,scales="free",ncol=2)+scale_fill_manual(values=c("white","black"))
+
+pl5
+
+```
+
+Calculating the arithmetic mean of these occupancy trends per region we observe an average decline only in the Atlantic bio-geographic region (@fig-avg). It is however important to note the strong uncertainty around these average values, due to the heterogeneity in occupancy trends across species.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-avg
+#| fig-cap: Average occupancy trends (1921-2020) per biogeographic regions. Error bars are 95% confidence interval.
+
+
+
+trendsf=trendsf %>% group_by(region_50) %>% mutate(pred_quant95=quantile(trend,probs=0.95))
+
+model=lmer(trend~region_50+(1|species),data=subset(trendsf,trend<pred_quant95))
+model=rma(trend ~ 0+region_50, sei=sde,data=subset(trendsf,trend<pred_quant95), digits=5)
+
+b=ggpredict(model,"region_50")
+
+pl6=ggplot(data=b,aes(y=predicted,x=x,color=x))+geom_pointrange(aes(ymin=conf.low,ymax=conf.high))+geom_hline(yintercept=0,linetype="dashed")+
+theme_bw()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
+scale_color_manual(values=colo2)+ylab("Average trend")+xlab("Biogeographic region")
+  
+pl6
+
+```
+
+Moreover, although most of the region exhibit a positive average occupancy trend, this positive trend is driven by the right-skewness of the distribution (@fig-histo). When looking at the proportion of losers and winners per region, losers are often as common as winners (@tbl-lw). The only exception is the alpine biogeographic region, in which winners are strongly over-represented. This is consistent with the expectations under a climate warming scenario [@pradervand_functional_2014].
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: tbl-lw
+#| tbl-cap: Porpotion of winners and losers per biogeogrpahic region.
+
+trendsf$winner=0
+trendsf$winner[trendsf$trend>0 & trendsf$significant=="yes"]=1
+
+trendsf$looser=0
+trendsf$looser[trendsf$trend<0 & trendsf$significant=="yes"]=1
+
+tabi=trendsf %>% group_by(region_50) %>% summarise(prop_looser=round(sum(looser)/length(looser),2),prop_winner=round(sum(winner)/length(winner),2))
+
+names(tabi)=c("Region","Proportion of losers","Proportion of winners")
+
+knitr::kable(tabi,format = "html")
+
+```
+
+## Non-linear occupancy trends {#sec-res_nl}
+
+Using the second kind of occupancy model, accounting for non-linearity, described in @sec-stat_nl,we could exemplify that occupancy trends are indeed rarely linear (@fig-exempl).
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-exempl
+#| fig-cap: Predicted species occupancy across time when using a non-linear model (AR1 process).  The different panels show different species. Error bars are 95% confidence intervals
+
+nonl=fread(paste0(path_data,"results_TMB_nonl_with_counts.csv"))
+nonl=subset(nonl,convergence==0)
+nonl=subset(nonl,!is.na(std.error))
+#length(unique(nonl$species))
+nonl$years=nonl$x+1920
+
+bidon=subset(nonl,species %in% c("Andrena bimaculata", "Bombus lapponicus" ,"Osmia bicornis","Lasioglossum malachurum"))
+
+pl7=ggplot(data=bidon,aes(y=occ_logit,x=years,color=group))+geom_pointrange(aes(ymin=occ_logit-1.96*std.error,ymax=occ_logit+1.96*std.error))+geom_line()+
+theme_bw()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
+scale_color_manual(values=colo2)+ylab("logit of the occupancy probability")+xlab("Time (years)")+
+facet_wrap(~species,scales="free")
+
+pl7
+
+```
+
+When looking at how the median of the occupancy probability varies over time, we notice an historical decline in the Boreal, Continental and Atlantic regions, followed by a recent increase in occupancy probability, in a "U" shaped pattern that is consistent with what we know from other studies [@duchenne_long-term_2020; @carvalheiro_species_2013]. In contrast, alpine region shows a constant increase in median occupancy probability over-time. This is consistent with the displacement of species-rich lowlands bee communities towards higher elevation. Moreover, the fact that the Alpine region does not exhibit the "U" shaped temporal variation in occupancy observed in the Continental and Atlantic regions is consistent with the fact that this historical decline has been driven by agricultural intensification.
+
+Finally, Mediterranean region shows a slight increase in median occupancy probability but the temporal pattern is rather unclear and variation is weak, probably due to the lack of historical data in that region.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-median_nl
+#| fig-cap: Median of the predicted occupancy probability across species, as a function of biogeographic region and time, when using a non-linear model (AR1 process).
+#| fig-width: 7
+#| fig-height: 9
+
+bb=nonl %>% group_by(group,years) %>% summarise(med=exp(mean(log(pred))))
+
+pl8=ggplot(data=bb,aes(y=med,x=years,color=group))+geom_point()+geom_line()+
+theme_bw()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
+scale_color_manual(values=colo2)+ylab("Median occupancy probability")+xlab("Time (years)")+facet_wrap(~group,scales="free",ncol=2)
+
+pl8
+
+```
+
+We can use this model to retrieve linear temporal trends in occupancy across 1921-2020, but accounting for the uncertainty due to non-linearity, to compare results with previous ones. When looking at average occupancy trends per biogeographic regions we observe a result slightly different results than those presented in @sec-res_l.
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-avg-nl
+#| fig-cap: Average occupancy trends (1921-2020) per biogeographic regions, when acocunting for non-linearity. Error bars are 95% confidence interval.
+
+
+model=rma(x.trend ~ region_50+(1|species), sei=SE, method="FE", data=trendsf, digits=5)
+model=lmer(x.trend~region_50+(1|species),data=trendsf)
+b=ggpredict(model,"region_50")
+
+pl9=ggplot(data=b,aes(y=predicted,x=x,color=x))+geom_pointrange(aes(ymin=conf.low,ymax=conf.high))+geom_hline(yintercept=0,linetype="dashed")+
+theme_bw()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
+scale_color_manual(values=colo2)+ylab("Average trend")+xlab("Biogeographic region")
+pl9
+```
+
+# References
