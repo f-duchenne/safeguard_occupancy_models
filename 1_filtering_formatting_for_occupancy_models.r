@@ -74,11 +74,11 @@ length(unique(dat$survey)) #number of survey (nrow of the matrix)
 ###EXPORT NUMBERS AND TABLES THAT WILL BE USEFUL LATTER
 count_table=dat[, .N,by=c("TAXON","FAMILY","taxo_group")] #count number of records per species
 
-bb=dat %>% dplyr::group_by(gridID_50,region_50,TAXON,survey,taxo_group) %>% dplyr::summarise(occupied=length(TAXON))
+bb=dat %>% dplyr::group_by(gridID_50,region_50,TAXON,FAMILY,survey,taxo_group) %>% dplyr::summarise(occupied=length(TAXON))
 bb=bb %>% dplyr::group_by(region_50,taxo_group) %>% dplyr::mutate(nsurv=length(unique(survey)))
 
-b= bb %>% dplyr::group_by(region_50,TAXON,taxo_group) %>% dplyr::summarise(occupancy_obs=sum(occupied>0)/mean(nsurv),nb_records=sum(occupied),nb_detect=sum(occupied>0))
-b=b %>% group_by(TAXON,taxo_group) %>% mutate(nb_records_tot=sum(nb_records))
+b= bb %>% dplyr::group_by(region_50,TAXON,FAMILY,taxo_group) %>% dplyr::summarise(occupancy_obs=sum(occupied>0)/mean(nsurv),nb_records=sum(occupied),nb_detect=sum(occupied>0))
+b=b %>% group_by(TAXON,taxo_group,FAMILY) %>% mutate(nb_records_tot=sum(nb_records))
 
 fwrite(b,"species_nb_records.csv")
 
@@ -104,41 +104,59 @@ fwrite(b,"regions_sampling.csv")
 taxo_group_vec=c("bees","hoverflies")
 for(j in taxo_group_vec){
 	dat2=subset(dat,taxo_group==j)
-	count_table=dat2[, .N,by=c("TAXON","FAMILY")] #count number of records per species
-	#matrix is way too big, needs to be splitted in two parts
-	#focusing on common species first
-	## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
-	dat2[,species:=TAXON] #new species column
-	dat2[dat2$species %in% subset(count_table,N<1000)$TAXON,species:="others"] #all species with less than 1000 records are classified as "others"
-	# sp_to_test=c("Andrena agilissima","Andrena strohmella","Halictus scabiosae","Lasioglossum minutulum","Bombus terrestris")
-	# dat[!(dat$species %in% sp_to_test),species:="others"]
+	
+	if(j=="bees"){
+		count_table=dat2[, .N,by=c("TAXON","FAMILY")] #count number of records per species
+		#matrix is way too big, needs to be splitted in two parts
+		#focusing on common species first
+		## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
+		dat2[,species:=TAXON] #new species column
+		dat2[dat2$species %in% subset(count_table,N<1000)$TAXON,species:="others"] #all species with less than 1000 records are classified as "others"
+		# sp_to_test=c("Andrena agilissima","Andrena strohmella","Halictus scabiosae","Lasioglossum minutulum","Bombus terrestris")
+		# dat[!(dat$species %in% sp_to_test),species:="others"]
 
-	#create the matrix
-	mat1=dcast(dat2,survey+list_length+record_number+year_grouped+MONTH_2+time_period+site+long_50+lat_50+region_50~species)
+		#create the matrix
+		mat1=dcast(dat2,survey+list_length+record_number+year_grouped+MONTH_2+time_period+site+long_50+lat_50+region_50~species)
 
-	# mat1$log.list.length=log(mat1$list_length)
-	# mat1=mat1 %>% dplyr::group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
+		# mat1$log.list.length=log(mat1$list_length)
+		# mat1=mat1 %>% dplyr::group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
 
-	# fwrite(mat1,"det_nondet_matrix_species_test.csv")
+		# fwrite(mat1,"det_nondet_matrix_species_test.csv")
 
-	#export matrix
-	fwrite(mat1,paste0(j,"_det_nondet_matrix_common.csv"))
+		#export matrix
+		fwrite(mat1,paste0(j,"_det_nondet_matrix_common.csv"))
 
-	#focusing on rare species
-	count_table=dat2[, .N,by=c("TAXON","FAMILY")] #count number of records per species
-	dat2[,species:=TAXON] #new species column
-	dat2[dat2$species %in% subset(count_table,N>=1000)$TAXON,species:="others"] #all species with more than 999 records are classified as "others"
-	dat2[dat2$species %in% subset(count_table,N<10)$TAXON,species:="others"] #all species with less than 10 records are classified as "others"
+		#focusing on rare species
+		count_table=dat2[, .N,by=c("TAXON","FAMILY")] #count number of records per species
+		dat2[,species:=TAXON] #new species column
+		dat2[dat2$species %in% subset(count_table,N>=1000)$TAXON,species:="others"] #all species with more than 999 records are classified as "others"
+		dat2[dat2$species %in% subset(count_table,N<10)$TAXON,species:="others"] #all species with less than 10 records are classified as "others"
 
-	#create the matrix
-	mat2=dcast(dat2,survey+list_length+record_number+year_grouped+MONTH_2+time_period+site+long_50+lat_50+region_50~species)
+		#create the matrix
+		mat2=dcast(dat2,survey+list_length+record_number+year_grouped+MONTH_2+time_period+site+long_50+lat_50+region_50~species)
 
-	#export second matrix
-	fwrite(mat2,paste0(j,"_det_nondet_matrix_rare.csv"))
+		#export second matrix
+		fwrite(mat2,paste0(j,"_det_nondet_matrix_rare.csv"))
+	}else{
+		dat2[,species:=TAXON] #new species column
+		#create the matrix
+		mat1=dcast(dat2,survey+list_length+record_number+year_grouped+MONTH_2+time_period+site+long_50+lat_50+region_50~species)
+
+		# mat1$log.list.length=log(mat1$list_length)
+		# mat1=mat1 %>% dplyr::group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
+
+		# fwrite(mat1,"det_nondet_matrix_species_test.csv")
+
+		#export matrix
+		fwrite(mat1,paste0(j,"_det_nondet_matrix.csv"))
+	}
+
 }
 
 
 
-
-
-
+dat1=fread(paste0("bees_det_nondet_matrix_common.csv"))
+dat2=fread(paste0("bees_det_nondet_matrix_rare.csv"))
+dat3=fread(paste0("hoverflies_det_nondet_matrix.csv"))
+ncol(dat1)+ncol(dat2)-2*10
+ncol(dat3)-10

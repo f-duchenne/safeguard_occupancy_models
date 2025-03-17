@@ -70,6 +70,9 @@ nb_combi=nrow(bidon)
 load(paste0(project_folder,"data/model_total.RData"))
 sav <- emmprep(model)
 b=as.data.frame(emmeans(sav,specs="region_50"))
+b$baseline=1921
+b$basic_mean=bidon %>% group_by(region_50) %>% summarise(mean(trend)) %>% deframe()
+b$basic_SE=bidon %>% group_by(region_50) %>% summarise(sd(trend)/sqrt(length(trend))) %>% deframe()
 
 dodgi=0.1
 
@@ -109,7 +112,7 @@ bidon=subset(bidon,abs(trend)<1)
 # save(model,file=paste0(project_folder,"data/model_",baselines_vec[j],".RData"))
 # }
 
-bf=NULL
+bf=b
 for(j in 2:length(baselines_vec)){
 bidon2=subset(bidon,convergence==0 & !is.na(acim) & baseline2==baselines_vec[j] & !is.na(sde))
 load(paste0(project_folder,"data/model_",baselines_vec[j],".RData"))
@@ -146,5 +149,22 @@ pdf(paste0(project_folder,"Figure_2.pdf"),width=8,height=6)
 plot_grid(pl1,pl3,pl2,pl4,ncol=2,align="hv",rel_widths=c(1.2,1))
 dev.off();
 
+################################### Variance same species
+bidon=subset(trendsf,convergence==0 & !is.na(acim) & baseline2==1921 & !is.na(sde))
+nb_weird=nrow(subset(bidon,abs(trend)>=1))
+bidon=subset(bidon,abs(trend)<1)
+
+bidon$cate=1
+bidon$cate[bidon$region_50 %in% c("atlantic")]=2
+bidon$cate[bidon$region_50 %in% c("continental")]=3
+bidon$cate[bidon$region_50 %in% c("boreal","alpine")]=4
+bidon=bidon %>% group_by(species) %>% mutate(nr=length(unique(cate)),min.cate=min(cate),max.cate=max(cate))
+bidon$cate2="middle"
+bidon$cate2[bidon$cate==bidon$min.cate]="south edge"
+bidon$cate2[bidon$cate==bidon$max.cate]="north edge"
+
+bidon=subset(bidon,nr>1)
+
+model=lmer(trend~cate2+(1|species),data=bidon,weights=1/(sde^2))
 
 

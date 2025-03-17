@@ -19,11 +19,16 @@ i <- as.numeric(args_contents[[1]])
 #defining working folder:
 setwd(dir="/home/duchenne/safeguard/")
 #import data:
-if(i<=317){
-dat=fread(paste0("det_nondet_matrix_species_common_50.csv"))
+if(i<=1348){
+	taxo_group="bees"
+	if(i<=317){
+		dat=fread(paste0("det_nondet_matrix_species_common_50.csv"))
+	}else{
+		dat=fread(paste0("det_nondet_matrix_species_rare.csv"))
+		i=i-317
+	}
 }else{
-dat=fread(paste0("det_nondet_matrix_species_rare.csv"))
-i=i-317
+	taxo_group="hoverlfies"
 }
 
 #combinations
@@ -71,25 +76,31 @@ regions=lili2[[length(lili2)]]
 trendsf=NULL
 
 for(j in 1:length(baselines_vec)){
-  dat2=subset(dat,year_grouped>=baselines_vec[j])
+  dat2=as.data.frame(subset(dat,year_grouped>=baselines_vec[j]))
   modelt=up2date(lili2[[j]])
   zi_vcov=vcov(modelt)[[2]]
   trend=fixef(modelt)[[2]]["period.num_s"]+c(0,fixef(modelt)[[2]][grep("period.num_s:",names(fixef(modelt)[[2]]))])
   
   if(length(regions)>1){
-  trend=fixef(modelt)[[2]]["period.num_s"]+c(0,fixef(modelt)[[2]][grep("period.num_s:",names(fixef(modelt)[[2]]))])
-  errors=zi_vcov["zi~period.num_s","zi~period.num_s"]+
-  c(0,mapply(func,grep("period.num_s:",colnames(zi_vcov)),grep("period.num_s:",colnames(zi_vcov)))+
-  2*mapply(func,grep("period.num_s:",colnames(zi_vcov)),rep(which(colnames(zi_vcov)=="zi~period.num_s"),length(regions)-1)))
+	  trend=fixef(modelt)[[2]]["period.num_s"]+c(0,fixef(modelt)[[2]][grep("period.num_s:",names(fixef(modelt)[[2]]))])
+	  errors=zi_vcov["zi~period.num_s","zi~period.num_s"]+
+	  c(0,mapply(func,grep("period.num_s:",colnames(zi_vcov)),grep("period.num_s:",colnames(zi_vcov)))+
+	  2*mapply(func,grep("period.num_s:",colnames(zi_vcov)),rep(which(colnames(zi_vcov)=="zi~period.num_s"),length(regions)-1)))
   }else{
-  trend=fixef(modelt)[[2]]["period.num_s"]
-  errors=zi_vcov["zi~period.num_s","zi~period.num_s"]
+	  trend=fixef(modelt)[[2]]["period.num_s"]
+	  errors=zi_vcov["zi~period.num_s","zi~period.num_s"]
   }
+  
+  newdat=data.frame(region_50=regions,period.num_s=rep(c(min(dat2$period.num_s),max(dat2$period.num_s)),each=length(regions)),log.list.length.c_s=0,log.list.count_s=0,MONTH_2=NA,site=NA)
+  newdat$fit=predict(modelt,newdata=newdat,type="zprob",re.form=NA)
 
-  trends=data.frame(region_50=regions,trend=-1*trend,sde=sqrt(errors),species=tab1$species[i],convergence=modelt$fit$convergence,acim=AIC(modelt))
+  newdat$pred=1-newdat$fit
+  resume=newdat %>% group_by(region_50) %>% summarise(max.occ=max(pred),min.occ=min(pred))
+  
+  trends=data.frame(region_50=regions,trend=-1*trend,sde=sqrt(errors),species=tab1$species[i],convergence=modelt$fit$convergence,acim=AIC(modelt),max.occ=resume$max.occ,min.occ=resume$min.occ,taxo_group=taxo_group)
   trends$trend=trends$trend/lili2[[12]][1,"std"]
   trends$sde=trends$sde/lili2[[12]][1,"std"]
-  trends$baseline=j
+  trends$baseline=baselines_vec[j]
   
   trendsf=rbind(trendsf,trends)
 }
