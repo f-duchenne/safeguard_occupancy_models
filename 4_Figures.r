@@ -165,6 +165,7 @@ bidon$cate2[bidon$cate==bidon$max.cate]="north edge"
 
 bidon=subset(bidon,nr>1)
 
-model=lmer(trend~cate2+(1|species),data=bidon,weights=1/(sde^2))
+model=lmer(trend~cate2+(1|FAMILY)+(1|species),data=bidon)
 
-
+be=ggpredict(model,"cate2",type="fixed")
+plot(be)+geom_hline(yintercept=0)+xlab("")
