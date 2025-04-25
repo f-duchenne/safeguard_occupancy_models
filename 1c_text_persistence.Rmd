@@ -1,0 +1,65 @@
+---
+title: "text for the persistence section"
+output: html_document
+date: "2025-04-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r data, message=FALSE, warning=FALSE, include=FALSE}
+#read the data-----
+###IMPOIRTANT Databases (specially IUCN) are not standardized for names UPDATE####
+iucn <- read.csv(file = "data/Pollinators_IUCN.csv") #modify!
+head(iucn)
+
+dat <- read.csv(file = "data/Summary_species_presence.csv") #exclude Apis mellifera
+head(dat)
+colnames(dat)[3:7] <- c("period_1921_1940",
+                        "period_1941_1960",
+                        "period_1961_1980",
+                        "period_1981_2000",
+                        "period_2001_2020")
+#join
+dim(dat)
+dim(iucn)
+iucn$Species <- gsub("_new", "", iucn$Species)
+iucn$Species[which(!iucn$Species %in% dat$species)]
+dat$species[which(!dat$species %in% iucn$Species)]
+#IGNORE FOR NOW
+dat <- merge(dat, iucn, by.x = "species", by.y = "Species")
+dim(dat)
+head(dat)
+
+dat_bee <- subset(dat, taxo_group.x == "bees")
+dat_fly <- subset(dat, taxo_group.x == "hoverflies")
+
+#First waffle plots info...
+
+periods <- table(dat$Periods)
+periods_bees <- table(dat_bee$Periods)
+periods_flies <- table(dat_fly$Periods)
+
+#Next we focus on species not seen in the last time period.
+
+big_n <- nrow(dat)
+not_observed <- length(which(dat$Periods == 0))
+not_observed_bee <- length(which(dat_bee$Periods == 0))
+not_observed_fly <- length(which(dat_fly$Periods == 0))
+
+n_bee <- nrow(dat_bee)
+n_fly <- nrow(dat_fly)
+
+not_t5 <- length(which(dat$period_2001_2020 == 0))
+
+not5_0 <- length(which(dat$Records == 0 & dat$period_2001_2020 == 0))
+not5_25 <- length(which(dat$Records > 25 & dat$period_2001_2020 == 0))
+not5_100 <- length(which(dat$Records > 100 & dat$period_2001_2020 == 0))
+
+not_observedIUCN <- table(dat$European_Category[which(dat$Periods == 0)])
+
+```
+
+From the `r big_n` pollinator species (`r n_bee` bee and `r n_fly` hoverfly species) present in Europe (Reverte et al 2024), our database contains `r 100-round((not_observed/big_n)*100)` % of those (`r not_observed_bee` bee and `r not_observed_fly` hoverfly species). Over half of the species recorded are observed across all time periods, but `r round((periods[2]/sum(periods))*100)` % of the species are recorded in a single 20-y time period (Fig 1c). Interestingly, only `r round((not_t5/big_n)*100)` % of the European species are not recorded in the last 20 years, indicating very few potential continental extinctions. In fact, from the non-recorded species, most are extremely rare (`r round((not5_0/not_t5)*100, 0)` % never recorded; `r round((not5_25/not_t5)*100, 0)` % with more than 25 records in previous time periods, and only `r round((not5_100/not_t5)*100, 0)`% (`r not5_100` species) with more than 100 historical records). Hence, while this species are concerning, we do not expect those to be extinct, and consulting taxonimcal experts MOST (give%) of the species not recorded in the last 20 years has known recent observations (see details in Supplementary material Table 1). In fact, as expected, from the `r not_t5` species not recorded in the last 20 years in our database, `r not_observedIUCN["DD"]` are classified as Data Deficient and `r sum(not_observedIUCN[c(1,3,5,6,7)])` has some level of concern in the IUCN assessment. While the lack of species extinctions sets the stage for a potential recovery of pollinator populations if restoration endeavours are pursued, it also highlights that most pollinator species are rare and geographically restricted (Fig 1?), making conservation challenging.
+
