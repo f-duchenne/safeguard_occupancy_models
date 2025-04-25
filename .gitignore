@@ -4,3 +4,4 @@
 .Ruserdata
 .DS_Store
 safeguard_occupancy_models.Rproj
+*.html
