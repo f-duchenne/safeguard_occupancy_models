@@ -48,6 +48,7 @@ names(Portugal)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","C
 
 ## Integrate Iberian database with the European dataset.
 data1 <- rbind(dat2, Spain,Portugal)
+data1=subset(data1,TAXON!="Apis mellifera")
 
 ############################ LOADING AND ASSEMBLING HOVERFLIES DATA
 dath=readRDS("Hoverfly_DB.rds")

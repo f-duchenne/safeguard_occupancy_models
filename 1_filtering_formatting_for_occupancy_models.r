@@ -158,5 +158,9 @@ for(j in taxo_group_vec){
 dat1=fread(paste0("bees_det_nondet_matrix_common.csv"))
 dat2=fread(paste0("bees_det_nondet_matrix_rare.csv"))
 dat3=fread(paste0("hoverflies_det_nondet_matrix.csv"))
-ncol(dat1)+ncol(dat2)-2*10
-ncol(dat3)-10
+
+liste_species=rbind(
+data.frame(species=names(dat1)[(which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1)],taxo_group="bees",matrix="common"),
+data.frame(species=names(dat2)[(which(names(dat2)=="region_50")+1):(which(names(dat2)=="others")-1)],taxo_group="bees",matrix="rare"),
+data.frame(species=names(dat3)[(which(names(dat3)=="region_50")+1):ncol(dat3)],taxo_group="hoverflies",matrix=NA))
+fwrite(liste_species,"liste_total_species_occupancy.csv")

@@ -7,7 +7,7 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
-setwd(dir=paste0(project_folder,"results_glm_with_counts"))
+setwd(dir=paste0(project_folder,"results_glm_with_counts_non_linear"))
 lifile=list.files( pattern ="predicts_")
 
 trendsf=NULL
@@ -19,7 +19,7 @@ trends=lili[[1]]
 trendsf=rbind(trendsf,trends)
 }
 
-fwrite(trendsf,paste0(project_folder,"data/results_TMB_trends_with_counts.csv"))
+fwrite(trendsf,paste0(project_folder,"data/results_TMB_trends_with_counts_non_linear.csv"))
 
 ############# SECOND PLOT RESULTS:
 pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse") 
@@ -33,11 +33,26 @@ colo2=c("#44AA99","#117733","#332288","#CC6677","#DDCC77")
 inv.logit=function(x){exp(x)/(1+exp(x))}
 logit=function(x){log(x/(1-x))}
 
-tab_spec=fread(paste0(project_folder,"data/species_nb_records.csv"))
-tab_spec=subset(tab_spec,nb_detect>=5 & nb_records_tot>=10) %>% group_by(TAXON) %>% mutate(nb_detect_tot=sum(nb_detect),occ_min=min(occupancy_obs))
-
-trendsf=fread(paste0(project_folder,"data/results_TMB_trends_with_counts.csv"))
+trendsf=fread(paste0(project_folder,"data/results_TMB_trends_with_counts_non_linear.csv"))
 trendsf=subset(trendsf,species!="Apis mellifera")
+trendsf$yearr=round(trendsf$year)
+trendsf=trendsf %>% group_by(species,group) %>% mutate(ner=sum(is.na(std.error)))
+trendsf=subset(trendsf,ner==0)
+
+bidon=trendsf %>% dplyr::group_by(group,yearr,taxo_group) %>% dplyr::summarise(moy=mean(pred))
+
+ggplot(data=bidon,aes(x=yearr,y=moy,color=group))+geom_line()+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
+ylab("Occupancy")+facet_wrap(~taxo_group)
+
+
+bidon_bee=subset(trendsf,taxo_group=="bees")
+bidon_bee$occ_logit=logit(bidon_bee$pred)
+model_bee=rma(occ_logit ~ group*year, sei=std.error,data=bidon_bee, digits=10)
+
+
 nrow(trendsf)
 trendsf=merge(trendsf,tab_spec,by.x=c("species","region_50","taxo_group"),by.y=c("TAXON","region_50","taxo_group"))
 nrow(trendsf)

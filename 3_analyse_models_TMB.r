@@ -19,18 +19,20 @@ i <- as.numeric(args_contents[[1]])
 #defining working folder:
 setwd(dir="/home/duchenne/safeguard/")
 #import data:
-if(i<=1348){
+if(i<=1396){
 	taxo_group="bees"
-	if(i<=317){
-		dat=fread(paste0("det_nondet_matrix_species_common_50.csv"))
+	if(i<=325){
+		dat=fread(paste0("bees_det_nondet_matrix_common.csv"))
 	}else{
-		dat=fread(paste0("det_nondet_matrix_species_rare.csv"))
-		i=i-317
+		dat=fread(paste0("bees_det_nondet_matrix_rare.csv"))
+		i=i-325
 	}
 }else{
-	taxo_group="hoverlfies"
+  i=i-1396
+	taxo_group="hoverflies"
+  dat=fread(paste0("hoverflies_det_nondet_matrix.csv"))
+  dat$others=NA
 }
-
 #combinations
 tab1=expand.grid(species=names(dat)[(which(names(dat)=="region_50")+1):(which(names(dat)=="others")-1)])
 
