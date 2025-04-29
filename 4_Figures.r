@@ -67,14 +67,15 @@ nb_combi=nrow(bidon)
 
 bidon_bee=subset(bidon,taxo_group=="bees")
 bidon_hov=subset(bidon,taxo_group=="hoverflies")
-model_bee=rma(trend ~ region_50+Family, sei=sde,data=bidon_bee, digits=10)
-model_hov=rma(trend ~ region_50+Family, sei=sde,data=bidon_hov, digits=10)
+model_bee=rma(trend ~ region_50+FAMILY, sei=sde,data=bidon_bee, digits=10)
+model_hov=rma(trend ~ region_50+FAMILY, sei=sde,data=bidon_hov, digits=10)
 # model_bee_2=rma(trend ~ region_50, sei=sde,data=subset(bidon_bee,max.occ>1e-4), digits=10)
 # model_hov_2=rma(trend ~ region_50, sei=sde,data=subset(bidon_hov,max.occ>1e-4), digits=10)
 # lis=list(model_bee,model_hov,model_bee_2,model_hov_2)
 # save(lis,file=paste0(project_folder,"data/models_total.RData"))
 sav <- emmprep(model_bee)
 b=as.data.frame(emmeans(sav,specs="FAMILY"))
+
 ggplot()+
 geom_pointrange(data=b,aes(y=emmean,x= FAMILY ,fill= FAMILY ,color= FAMILY ,ymax=emmean+1.96*SE,ymin=emmean-1.96*SE),size=2)+
 theme_bw()+geom_vline(xintercept=0,linetype="dashed")+

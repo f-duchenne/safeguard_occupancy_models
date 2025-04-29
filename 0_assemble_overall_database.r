@@ -12,9 +12,14 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 
 ############################ LOADING AND ASSEMBLING BEE DATA
-dat=readRDS("Bee_DB.rds")
+dat=readRDS("Safeguard_bee_df_final_v8.RDS")
 dat2 <- dat %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
 names(dat2)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
+
+bidon2=dat %>% group_by(YEAR_2) %>% summarise(nrec=length(TAXON))
+ggplot(data=bidon2,aes(x=as.numeric(YEAR_2),y=nrec))+geom_line(size=1.2)+
+theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12))+xlab("Years")+ylab("Number of records")+labs(color="region")+ggtitle("a")
 
 ## removing data from spain
 dat2 <- dat2[!(dat2$DATABASE_REFERENCE_CODE_2 %in% c("Ignasi Bartomeus","Nacho Bartomeus" ,"I. Bartomeus")),]
