@@ -12,52 +12,47 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
 
 ############################ LOADING AND ASSEMBLING BEE DATA
-dat=readRDS("Safeguard_bee_df_final_v8.RDS")
+dat=readRDS("Bee_DB_2025-05-16.RDS")
 dat2 <- dat %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
 names(dat2)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
-
-bidon2=dat %>% group_by(YEAR_2) %>% summarise(nrec=length(TAXON))
-ggplot(data=bidon2,aes(x=as.numeric(YEAR_2),y=nrec))+geom_line(size=1.2)+
-theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
-panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12))+xlab("Years")+ylab("Number of records")+labs(color="region")+ggtitle("a")
-
 ## removing data from spain
-dat2 <- dat2[!(dat2$DATABASE_REFERENCE_CODE_2 %in% c("Ignasi Bartomeus","Nacho Bartomeus" ,"I. Bartomeus")),]
+# dat2 <- dat2[!(dat2$DATABASE_REFERENCE_CODE_2 %in% c("Ignasi Bartomeus","Nacho Bartomeus" ,"I. Bartomeus")),]
 
 # Loading more recent data from spain:
-data_Spain <- fread("iberian_bees.csv")
-taxi=fread("species_family_table,.csv")
-nrow(data_Spain)
-data_Spain=merge(data_Spain,taxi,by.x="Accepted_name",by.y="TAXON")
-nrow(data_Spain)
-## I include approximate coordinates for two villages that do not have but hold 2750 records together (Pina de Ebro and Castello de Vide).
-data_Spain$Longitude[data_Spain$Locality == "Castello de Vide"] <- -7.45680
-data_Spain$Latitude[data_Spain$Locality == "Castello de Vide"] <- 39.41624
+# data_Spain <- fread("iberian_bees.csv")
+# taxi=fread("species_family_table,.csv")
+# nrow(data_Spain)
+# data_Spain=merge(data_Spain,taxi,by.x="Accepted_name",by.y="TAXON")
+# nrow(data_Spain)
+# ## I include approximate coordinates for two villages that do not have but hold 2750 records together (Pina de Ebro and Castello de Vide).
+# data_Spain$Longitude[data_Spain$Locality == "Castello de Vide"] <- -7.45680
+# data_Spain$Latitude[data_Spain$Locality == "Castello de Vide"] <- 39.41624
 
-## Assign coordinates for "Pina de Ebro"
-data_Spain$Longitude[data_Spain$Locality == "Pina de Ebro"] <- -0.5261
-data_Spain$Latitude[data_Spain$Locality == "Pina de Ebro"] <- 41.4814 
+# ## Assign coordinates for "Pina de Ebro"
+# data_Spain$Longitude[data_Spain$Locality == "Pina de Ebro"] <- -0.5261
+# data_Spain$Latitude[data_Spain$Locality == "Pina de Ebro"] <- 41.4814 
 
-## Select the columns that are common between both datasets and give them the right names
-Spain <- data_Spain %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,FAMILY,Unique.identifier)
-Spain$DATABASE_REFERENCE_CODE_2="BartomeusI_Iberia_2023"
-names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
+# ## Select the columns that are common between both datasets and give them the right names
+# Spain <- data_Spain %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,FAMILY,Unique.identifier)
+# Spain$DATABASE_REFERENCE_CODE_2="BartomeusI_Iberia_2023"
+# names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 
-# Adding data from Portugal (https://doi.org/10.15468/dl.7vqj99):
-data_port=fread("0000019-250214093936778.csv")
-data_port$Country="Portugal"
+# # Adding data from Portugal (https://doi.org/10.15468/dl.7vqj99):
+# data_port=fread("0000019-250214093936778.csv")
+# data_port$Country="Portugal"
 
-## Select the columns that are common between both datasets and give them the right names
-Portugal <- data_port %>% select (species, year, month, day, decimalLongitude,decimalLatitude,Country,genus,family,occurrenceID,datasetKey)
-names(Portugal)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
+# ## Select the columns that are common between both datasets and give them the right names
+# Portugal <- data_port %>% select (species, year, month, day, decimalLongitude,decimalLatitude,Country,genus,family,occurrenceID,datasetKey)
+# names(Portugal)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 
-## Integrate Iberian database with the European dataset.
-data1 <- rbind(dat2, Spain,Portugal)
-data1=subset(data1,TAXON!="Apis mellifera")
+# ## Integrate Iberian database with the European dataset.
+# data1 <- rbind(dat2,Portugal)
+
+data1=subset(dat2,TAXON!="Apis mellifera")
 
 ############################ LOADING AND ASSEMBLING HOVERFLIES DATA
-dath=readRDS("Hoverfly_DB.rds")
-dath <- dath %>% select (scientificName,startYear,startMonth,startDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
+dath=readRDS("DB_hoverfly_20250528.rds")
+dath <- dath %>% select (scientificName,yearEnd,monthEnd,dayEnd,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
 names(dath)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 dath$taxo_group="hoverflies"
 data1$taxo_group="bees"

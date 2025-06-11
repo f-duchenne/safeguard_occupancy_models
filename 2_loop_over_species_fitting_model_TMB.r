@@ -3,7 +3,7 @@
 #' Check for packages and if necessary install into library 
 #+ message = FALSE
 rm(list=ls())
-pkgs <- c("data.table","dplyr","ggeffects","glmmTMB","emmeans") 
+pkgs <- c("data.table", "dplyr","glmmTMB") 
 
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
@@ -18,33 +18,37 @@ i <- as.numeric(args_contents[[1]])
 
 #defining working folder:
 setwd(dir="/home/duchenne/safeguard/")
+
+print(i)
+
 #import data:
-if(i<=1396){
+if(i<=1364){
 	taxo_group="bees"
-	if(i<=325){
+	if(i<=317){
 		dat=fread(paste0("bees_det_nondet_matrix_common.csv"))
 	}else{
 		dat=fread(paste0("bees_det_nondet_matrix_rare.csv"))
-		i=i-325
+		i=i-317
 	}
 }else{
-  i=i-1396
+  i=i-1364
 	taxo_group="hoverflies"
   dat=fread(paste0("hoverflies_det_nondet_matrix.csv"))
   dat$others=NA
 }
+
+#todo=fread("species_to_repeat.csv", sep=",")
 #combinations
-tab1=expand.grid(species=names(dat)[(which(names(dat)=="region_50")+1):(which(names(dat)=="others")-1)])
+tab=expand.grid(species=names(dat)[(which(names(dat)=="region_50")+1):(which(names(dat)=="others")-1)])
+index=names(dat)[names(dat)==tab$species[i]]
 
-logit=function(x){log(x/(1-x))}
-func=function(x,y){zi_vcov[x,y]}
-func2=function(x,y){vc[x,y]}
+print(index)
 
-trendsf=NULL
-nonlf=NULL
 
-#combinations
-index=names(dat)[names(dat)==tab1$species[i]]
+files=list.files("/home/duchenne/safeguard/results/")
+
+#if(!(paste0("model_",tab$species[i],".RData") %in% files)){
+
 dat$Y=dat[,index,with=F]
 dat$Y[dat$Y>1]=1 #if many dets, put one
 #det/nondet of the focal species
@@ -63,50 +67,65 @@ dat=dat %>% group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mea
 #list count standardization
 dat$log.list.count=log(dat$record_number)
 
+N=nrow(dat)
+
+print(N)
+
 dat$period.num=as.numeric(as.factor(dat$year_grouped))
-dat$period.num2=factor(dat$period.num,levels=1:100)
+dat$period.num2=numFactor(dat$period.num)
 dat$group <- factor(rep(1,nrow(dat)))
 dat$period.num_s=scale(dat$period.num)
 dat$log.list.count_s=scale(dat$log.list.count)
 dat$log.list.length.c_s=scale(dat$log.list.length.c)
 
-print(index)
-load(paste0("results/","model_",tab1$species[i],".RData"))
+Nperiod=length(unique(dat$period.num))
 
-baselines_vec=lili2[[8]]
-regions=lili2[[length(lili2)]]
-trendsf=NULL
+Nr=length(unique(dat$region_50))
 
+Nsite=length(unique(dat$site))
+
+Nmonth=length(unique(dat$MONTH_2))
+
+regions=levels(factor(dat$region_50))
+
+#keep a table for period labels
+period_tab=dat %>% group_by(year_grouped,period.num) %>% summarise(log.list.length.c.moy=mean(log.list.length.c),log.list.count.moy=mean(log.list.count))
+
+scaling=data.frame(varia=c("period.num","log.list.count","log.list.length.c"),moy=c(mean(dat$period.num),mean(dat$log.list.count),mean(dat$log.list.length.c)),std=c(sd(dat$period.num),sd(dat$log.list.count),sd(dat$log.list.length.c)))
+
+optim_vec=c("Nelder-Mead", "BFGS", "CG")
+
+######## LINEAR TREND
+lili=list()
+baselines_vec=c(1921,1951,1961,1971,1981,1991,2001)
 for(j in 1:length(baselines_vec)){
-  dat2=as.data.frame(subset(dat,year_grouped>=baselines_vec[j]))
-  modelt=up2date(lili2[[j]])
-  zi_vcov=vcov(modelt)[[2]]
-  trend=fixef(modelt)[[2]]["period.num_s"]+c(0,fixef(modelt)[[2]][grep("period.num_s:",names(fixef(modelt)[[2]]))])
-  
-  if(length(regions)>1){
-	  trend=fixef(modelt)[[2]]["period.num_s"]+c(0,fixef(modelt)[[2]][grep("period.num_s:",names(fixef(modelt)[[2]]))])
-	  errors=zi_vcov["zi~period.num_s","zi~period.num_s"]+
-	  c(0,mapply(func,grep("period.num_s:",colnames(zi_vcov)),grep("period.num_s:",colnames(zi_vcov)))+
-	  2*mapply(func,grep("period.num_s:",colnames(zi_vcov)),rep(which(colnames(zi_vcov)=="zi~period.num_s"),length(regions)-1)))
-  }else{
-	  trend=fixef(modelt)[[2]]["period.num_s"]
-	  errors=zi_vcov["zi~period.num_s","zi~period.num_s"]
-  }
-  
-  newdat=data.frame(region_50=regions,period.num_s=rep(c(min(dat2$period.num_s),max(dat2$period.num_s)),each=length(regions)),log.list.length.c_s=0,log.list.count_s=0,MONTH_2=NA,site=NA)
-  newdat$fit=predict(modelt,newdata=newdat,type="zprob",re.form=NA)
 
-  newdat$pred=1-newdat$fit
-  resume=newdat %>% group_by(region_50) %>% summarise(max.occ=max(pred),min.occ=min(pred))
-  
-  trends=data.frame(region_50=regions,trend=-1*trend,sde=sqrt(errors),species=tab1$species[i],convergence=modelt$fit$convergence,acim=AIC(modelt),max.occ=resume$max.occ,min.occ=resume$min.occ,taxo_group=taxo_group)
-  trends$trend=trends$trend/lili2[[12]][1,"std"]
-  trends$sde=trends$sde/lili2[[12]][1,"std"]
-  trends$baseline=baselines_vec[j]
-  
-  trendsf=rbind(trendsf,trends)
+dat2=subset(dat,year_grouped>=baselines_vec[j])
+
+if(length(unique(dat$region_50))>1){
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
+}else{
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
 }
 
-lili=list(trendsf)
+### If it did not converge try to change the solver
+b=0
+while((modelt$fit$convergence!=0 | is.na(AIC(modelt))) & b<3){
+b=b+1
+if(length(unique(dat$region_50))>1){
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
+}else{
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
+}
+}
+lili[[j]]=modelt
+}
 
-save(lili,file=paste0("results/predicts_",tab1$species[i],".RData"))
+#b=ggpredict(model,c("period.num2","region_50"),type="re.zi")
+#ggplot(data=b,aes(x=as.numeric(x),y=predicted,color=group,fill=group))+geom_ribbon(aes(ymin=conf.low,ymax=conf.high),alpha=0.2)+geom_line()
+
+
+lili2=c(lili,list(baselines_vec,period_tab,nsurvey_tot,nsurvey_used,scaling,regions))
+
+save(lili2,file=paste0("results/model_",tab$species[i],".RData"))
+#}

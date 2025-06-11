@@ -19,16 +19,16 @@ i <- as.numeric(args_contents[[1]])
 #defining working folder:
 setwd(dir="/home/duchenne/safeguard/")
 #import data:
-if(i<=1396){
+if(i<=1364){
 	taxo_group="bees"
-	if(i<=325){
+	if(i<=317){
 		dat=fread(paste0("bees_det_nondet_matrix_common.csv"))
 	}else{
 		dat=fread(paste0("bees_det_nondet_matrix_rare.csv"))
-		i=i-325
+		i=i-317
 	}
 }else{
-  i=i-1396
+  i=i-1364
 	taxo_group="hoverflies"
   dat=fread(paste0("hoverflies_det_nondet_matrix.csv"))
   dat$others=NA
@@ -45,6 +45,11 @@ nonlf=NULL
 
 #combinations
 index=names(dat)[names(dat)==tab1$species[i]]
+
+files=list.files("/home/duchenne/safeguard/results/",pattern="predicts_")
+
+#if(!(paste0("predicts_",tab1$species[i],".RData") %in% files)){
+
 dat$Y=dat[,index,with=F]
 dat$Y[dat$Y>1]=1 #if many dets, put one
 #det/nondet of the focal species
@@ -110,3 +115,4 @@ for(j in 1:length(baselines_vec)){
 lili=list(trendsf)
 
 save(lili,file=paste0("results/predicts_",tab1$species[i],".RData"))
+#}

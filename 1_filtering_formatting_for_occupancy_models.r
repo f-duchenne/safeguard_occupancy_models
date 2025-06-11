@@ -27,12 +27,6 @@ dat=subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","medi
 nr_regions=n1-nrow(dat)
 nb_records=nrow(dat)
 
-bidon=subset(dat,taxo_group=="bees")
-bidon2=dat2 %>% group_by(YEAR_2) %>% summarise(nrec=length(TAXON))
-ggplot(data=bidon2,aes(x=as.numeric(YEAR_2),y=nrec))+geom_line(size=1.2)+
-theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
-panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12))+xlab("Years")+ylab("Number of records")+labs(color="region")+ggtitle("a")
-
 
 #roughly define sites
 dat$site=dat$gridID_50
@@ -165,6 +159,9 @@ for(j in taxo_group_vec){
 dat1=fread(paste0("bees_det_nondet_matrix_common.csv"))
 dat2=fread(paste0("bees_det_nondet_matrix_rare.csv"))
 dat3=fread(paste0("hoverflies_det_nondet_matrix.csv"))
+
+
+length((which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1))
 
 liste_species=rbind(
 data.frame(species=names(dat1)[(which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1)],taxo_group="bees",matrix="common"),
