@@ -208,8 +208,8 @@ bf=rbind(bf,bb)
 }
 
 pl3=ggplot()+
-geom_point(data=subset(bf,taxo_group=="bees" & subset_species=="all"),aes(y=emmean,x=baseline,fill=region_50,color=region_50),position=position_dodge(width=2),size=2)+
-geom_errorbar(data=subset(bf,taxo_group=="bees" & subset_species=="all"),aes(y=emmean,ymax=emmean+1.96*SE,ymin=emmean-1.96*SE,x=baseline,fill=region_50,color=region_50),position=position_dodge(width=2),width=0,size=1)+
+geom_point(data=subset(bf,taxo_group=="bees" & subset_species=="excluding rare"),aes(y=emmean,x=baseline,fill=region_50,color=region_50),position=position_dodge(width=2),size=2)+
+geom_errorbar(data=subset(bf,taxo_group=="bees" & subset_species=="excluding rare"),aes(y=emmean,ymax=emmean+1.96*SE,ymin=emmean-1.96*SE,x=baseline,fill=region_50,color=region_50),position=position_dodge(width=2),width=0,size=1)+
 theme_bw()+geom_hline(yintercept=0,linetype="dashed")+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
 panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),

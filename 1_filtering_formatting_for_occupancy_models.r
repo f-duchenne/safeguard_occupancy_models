@@ -22,6 +22,9 @@ nrow(dat)
 dat=merge(dat,gride,by=c("gridID_50"))
 nrow(dat)
 
+
+subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean")) %>% group_by(taxo_group) %>% count()
+
 n1=nrow(dat)
 dat=subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean"))
 nr_regions=n1-nrow(dat)
@@ -36,7 +39,9 @@ nyear_b70=sum(unique(YEAR_2)<=1970),nyear_a70=sum(unique(YEAR_2)>1970),nb_record
 
 fwrite(b,"sites_studied_tot.csv")
 
-nr_month=nrow(subset(dat,is.na(MONTH_2)))
+
+nr_month=subset(dat,is.na(MONTH_2))
+nr_month %>% group_by(taxo_group) %>% count()
 dat=subset(dat,!is.na(MONTH_2))
 
 #define what is a survey:
@@ -62,8 +67,9 @@ b=dat %>% group_by(year_grouped) %>% summarise(latitude_avg=mean(LATITUDE),longi
 #boxplot(LATITUDE~year_grouped,data=dat)
 
 #removing the sites that have been visited only in one period
-count_table_sites=dat %>% group_by(site) %>% summarise(nperiods=length(unique(year_grouped))) 
+count_table_sites=dat %>% group_by(site,taxo_group) %>% summarise(nperiods=length(unique(year_grouped))) 
 nr_sites=nrow(subset(count_table_sites,nperiods<2))
+subset(count_table_sites,nperiods<2) %>% group_by(taxo_group) %>% count()
 dat=subset(dat,site %in% subset(count_table_sites,nperiods>1)$site)
 nb_surveys=length(unique(dat$survey))
 

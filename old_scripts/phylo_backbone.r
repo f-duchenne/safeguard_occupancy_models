@@ -20,18 +20,16 @@ genus=sapply(str_split(species," "),"[",1)
 bee.tree=read.tree(file="BEE_mat7gen_p8pmAa_fst.nwk")
 bee.tree$tip.label=gsub("~","_",bee.tree$tip.label)
 bee.tree$tip.label=sapply(str_split(bee.tree$tip.label,"_"),"[",1)
-drop.tip(bee.tree,bee.tree$tip.label[!(bee.tree$tip.label %in%genus)])
+drop.tip(bee.tree,bee.tree$tip.label[!(bee.tree$tip.label %in% genus)])
 bee.tree=chronos(bee.tree)
 # bee.tree=read.tree(file="BEE_mat7_fulltree.nwk")
 # bee.tree$tip.label=gsub("~","_",bee.tree$tip.label)
 # bee.tree$tip.label=sapply(str_split(bee.tree$tip.label,"_"),"[",1)
 
-
 #creates Seladonia genus:
 nodi=which("Halictus"==bee.tree$tip.label)
 pos=bee.tree$edge.length[nodi==bee.tree$edge[,2]]/2
 bee.tree=bind.tip(bee.tree,"Seladonia",where=Ancestors(bee.tree, nodi, type = c("parent")),posistion=pos)
-
 
 
 
@@ -41,7 +39,6 @@ species
 plot(bee.tree)
 nodelabels()
 tiplabels()
-
 
 #add dummy species labels
 bee.tree$tip.label<-paste(bee.tree$tip.label,"_dum",sep="")
@@ -61,3 +58,5 @@ plot(bee.tree, cex = 0.6)
 ##Check for missing species
 setdiff(species,str_replace_all(bee.tree$tip.label, "_", " "))
 write.tree(bee.tree,"phylo_bees_safeguard.nxs")
+
+tr=read.tree("phylo_bees_safeguard.nxs")
