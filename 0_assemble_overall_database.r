@@ -59,7 +59,6 @@ data1$taxo_group="bees"
 ## Integrate hoverflies with bees
 data2 <- rbind(data1, dath)
 
-
 ############################ FILTERS THE RECORDS TO KEEP ONLY THE ONE WITH YEAR AND COORDINATES
 data2_subset=subset(data2, !is.na(YEAR_2) & !is.na(LONGITUDE) & !is.na(LATITUDE))
 
@@ -81,6 +80,14 @@ data3 <- st_as_sf(data2_subset,coords = c("LONGITUDE", "LATITUDE"), crs = 4326) 
 data3_filtered <- st_crop(data3, bbox)
 
 filter2=nrow(data3)-nrow(data3_filtered)
+
+#### remove duplicated records in 1989
+ndata=nrow(data3_filtered)
+data3_filtered_1=subset(data3_filtered,YEAR_2!=1989 | taxo_group!="bees")
+dat_1989=subset(data3_filtered,YEAR_2==1989 & taxo_group=="bees")
+dat_1989bis=dat[!duplicated(dat[,c("TAXON","YEAR_2","MONTH_2","DAY_2","geometry","GENUS","FAMILY")]),]
+data3_filtered=rbind(data3_filtered_1,dat_1989bis)
+filter3=ndata-nrow(data3_filtered)
 
 ######################### MAKE DIFFERENTE GRIDS WITH DIFFERENT RESOLUTION
 bioregions <- bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
@@ -130,7 +137,7 @@ data4_filtered=cbind(as.data.table(data4),coords)
 
 data4_filtered=subset(data4_filtered,!is.na(region_20) & region_20!="outside" & !is.na(region_50) & !is.na(region_100) & !is.na(region_200))
 
-filter3=nrow(data4)-nrow(data4_filtered)
+filter4=nrow(data4)-nrow(data4_filtered)
 
 ############ ATTRIBUTE TIME PERIOD
 ## Time periods:
@@ -149,10 +156,10 @@ data4_filtered$time_period[data4_filtered$YEAR_2>=2001 & data4_filtered$YEAR_2<=
 
 dataf=subset(data4_filtered,!is.na(time_period) & !is.na(region_50))
 
-filter4=nrow(data4_filtered)-nrow(dataf)
+filter5=nrow(data4_filtered)-nrow(dataf)
 
 fwrite(dataf,"database_clean_filtered.csv")
-filters=data.frame(filters=c("year and coordinates","geographical extent","not in a region","not in a period"),nb_removed=c(filter1,filter2,filter3,filter4))
+filters=data.frame(filters=c("year and coordinates","geographical extent","duplicated","not in a region","not in a period"),nb_removed=c(filter1,filter2,filter3,filter4,filter5))
 fwrite(filters,"nb_records_removed_during _filtering.csv")
 
 
