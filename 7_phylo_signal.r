@@ -25,11 +25,11 @@ Ab <- ape::vcv.phylo(bp)
 bidon2=subset(bidon,taxo_group=="bees" & phylo %in% colnames(Ab))
 
 model_bees <- brm(
-  trend | mi(sde) ~ 1 +(1|region_50) +(1|FAMILY)+(1|genus)+(1|gr(phylo, cov = A)),
+  trend | mi(sde) ~ 1 +(1|region_50) +(1|FAMILY/genus)+(1|gr(phylo, cov = A)),
   data = bidon2,
   family = gaussian(),
   data2 = list(A = Ab),
-  chains = 3,cores=3,iter =3000)
+  chains = 3,cores=3,iter =7000)
   
 model_bees=model_simple
 
@@ -40,7 +40,7 @@ model_hovs <- brm(
   data = bidon2,
   family = gaussian(),
   data2 = list(A = Ah),
-  chains = 3,cores=3,iter =3000)
+  chains = 3,cores=3,iter =5000)
   
 
 models=list(model_bees,model_hovs)
@@ -80,7 +80,7 @@ scale_y_continuous(labels=scales::percent,limits=c(0,1))+
 theme_bw()+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
 panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
-strip.background=element_rect(fill=NA,color=NA),legend.position="none",axis.text.x=element_text(angle=45,hjust=1))+ylab("Percentage of the total variance")+xlab("")
+strip.background=element_rect(fill=NA,color=NA),legend.position="none",axis.text.x=element_text(angle=45,hjust=1))+ylab("Percentage of the total variance")+xlab("")+ggtitle("a")
 
 obj=as_draws_df(model_hovs)
 names(obj)[1:5]=c("intercept","genus","phylo","region","sigma")
@@ -104,7 +104,11 @@ scale_y_continuous(labels=scales::percent)+
 theme_bw()+
 theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
 panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
-strip.background=element_rect(fill=NA,color=NA),legend.position="none",axis.text.x=element_text(angle=45,hjust=1))+ylab("Percentage of the total variance")+xlab("")
+strip.background=element_rect(fill=NA,color=NA),legend.position="none",axis.text.x=element_text(angle=45,hjust=1))+ylab("Percentage of the total variance")+xlab("")+ggtitle("b")
 
 
 plot_grid(p1,p2,align="hv")
+
+pdf(paste0(project_folder,"Figure_3.pdf"),width=7,height=5)
+plot_grid(p1,p2,align="hv")
+dev.off();

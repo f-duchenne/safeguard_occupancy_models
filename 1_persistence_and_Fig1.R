@@ -13,6 +13,7 @@ project_folder="C:/Users/Duchenne/Documents/safeguard/"
 # Loading data
 datf=fread(paste0(project_folder,"data/database_clean_filtered.csv"))
 datf %>% group_by(taxo_group) %>% count()
+datf %>% group_by(taxo_group) %>% summarise(length(unique(TAXON)))
 
 #define the total number of species expected, accoridng to Reverte:
 datf$ntot_spec_europe_tax=2138
