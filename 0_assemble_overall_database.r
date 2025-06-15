@@ -9,10 +9,11 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
-setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
+project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
 ############################ LOADING AND ASSEMBLING BEE DATA
-dat=readRDS("Bee_DB_2025-05-16.RDS")
+dat=readRDS(paste0(project_folder,"data/Bee_DB_2025-05-16.RDS"))
+bidon=subset(dat,endYear==1989 & family=="Andrenidae")
 dat2 <- dat %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
 names(dat2)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 ## removing data from spain
@@ -51,7 +52,7 @@ names(dat2)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNT
 data1=subset(dat2,TAXON!="Apis mellifera")
 
 ############################ LOADING AND ASSEMBLING HOVERFLIES DATA
-dath=readRDS("DB_hoverfly_20250528.rds")
+dath=readRDS(paste0(project_folder,"data/DB_hoverfly_20250528.rds"))
 dath <- dath %>% select (scientificName,yearEnd,monthEnd,dayEnd,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
 names(dath)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
 dath$taxo_group="hoverflies"
@@ -81,16 +82,13 @@ data3_filtered <- st_crop(data3, bbox)
 
 filter2=nrow(data3)-nrow(data3_filtered)
 
-#### remove duplicated records in 1989
+#### remove duplicated and blurr records in 1989
 ndata=nrow(data3_filtered)
-data3_filtered_1=subset(data3_filtered,YEAR_2!=1989 | taxo_group!="bees")
-dat_1989=subset(data3_filtered,YEAR_2==1989 & taxo_group=="bees")
-dat_1989bis=dat[!duplicated(dat[,c("TAXON","YEAR_2","MONTH_2","DAY_2","geometry","GENUS","FAMILY")]),]
-data3_filtered=rbind(data3_filtered_1,dat_1989bis)
+data3_filtered=subset(data3_filtered,!(YEAR_2==1989 & taxo_group=="bees" & is.na(MONTH_2) & FAMILY=="Andrenidae" & DATABASE_REFERENCE_CODE_2 %in% c("Pierre Rasmont","ULB")))
 filter3=ndata-nrow(data3_filtered)
 
 ######################### MAKE DIFFERENTE GRIDS WITH DIFFERENT RESOLUTION
-bioregions <- bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
+bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
 bioregions <- st_transform(bioregions, crs = utm_crs)
 resolutions=c(20000,50000,100000,200000)
 plot(st_geometry(bioregions))
@@ -105,13 +103,13 @@ plot(st_geometry(st_as_sfc(bbox)),add=TRUE)
 	# names(hex_grid)=c("gridID","PK_UID","region","p2012","code","name","geometry")
 	# ge=which(names(hex_grid)=="geometry")
 	# names(hex_grid)[-ge]=paste0(names(hex_grid)[-ge],"_",i/1000)
-	# st_write(hex_grid,paste0("grid_",i/1000,"KM.shp")) #export the grid to be able to access them latter and furnish them with the paper
+	# st_write(hex_grid,paste0(project_folder,"data/grid_",i/1000,"KM.shp")) #export the grid to be able to access them latter and furnish them with the paper
 # }
 
 ######################### MERGE DATA AND GRIDS
 nbr=nrow(data3_filtered)
 for(i in resolutions){
-	hex_grid=st_read(paste0("grid_",i/1000,"KM.shp"),crs=utm_crs)
+	hex_grid=st_read(paste0(project_folder,"data/grid_",i/1000,"KM.shp"),crs=utm_crs)
 	data3_filtered=st_join(data3_filtered,hex_grid[,paste0(c("gridID","region"),"_",i/1000)])
 	data3_filtered=data3_filtered[,-which(names(data3_filtered)=="geometry")]
 	print(nrow(data3_filtered))
@@ -158,9 +156,9 @@ dataf=subset(data4_filtered,!is.na(time_period) & !is.na(region_50))
 
 filter5=nrow(data4_filtered)-nrow(dataf)
 
-fwrite(dataf,"database_clean_filtered.csv")
+fwrite(dataf,paste0(project_folder,"data/database_clean_filtered.csv"))
 filters=data.frame(filters=c("year and coordinates","geographical extent","duplicated","not in a region","not in a period"),nb_removed=c(filter1,filter2,filter3,filter4,filter5))
-fwrite(filters,"nb_records_removed_during _filtering.csv")
+fwrite(filters,paste0(project_folder,"data/nb_records_removed_during _filtering.csv"))
 
 
 

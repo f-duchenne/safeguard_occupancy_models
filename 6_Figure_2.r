@@ -130,6 +130,13 @@ bidon_hov$winlo=NA
 bidon_hov$winlo[bidon_hov$trend>0 & bidon_hov$significant=="yes"]="Winners"
 bidon_hov$winlo[bidon_hov$trend<0 & bidon_hov$significant=="yes"]="Losers"
 
+bidon_bee=bidon_bee %>% group_by(region_50) %>% mutate(nsp=length(unique(species)))
+bidon_bee %>% group_by(winlo,region_50) %>% summarise(length(unique(species))/unique(nsp))
+
+bidon_hov=bidon_hov %>% group_by(region_50) %>% mutate(nsp=length(unique(species)))
+bidon_hov %>% group_by(winlo,region_50) %>% summarise(length(unique(species))/unique(nsp))
+
+
 pl3=ggplot(data=subset(bidon_bee,!is.na(winlo)),aes(x=winlo,fill=region2),position="stack")+
 geom_bar()+
 theme_bw()+
@@ -167,6 +174,57 @@ grid.arrange(p1,pl5,ncol=2,widths=c(2,0.75))
 pdf(paste0(project_folder,"/Figure_2.pdf"),width=8,height=5)
 grid.arrange(p1,pl5,ncol=2,widths=c(2,1))
 dev.off();
+
+##################### FIGURE S3
+bf=NULL
+bf2=NULL
+for(jj in unique(bidon$taxo_group)){
+for(base in c(1921,1971)){
+load(paste0(project_folder,"data/model_",base,"_",jj,".RData"))
+model_1=lis_bas[[1]]
+sav <- emmprep(model_1)
+b=as.data.frame(emmeans(sav,specs="region_50"))
+b$baseline=base
+b$basic_mean=subset(bidon,taxo_group==jj) %>% group_by(region_50) %>% summarise(mean(trend)) %>% deframe()
+b$basic_SE=subset(bidon,taxo_group==jj) %>% group_by(region_50) %>% summarise(sd(trend)/sqrt(length(trend))) %>% deframe()
+b$taxo_group=jj
+b$n_trends=model_1$k
+b$subset_species="all"
+bf=rbind(bf,b)
+}}
+
+
+bf=as.data.frame(bf)
+bf$region2=as.character(bf$region_50)
+bf$region2[bf$region2=="mediterranean"]="medit."
+bf$region2[bf$region2=="continental"]="conti."
+
+### PANEL A-B
+pl1=ggplot(data=bf,aes(y=emmean,x=region2,fill=region2,color=region2))+
+geom_point(size=1.5)+
+geom_errorbar(aes(ymax=emmean+1.96*SE,ymin=emmean-1.96*SE),width=0,size=1)+
+theme_bw()+geom_hline(yintercept=0,linetype="dashed")+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
+scale_color_manual(values=colo2)+scale_fill_manual(values=colo2)+xlab("Biogeographic region")+ylab(expression(paste("Species trend (log of growth rate)")))+
+facet_grid(cols=vars(taxo_group),rows=vars(baseline))
+
+pl2=ggplot()+
+geom_density_ridges(data=bidon_hov,aes(x=trend,y=region2,fill=region2,color=region2),alpha=0.3,scale = 0.9)+
+xlim(c(-0.2,0.2))+
+geom_point(data=subset(bf,taxo_group=="hoverflies" & subset_species=="all"),aes(x=emmean,y=as.numeric(as.factor(region2))+dodgi,fill=region2,color=region2),size=1.5)+
+geom_errorbarh(data=subset(bf,taxo_group=="hoverflies" & subset_species=="all"),aes(x=emmean,xmax=emmean+1.96*SE,xmin=emmean-1.96*SE,y=as.numeric(as.factor(region2))+dodgi,fill=region2,color=region2),height = 0,size=1)+
+theme_bw()+geom_vline(xintercept=0,linetype="dashed")+
+theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
+panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
+strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
+scale_color_manual(values=colo2)+scale_fill_manual(values=colo2)+ylab("Biogeographic region")+xlab(expression(paste("Species trend (log of growth rate)")))+coord_cartesian(expand=FALSE)+ggtitle("b")
+
+
+
+
+
 
 
 ########################################

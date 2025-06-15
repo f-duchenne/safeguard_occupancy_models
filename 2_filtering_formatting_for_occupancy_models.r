@@ -9,10 +9,10 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
-setwd(dir="C:/Users/Duchenne/Documents/safeguard/data")
+project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
 # Loading data
-dat=fread("database_clean_filtered.csv")
+dat=fread(paste0(project_folder,"data/database_clean_filtered.csv"))
 nb_records_initial=nrow(dat)
 hex_grid=st_read(paste0("grid_",50,"KM.shp"),crs="+proj=utm +zone=32 +ellps=WGS84")
 hex_grid_p=st_centroid(hex_grid)
@@ -29,7 +29,7 @@ n1=nrow(dat)
 dat=subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean"))
 nr_regions=n1-nrow(dat)
 nb_records=nrow(dat)
-
+datf %>% group_by(taxo_group) %>% count()
 
 #roughly define sites
 dat$site=dat$gridID_50
@@ -87,7 +87,7 @@ bb=bb %>% dplyr::group_by(region_50,taxo_group) %>% dplyr::mutate(nsurv=length(u
 b= bb %>% dplyr::group_by(region_50,TAXON,FAMILY,taxo_group) %>% dplyr::summarise(occupancy_obs=sum(occupied>0)/mean(nsurv),nb_records=sum(occupied),nb_detect=sum(occupied>0))
 b=b %>% group_by(TAXON,taxo_group,FAMILY) %>% mutate(nb_records_tot=sum(nb_records))
 
-fwrite(b,"species_nb_records.csv")
+fwrite(b,paste0(project_folder,"data/species_nb_records.csv"))
 
 nb_sp_common=subset(count_table,N>=1000) %>% group_by(taxo_group) %>% count() %>%  deframe()
 nb_sp=subset(b,nb_records_tot>=10 & nb_detect>=5) %>% group_by(taxo_group) %>% summarise(n=length(unique(TAXON))) %>%  deframe()
@@ -95,17 +95,17 @@ nsp_tot=b %>% group_by(taxo_group) %>% summarise(n=length(unique(TAXON))) %>%  d
 length(unique(dat$TAXON))
 
 list_filtering=list(nb_records_initial,nr_regions,nb_records,nr_month,nr_sites,nb_surveys,nb_sp_common,nb_sp,nsp_tot)
-save(list_filtering,file=paste0("list_filtering.RData"))
+save(list_filtering,file=paste0(project_folder,"data/list_filtering.RData"))
 
 b=dat %>% dplyr::group_by(gridID_50,region_50,taxo_group) %>% dplyr::summarise(nyear=length(unique(YEAR_2)),
 nyear_b70=sum(unique(YEAR_2)<=1970),nyear_a70=sum(unique(YEAR_2)>1970))
 
-fwrite(b,"sites_studied.csv")
+fwrite(b,paste0(project_folder,"data/sites_studied.csv"))
 
 bb=dat %>% dplyr::group_by(region_50,YEAR_2,gridID_50,taxo_group) %>% dplyr::summarise(nsurveys=length(unique(survey)),nrec=length(survey))
 b=bb %>% dplyr::group_by(region_50,YEAR_2,taxo_group) %>% dplyr::summarise(nsites=length(unique(gridID_50)),mean_nsurv=mean(nsurveys),nrec=sum(nrec))
 
-fwrite(b,"regions_sampling.csv")
+fwrite(b,paste0(project_folder,"data/regions_sampling.csv"))
 
 ######################################### PREPARE MATRIX OF DETECTION AND NON DETECTION FOR EACH GROUP
 taxo_group_vec=c("bees","hoverflies")
@@ -155,16 +155,16 @@ for(j in taxo_group_vec){
 		# fwrite(mat1,"det_nondet_matrix_species_test.csv")
 
 		#export matrix
-		fwrite(mat1,paste0(j,"_det_nondet_matrix.csv"))
+		fwrite(mat1,paste0(project_folder,"data/",j,"_det_nondet_matrix.csv"))
 	}
 
 }
 
 
 
-dat1=fread(paste0("bees_det_nondet_matrix_common.csv"))
-dat2=fread(paste0("bees_det_nondet_matrix_rare.csv"))
-dat3=fread(paste0("hoverflies_det_nondet_matrix.csv"))
+dat1=fread(paste0(project_folder,"data/bees_det_nondet_matrix_common.csv"))
+dat2=fread(paste0(project_folder,"data/bees_det_nondet_matrix_rare.csv"))
+dat3=fread(paste0(project_folder,"data/hoverflies_det_nondet_matrix.csv"))
 
 
 length((which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1))
@@ -173,4 +173,4 @@ liste_species=rbind(
 data.frame(species=names(dat1)[(which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1)],taxo_group="bees",matrix="common"),
 data.frame(species=names(dat2)[(which(names(dat2)=="region_50")+1):(which(names(dat2)=="others")-1)],taxo_group="bees",matrix="rare"),
 data.frame(species=names(dat3)[(which(names(dat3)=="region_50")+1):ncol(dat3)],taxo_group="hoverflies",matrix=NA))
-fwrite(liste_species,"liste_total_species_occupancy.csv")
+fwrite(liste_species,paste0(project_folder,"data/liste_total_species_occupancy.csv"))
