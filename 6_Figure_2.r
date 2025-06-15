@@ -1,4 +1,4 @@
-pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse") 
+pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse","gridExtra") 
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
@@ -10,7 +10,7 @@ inv.logit=function(x){exp(x)/(1+exp(x))}
 logit=function(x){log(x/(1-x))}
 
 #load trends
-trendsf=fread("all_trends.csv")
+trendsf=fread(paste0(project_folder,"data/all_trends.csv"))
 
 ####### FOCUS ON THE OVERALL PERIOD; BASELINE = 1921
 bidon=subset(trendsf,baseline==1921)
@@ -36,6 +36,7 @@ for(jj in unique(bidon$taxo_group)){
 	b$basic_mean=subset(bidon,taxo_group==jj) %>% group_by(region_50) %>% summarise(mean(trend)) %>% deframe()
 	b$basic_SE=subset(bidon,taxo_group==jj) %>% group_by(region_50) %>% summarise(sd(trend)/sqrt(length(trend))) %>% deframe()
 	b$taxo_group=jj
+	b$n_trends=model_1$k
 	b$subset_species="all"
 	bf=rbind(bf,b)
 	
@@ -45,6 +46,7 @@ for(jj in unique(bidon$taxo_group)){
 	b$basic_mean=subset(bidon,taxo_group==jj & max.occ>=1e-4) %>% group_by(region_50) %>% summarise(mean(trend)) %>% deframe()
 	b$basic_SE=subset(bidon,taxo_group==jj & max.occ>=1e-4) %>% group_by(region_50) %>% summarise(sd(trend)/sqrt(length(trend))) %>% deframe()
 	b$taxo_group=jj
+	b$n_trends=model_2$k
 	b$subset_species="excluding rare"
 	bf=rbind(bf,b)
 	
@@ -55,6 +57,7 @@ for(jj in unique(bidon$taxo_group)){
 	b=as.data.frame(emmeans(sav,specs="1"))
 	b$baseline=1921
 	b$taxo_group=jj
+	b$n_trends=model_1$k
 	b$subset_species="all"
 	bf2=rbind(bf2,b)
 	load(paste0(project_folder,"data/model_total_",1971,"_",jj,".RData"))
@@ -64,6 +67,7 @@ for(jj in unique(bidon$taxo_group)){
 	b=as.data.frame(emmeans(sav,specs="1"))
 	b$baseline=1971
 	b$taxo_group=jj
+	b$n_trends=model_1$k
 	b$subset_species="all"
 	bf2=rbind(bf2,b)
 }
@@ -86,6 +90,10 @@ bf$region2=as.character(bf$region_50)
 bf$region2[bf$region2=="mediterranean"]="medit."
 bf$region2[bf$region2=="continental"]="conti."
 
+table_S2=subset(bf, subset_species=="all")
+n_tab=bidon %>% group_by(taxo_group,region_50) %>% count()
+table_S2=merge(table_S2,n_tab,by=c("taxo_group","region_50"))
+fwrite(table_S2,paste0(project_folder,"data/table_S2.csv"))
 
 nrow(subset(bidon_bee,abs(trend)>0.2))/nrow(bidon_bee)
 nrow(subset(bidon_hov,abs(trend)>0.2))/nrow(bidon_hov)
