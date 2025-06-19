@@ -21,16 +21,23 @@ bee.tree=force.ultrametric(bee.tree)
 bee.tree$tip.label=gsub("~","_",bee.tree$tip.label)
 genus_of_tips=sapply(str_split(bee.tree$tip.label,"_"),"[",1)
 bee.tree$tip.label=paste0(sapply(str_split(bee.tree$tip.label,"_"),"[",1),"_",sapply(str_split(bee.tree$tip.label,"_"),"[",2))
-drop.tip(bee.tree,bee.tree$tip.label[!(genus_of_tips %in% genus)])
+bee.tree=drop.tip(bee.tree,bee.tree$tip.label[!(genus_of_tips %in% genus)])
 
 # bee.tree=read.tree(file="BEE_mat7_fulltree.nwk")
 # bee.tree$tip.label=gsub("~","_",bee.tree$tip.label)
 # bee.tree$tip.label=sapply(str_split(bee.tree$tip.label,"_"),"[",1)
 
+root_age=max(nodeHeights(bee.tree))
+
 #creates Seladonia genus:
 nodi=getMRCA(bee.tree, bee.tree$tip.label[grep("Halictus",bee.tree$tip.label)])
-pos=bee.tree$edge.length[nodi==bee.tree$edge[,2]]/2
-bee.tree=bind.tip(bee.tree,"Seladonia_sp",where=Ancestors(bee.tree, nodi, type = c("parent")),posistion=pos)
+height=findMRCA(bee.tree, tips=bee.tree$tip.label[grep("Halictus",bee.tree$tip.label)], type=c("height"))
+pos=(root_age-nodeheight(bee.tree,nodi))/2
+bee.tree=drop.tip(bee.tree,bee.tree$tip.label[grep("Halictus",bee.tree$tip.label)][-1])
+#pos=bee.tree$edge.length[bee.tree$edge[,2] == grep("Halictus_confusus",bee.tree$tip.label)]/2
+bee.tree=bind.tip(bee.tree,"Seladonia_sp",where=grep("Halictus",bee.tree$tip.label),position=pos)
+#check visually
+plot(drop.tip(bee.tree,bee.tree$tip.label[-c(grep("Lasioglossum_pallens",bee.tree$tip.label),grep("Seladonia",bee.tree$tip.label),grep("Halictus",bee.tree$tip.label))]))
 
 species[!(species %in% str_replace_all(bee.tree$tip.label,"_"," "))]
 # plot(bee.tree)
@@ -40,10 +47,59 @@ species[!(species %in% str_replace_all(bee.tree$tip.label,"_"," "))]
 #add dummy species labels
 bee.tree$tip.label<-paste(bee.tree$tip.label," dum",sep="")
 
+getMRCA(bee.tree, c("Seladonia_sp dum","Halictus_confusus dum"))
+
+#genus to modify
+gen_tab=data.frame(genus=unique(sapply(str_split(species," "),"[",1)),node=NA,age=NA)
+for(i in 1:nrow(gen_tab)){
+	focal_genus=gen_tab$genus[i]
+	tip_genus=bee.tree$tip.label[grep(focal_genus,bee.tree$tip.label)]
+	if(!(gen_tab$genus[i] %in% c("Halictus","Seladonia"))){
+		if(length(tip_genus)>1){
+			nodi=getMRCA(bee.tree, tip_genus)
+			height=nodeheight(bee.tree,nodi)
+			gen_tab$node[i]=nodi
+			gen_tab$age[i]=height
+		}
+	}else{
+		gen_tab$age[i]=nodeheight(bee.tree,getMRCA(bee.tree, c("Seladonia_sp dum","Halictus_confusus dum")))
+		gen_tab$node[i]=grep(focal_genus,bee.tree$tip.label)
+	}
+}
+
+
 #Add species tips
-for(i in 1:length(species)){
-    bee.tree<-add.species.to.genus(bee.tree,species[i],
-                                      where="root")
+dat=as.data.frame(cbind(species,genus))
+for(i in 1:nrow(gen_tab)){
+	focal_genus=gen_tab$genus[i]
+	spec=gsub(" ","_",subset(dat,genus==focal_genus)$species)
+	bee.tree=drop.tip(bee.tree,bee.tree$tip.label[grep(focal_genus,bee.tree$tip.label)][-1])
+	if(!is.na(gen_tab$age[i])){
+		pos=(root_age-gen_tab$age[i])/2
+		for(j in 1:length(spec)){
+			if(j==1){
+				bee.tree=bind.tip(bee.tree,spec[j],where=grep(focal_genus,bee.tree$tip.label),position=pos)
+			}else{
+				bee.tree<-add.species.to.genus(bee.tree,spec[j],where="root")
+			}
+		}	
+	}else{
+		for(j in 1:length(spec)){
+			bee.tree<-add.species.to.genus(bee.tree,spec[j],where="root")
+		}
+	}
+}
+	
+	
+	plot(drop.tip(bee.tree,bee.tree$tip.label[-c(grep("Lasioglossum_pallens",bee.tree$tip.label),grep(focal_genus,bee.tree$tip.label))]))
+	
+	nodi=getMRCA(bee.tree, bee.tree$tip.label[grep(focal_genus,bee.tree$tip.label)])
+	height=nodeheight(bee.tree,nodi)
+	pos=(root_age-nodeheight(bee.tree,nodi))/2
+	bee.tree=bind.tip(bee.tree,species[i],where=Ancestors(bee.tree, nodi, type = c("parent")),posistion=pos)
+	plot(drop.tip(bee.tree,bee.tree$tip.label[grep(focal_genus,bee.tree$tip.label,invert=TRUE)]))
+	
+    bee.tree<-add.species.to.genus(bee.tree,species[i],where="root")
 }
 
 ## prune out dummy taxa
