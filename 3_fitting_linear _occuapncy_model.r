@@ -84,7 +84,7 @@ Nr=length(unique(dat$region_50))
 
 Nsite=length(unique(dat$site))
 
-Nmonth=length(unique(dat$MONTH_2))
+Nmonth=length(unique(dat$endMonth))
 
 regions=levels(factor(dat$region_50))
 
@@ -103,9 +103,9 @@ for(j in 1:length(baselines_vec)){
 dat2=subset(dat,year_grouped>=baselines_vec[j])
 
 if(length(unique(dat$region_50))>1){
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/endMonth),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
 }else{
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|endMonth),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
 }
 
 ### If it did not converge try to change the solver
@@ -113,9 +113,9 @@ b=0
 while((modelt$fit$convergence!=0 | is.na(AIC(modelt))) & b<3){
 b=b+1
 if(length(unique(dat$region_50))>1){
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/endMonth),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
 }else{
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|MONTH_2),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
+modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|endMonth),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
 }
 }
 lili[[j]]=modelt

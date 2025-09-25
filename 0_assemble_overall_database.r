@@ -12,58 +12,33 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
 ############################ LOADING AND ASSEMBLING BEE DATA
-dat=readRDS(paste0(project_folder,"data/Bee_DB_2025-05-16.RDS"))
-bidon=subset(dat,endYear==1989 & family=="Andrenidae")
-dat2 <- dat %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
-names(dat2)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
-## removing data from spain
-# dat2 <- dat2[!(dat2$DATABASE_REFERENCE_CODE_2 %in% c("Ignasi Bartomeus","Nacho Bartomeus" ,"I. Bartomeus")),]
+datb=readRDS(paste0(project_folder,"data/Bee_DB_2025-09-03.rds"))
 
-# Loading more recent data from spain:
-# data_Spain <- fread("iberian_bees.csv")
-# taxi=fread("species_family_table,.csv")
-# nrow(data_Spain)
-# data_Spain=merge(data_Spain,taxi,by.x="Accepted_name",by.y="TAXON")
-# nrow(data_Spain)
-# ## I include approximate coordinates for two villages that do not have but hold 2750 records together (Pina de Ebro and Castello de Vide).
-# data_Spain$Longitude[data_Spain$Locality == "Castello de Vide"] <- -7.45680
-# data_Spain$Latitude[data_Spain$Locality == "Castello de Vide"] <- 39.41624
+data1b <- datb %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider,institutionName,isPseudodata)
+data1b$taxo_group="bees"
 
-# ## Assign coordinates for "Pina de Ebro"
-# data_Spain$Longitude[data_Spain$Locality == "Pina de Ebro"] <- -0.5261
-# data_Spain$Latitude[data_Spain$Locality == "Pina de Ebro"] <- 41.4814 
+ndata=nrow(data1b)
 
-# ## Select the columns that are common between both datasets and give them the right names
-# Spain <- data_Spain %>% select (Accepted_name, Year, Month, Day, Longitude,Latitude,Country,Genus,FAMILY,Unique.identifier)
-# Spain$DATABASE_REFERENCE_CODE_2="BartomeusI_Iberia_2023"
-# names(Spain)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
+#remove Apis mellifera
+data1b=subset(data1b,scientificName!="Apis mellifera")
 
-# # Adding data from Portugal (https://doi.org/10.15468/dl.7vqj99):
-# data_port=fread("0000019-250214093936778.csv")
-# data_port$Country="Portugal"
+#### remove duplicated and blurr records in 1989
 
-# ## Select the columns that are common between both datasets and give them the right names
-# Portugal <- data_port %>% select (species, year, month, day, decimalLongitude,decimalLatitude,Country,genus,family,occurrenceID,datasetKey)
-# names(Portugal)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
-
-# ## Integrate Iberian database with the European dataset.
-# data1 <- rbind(dat2,Portugal)
-
-data1=subset(dat2,TAXON!="Apis mellifera")
+data1b=subset(data1b,isPseudodata==FALSE)
+filter1=ndata-nrow(data1b)
 
 ############################ LOADING AND ASSEMBLING HOVERFLIES DATA
-dath=readRDS(paste0(project_folder,"data/DB_hoverfly_20250528.rds"))
-dath <- dath %>% select (scientificName,yearEnd,monthEnd,dayEnd,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider)
-names(dath)<- c("TAXON","YEAR_2","MONTH_2","DAY_2","LONGITUDE","LATITUDE","COUNTRY","GENUS","FAMILY","UUID","DATABASE_REFERENCE_CODE_2")
-dath$taxo_group="hoverflies"
-data1$taxo_group="bees"
+dath=readRDS(paste0(project_folder,"data/Hoverfly_DB_2025-09-03.rds"))
+data1h <- dath %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider,institutionName)
+data1h$taxo_group="hoverflies"
+
 ## Integrate hoverflies with bees
-data2 <- rbind(data1, dath)
+data2 <- rbind(data1b[,-which(names(data1b)=="isPseudodata")], data1h)
 
 ############################ FILTERS THE RECORDS TO KEEP ONLY THE ONE WITH YEAR AND COORDINATES
-data2_subset=subset(data2, !is.na(YEAR_2) & !is.na(LONGITUDE) & !is.na(LATITUDE))
+data2_subset=subset(data2, !is.na(endYear) & !is.na(decimalLongitude) & !is.na(decimalLatitude))
 
-filter1=(nrow(data2)-nrow(data2_subset)) #number of records removed
+filter2=(nrow(data2)-nrow(data2_subset)) #number of records removed
 
 # LOAD SOME BASIC SHAPEFILES THAT WILL USE TO DEFINE THE AREA
 # Define the UTM projection for a suitable UTM zone
@@ -75,17 +50,13 @@ bboxsf=st_as_sf(st_as_sfc(st_bbox(bbox)))
 
 # FILTERS THE RECORDS TO KEEP ONLY THE ONE IN THE DEFINED AREA
 # Set the CRS of data3 to be the same as that of the map
-data3 <- st_as_sf(data2_subset,coords = c("LONGITUDE", "LATITUDE"), crs = 4326) %>% st_transform(crs = utm_crs)
+data3 <- st_as_sf(data2_subset,coords = c("decimalLongitude", "decimalLatitude"), crs = 4326) %>% st_transform(crs = utm_crs)
   
 #crop to the extent of the map
 data3_filtered <- st_crop(data3, bbox)
 
-filter2=nrow(data3)-nrow(data3_filtered)
+filter3=nrow(data3)-nrow(data3_filtered)
 
-#### remove duplicated and blurr records in 1989
-ndata=nrow(data3_filtered)
-data3_filtered=subset(data3_filtered,!(YEAR_2==1989 & taxo_group=="bees" & is.na(MONTH_2) & FAMILY=="Andrenidae" & DATABASE_REFERENCE_CODE_2 %in% c("Pierre Rasmont","ULB")))
-filter3=ndata-nrow(data3_filtered)
 
 ######################### MAKE DIFFERENTE GRIDS WITH DIFFERENT RESOLUTION
 bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
@@ -117,20 +88,20 @@ for(i in resolutions){
 
 
 #SOME RECORDS FALL ON THE EDGE OF TWO CELLS AND ARE THUS DUPLICATED; ATTRIBUTE THEM TO ONE ARBITRARY
-bidon=data3_filtered[data3_filtered$UUID %in% data3_filtered$UUID[duplicated(data3_filtered$UUID)],]
+bidon=data3_filtered[data3_filtered$occurrenceID %in% data3_filtered$occurrenceID[duplicated(data3_filtered$occurrenceID)],]
 unique(bidon$region_20) #check that all concern cells have a region
 unique(bidon$region_50) #check that all concern cells have a region
 unique(bidon$region_100) #check that all concern cells have a region
 unique(bidon$region_200) #check that all concern cells have a region
 
-data4=data3_filtered[!duplicated(data3_filtered$UUID),] #remove the duplicated values
+data4=data3_filtered[!duplicated(data3_filtered$occurrenceID),] #remove the duplicated values
 
 ############ SOME GRIDCELLS ALONG THE BORDER DO NOT HAVE A REGION; REATRRIBUTE THEM
 data4$region_20[is.na(data4$region_20) & !is.na(data4$region_50)]=data4$region_50[is.na(data4$region_20) & !is.na(data4$region_50)]
 
 
 coords=as.data.table(st_coordinates(data4))
-names(coords)=c("LONGITUDE","LATITUDE")
+names(coords)=c("decimalLongitude", "decimalLatitude")
 data4_filtered=cbind(as.data.table(data4),coords)
 
 data4_filtered=subset(data4_filtered,!is.na(region_20) & region_20!="outside" & !is.na(region_50) & !is.na(region_100) & !is.na(region_200))
@@ -146,11 +117,11 @@ filter4=nrow(data4)-nrow(data4_filtered)
 #P5 <- 2001 - 2020
 #define time periods
 data4_filtered$time_period=NA
-data4_filtered$time_period[data4_filtered$YEAR_2>=1921 & data4_filtered$YEAR_2<=1940]= "1921-1940"
-data4_filtered$time_period[data4_filtered$YEAR_2>=1941 & data4_filtered$YEAR_2<=1960]="1941-1960"
-data4_filtered$time_period[data4_filtered$YEAR_2>=1961 & data4_filtered$YEAR_2<=1980]="1961-1980"
-data4_filtered$time_period[data4_filtered$YEAR_2>=1981 & data4_filtered$YEAR_2<=2000]="1981-2000"
-data4_filtered$time_period[data4_filtered$YEAR_2>=2001 & data4_filtered$YEAR_2<=2020]="2001-2020"
+data4_filtered$time_period[data4_filtered$endYear>=1921 & data4_filtered$endYear<=1940]= "1921-1940"
+data4_filtered$time_period[data4_filtered$endYear>=1941 & data4_filtered$endYear<=1960]="1941-1960"
+data4_filtered$time_period[data4_filtered$endYear>=1961 & data4_filtered$endYear<=1980]="1961-1980"
+data4_filtered$time_period[data4_filtered$endYear>=1981 & data4_filtered$endYear<=2000]="1981-2000"
+data4_filtered$time_period[data4_filtered$endYear>=2001 & data4_filtered$endYear<=2020]="2001-2020"
 
 dataf=subset(data4_filtered,!is.na(time_period) & !is.na(region_50))
 
