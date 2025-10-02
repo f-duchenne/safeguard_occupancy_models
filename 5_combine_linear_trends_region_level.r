@@ -7,7 +7,7 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
-setwd(dir=paste0(project_folder,"results_glm_with_counts"))
+setwd(dir=paste0(project_folder,"/predicts_linear"))
 lifile=list.files( pattern ="predicts_")
 lifile=lifile[grep("non_linear",lifile,invert=TRUE)]
 
@@ -25,10 +25,10 @@ inv.logit=function(x){exp(x)/(1+exp(x))}
 logit=function(x){log(x/(1-x))}
 
 tab_spec=fread(paste0(project_folder,"data/species_nb_records.csv"))
-tab_spec=subset(tab_spec,nb_detect>=5 & nb_records_tot>=10) %>% group_by(TAXON) %>% mutate(nb_detect_tot=sum(nb_detect),occ_min=min(occupancy_obs))
+tab_spec=subset(tab_spec,nb_detect>=5 & nb_records_tot>=10) %>% group_by(scientificName) %>% mutate(nb_detect_tot=sum(nb_detect),occ_min=min(occupancy_obs))
 
 nrow(trendsf)
-trendsf=merge(trendsf,tab_spec,by.x=c("species","region_50","taxo_group"),by.y=c("TAXON","region_50","taxo_group"))
+trendsf=merge(trendsf,tab_spec,by.x=c("species","region_50","taxo_group"),by.y=c("scientificName","region_50","taxo_group"))
 nrow(trendsf)
 
 b=unique(trendsf[,c("species","nb_records_tot","nb_detect_tot","convergence","occ_min")])
