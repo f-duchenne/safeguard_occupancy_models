@@ -153,7 +153,7 @@ panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title
 strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
 scale_color_manual(values=colo2)+scale_fill_manual(values=colo2)+ylab("nb. of species")+xlab("")+coord_cartesian(expand=FALSE)+ggtitle("d")
 
-p1=plot_grid(pl1,pl3,pl2,pl4,ncol=2,rel_widths=c(2/4,1/4))
+p1=plot_grid(pl1,pl3,pl2,pl4,ncol=2,rel_widths=c(2/4,1/4),align="hv")
 
 
 ### PANEL E
@@ -171,7 +171,7 @@ scale_color_manual(values=c("black","grey"))
 grid.arrange(p1,pl5,ncol=2,widths=c(2,0.75))
 
 
-pdf(paste0(project_folder,"/Figure_2.pdf"),width=8,height=5)
+pdf(paste0(project_folder,"/Figure_3.pdf"),width=8,height=5)
 grid.arrange(p1,pl5,ncol=2,widths=c(2,1))
 dev.off();
 
