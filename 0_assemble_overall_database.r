@@ -14,7 +14,7 @@ project_folder="C:/Users/Duchenne/Documents/safeguard/"
 ############################ LOADING AND ASSEMBLING BEE DATA
 datb=readRDS(paste0(project_folder,"data/Bee_DB_2025-09-03.rds"))
 
-data1b <- datb %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider,institutionName,isPseudodata)
+data1b <- datb %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider,institutionName,isPseudodata,scientificNameAuthorship)
 data1b$taxo_group="bees"
 
 ndata=nrow(data1b)
@@ -29,7 +29,7 @@ filter1=ndata-nrow(data1b)
 
 ############################ LOADING AND ASSEMBLING HOVERFLIES DATA
 dath=readRDS(paste0(project_folder,"data/Hoverfly_DB_2025-09-03.rds"))
-data1h <- dath %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider,institutionName)
+data1h <- dath %>% select (scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider,institutionName,scientificNameAuthorship)
 data1h$taxo_group="hoverflies"
 
 ## Integrate hoverflies with bees
