@@ -58,8 +58,8 @@ data3_filtered <- st_crop(data3, bbox)
 filter3=nrow(data3)-nrow(data3_filtered)
 
 
-######################### MAKE DIFFERENTE GRIDS WITH DIFFERENT RESOLUTION
-bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
+######################### MAKE DIFFERENTE GRIDS WITH DIFFERENT RESOLUTION (GRIDS ARE ALREADY DONE AND AVAILABLE IN THE DATA FOLDER, SO THE LOOP IS COMMENTED)
+bioregions <- st_read ("data/grids_shapefiles/BiogeoRegions2016.shp")
 bioregions <- st_transform(bioregions, crs = utm_crs)
 resolutions=c(20000,50000,100000,200000)
 plot(st_geometry(bioregions))
@@ -74,13 +74,13 @@ plot(st_geometry(st_as_sfc(bbox)),add=TRUE)
 	# names(hex_grid)=c("gridID","PK_UID","region","p2012","code","name","geometry")
 	# ge=which(names(hex_grid)=="geometry")
 	# names(hex_grid)[-ge]=paste0(names(hex_grid)[-ge],"_",i/1000)
-	# st_write(hex_grid,paste0(project_folder,"data/grid_",i/1000,"KM.shp")) #export the grid to be able to access them latter and furnish them with the paper
+	# st_write(hex_grid,paste0(project_folder,"data/grids_shapefiles/grid_",i/1000,"KM.shp")) #export the grid to be able to access them latter and furnish them with the paper
 # }
 
 ######################### MERGE DATA AND GRIDS
 nbr=nrow(data3_filtered)
 for(i in resolutions){
-	hex_grid=st_read(paste0(project_folder,"data/grid_",i/1000,"KM.shp"),crs=utm_crs)
+	hex_grid=st_read(paste0(project_folder,"data/grids_shapefiles/grid_",i/1000,"KM.shp"),crs=utm_crs)
 	data3_filtered=st_join(data3_filtered,hex_grid[,paste0(c("gridID","region"),"_",i/1000)])
 	data3_filtered=data3_filtered[,-which(names(data3_filtered)=="geometry")]
 	print(nrow(data3_filtered))
@@ -132,6 +132,7 @@ filters=data.frame(filters=c("year and coordinates","geographical extent","dupli
 fwrite(filters,paste0(project_folder,"data/nb_records_removed_during _filtering.csv"))
 
 
+#### SMALL OLD CHECKS
 
 library(rgbif)
 tab=data.frame(species=unique(dat$TAXON),family=NA)

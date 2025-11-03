@@ -4,11 +4,18 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
-nit=20000
+#MERGE TRENDS AND TRAITS
+trends=fread(paste0(project_folder,"data/all_trends.csv"))
+traits=fread(paste0(project_folder,"data/traits_table.csv"))
+traits[traits==""]=NA
+trends=merge(trends,traits,by.x="species",by.y="Species",all.x=TRUE,all.y=FALSE)
+
+#### RUNNING MODELS (MODELS TAKE FEW HOURS TO RUN, YOU CAN SKIP THAT SCRIPT AND LOAD THEM DIRECTLY TO DO FIGURE 4)
+
+nit=20000 #set number of iterations for bayesian models
 
 #### BEES
-trends_bee=fread(paste0(project_folder,"data/Bee_Traits.csv"))
-trends_bee$Larval_diet_breadth[trends_bee$Larval_diet_breadth=="na"]=NA
+trends_bee=subset(trends,taxo_group=="bees")
 trends_bee=subset(trends_bee,!is.na(Larval_diet_breadth) & !is.na(ITD_F_mm) & !is.na(STI_Species_temperature_index) & !is.na(Sociality_simplified))
 trends_bee$phylo=gsub(" ","_",trends_bee$Species)
 trends_bee$genus=sapply(str_split(trends_bee$species," "),"[",1)
@@ -23,10 +30,9 @@ Ab <- ape::vcv.phylo(bp)
 subset(trends_bee,taxo_group=="bees" & !(phylo %in% colnames(Ab)))
 bidon=subset(trends_bee,taxo_group=="bees" & phylo %in% colnames(Ab))
 
-
 model_bees <- brm(
-  trend | mi(sde) ~ 1+ITD_F_mm + Sociality_simplified+                             STI_Species_temperature_index +
-  Larval_diet_breadth+(1|region_50)+(1|gr(phylo, cov = A)),
+  trend | mi(sde) ~ 1 + ITD_F_mm + Sociality_simplified + STI_Species_temperature_index +
+  Larval_diet_breadth + (1|region_50)+(1|gr(phylo, cov = A)),
   data = bidon,
   family = gaussian(),
   data2 = list(A = Ab),
@@ -40,7 +46,7 @@ model_bees <- brm(
   chains = 3,cores=3,iter =nit)
 
 #### HOVERFLIES
-trends_hov=fread(paste0(project_folder,"data/Hoverfly_Traits.csv"))
+trends_hov=subset(trends,taxo_group=="hoverflies")
 trends_hov=subset(trends_hov,!is.na(Larval_diet_breadth) & !is.na(Adult_Body_size_num) & !is.na(STI_Species_temperature_index) & !is.na(Flight_height))
 trends_hov$phylo=gsub(" ","_",trends_hov$Species)
 trends_hov$genus=sapply(str_split(trends_hov$species," "),"[",1)
