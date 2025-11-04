@@ -20,7 +20,6 @@ datf$ntot_spec_europe_tax=2138
 datf$ntot_spec_europe_tax[datf$taxo_group=="hoverflies"]=913
 datf$ntot_spec_europe=3051
 
-
 #proportion of species detected in each period
 dat=datf %>% group_by(time_period,taxo_group) %>% summarise(prop_sp=length(unique(TAXON))/unique(ntot_spec_europe_tax))
 

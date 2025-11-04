@@ -8,7 +8,7 @@ project_folder="C:/Users/Duchenne/Documents/safeguard/"
 trends=fread(paste0(project_folder,"data/all_trends.csv"))
 traits=fread(paste0(project_folder,"data/traits_table.csv"))
 traits[traits==""]=NA
-trends=merge(trends,traits,by.x="species",by.y="Species",all.x=TRUE,all.y=FALSE)
+trends=merge(trends,traits,by.x=c("species","taxo_group"),by.y=c("Species","taxo_group"),all.x=TRUE,all.y=FALSE)
 
 #### RUNNING MODELS (MODELS TAKE FEW HOURS TO RUN, YOU CAN SKIP THAT SCRIPT AND LOAD THEM DIRECTLY TO DO FIGURE 4)
 
@@ -17,7 +17,7 @@ nit=20000 #set number of iterations for bayesian models
 #### BEES
 trends_bee=subset(trends,taxo_group=="bees")
 trends_bee=subset(trends_bee,!is.na(Larval_diet_breadth) & !is.na(ITD_F_mm) & !is.na(STI_Species_temperature_index) & !is.na(Sociality_simplified))
-trends_bee$phylo=gsub(" ","_",trends_bee$Species)
+trends_bee$phylo=gsub(" ","_",trends_bee$species)
 trends_bee$genus=sapply(str_split(trends_bee$species," "),"[",1)
 
 bp=read.tree(paste0(project_folder,"data/phylo_bees_safeguard.tree"))
@@ -76,7 +76,7 @@ model_hovs_null <- brm(
 
 models=list(model_bees,model_hovs,model_bees_null,model_hovs_null)
 
-save(models,file=paste0(project_folder,"data/traits_models_brms_taxo.RData"))
+save(models,file=paste0(project_folder,"data/model traits/traits_models_brms_taxo.RData"))
 
 ###############################################################################
 pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse","ape","brms") 
@@ -85,7 +85,7 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
-load(paste0(project_folder,"data/traits_models_brms_taxo.RData"))
+load(paste0(project_folder,"data/model traits/traits_models_brms_taxo.RData"))
 model_bees=models[[1]]
 model_hovs=models[[2]]
 model_bees_null=models[[3]]
