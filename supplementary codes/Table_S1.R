@@ -18,8 +18,9 @@ summary_table
 
 colnames(summary_table)[3] <- "Group"
 
-str(Trends_1921)
+Trends <- read.csv("all_trends.csv", stringsAsFactors = T)
 
+Trends_1921 <- Trends %>% filter( baseline == "1921")
 
 # Pivot the trends table so each region is a column
 
