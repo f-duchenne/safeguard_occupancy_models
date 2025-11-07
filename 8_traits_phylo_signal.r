@@ -47,8 +47,8 @@ model_bees <- brm(
 
 #### HOVERFLIES
 trends_hov=subset(trends,taxo_group=="hoverflies")
-trends_hov=subset(trends_hov,!is.na(Larval_diet_breadth) & !is.na(Adult_Body_size_num) & !is.na(STI_Species_temperature_index) & !is.na(Flight_height))
-trends_hov$phylo=gsub(" ","_",trends_hov$Species)
+trends_hov=subset(trends_hov,!is.na(Larval_nutrition) & !is.na(Adult_Body_size_num) & !is.na(STI_Species_temperature_index) & !is.na(Flight_height))
+trends_hov$phylo=gsub(" ","_",trends_hov$species)
 trends_hov$genus=sapply(str_split(trends_hov$species," "),"[",1)
 
 hp=read.tree(paste0(project_folder,"data/phylo_hovs_safeguard.tree"))
@@ -60,23 +60,22 @@ Ah <- ape::vcv.phylo(hp)
 bidon2=subset(trends_hov,taxo_group=="hoverflies" & phylo %in% colnames(Ah))
 
 model_hovs <- brm(
-  trend | mi(sde) ~ 1+Adult_Body_size_num +STI_Species_temperature_index+ Flight_height+Larval_nutrition +(1|region_50)+(1|region_50)+(1|gr(phylo, cov = A)),
+  trend | mi(sde) ~ 1+Adult_Body_size_num +STI_Species_temperature_index+ Flight_height+Larval_nutrition+(1|region_50)+(1|gr(phylo, cov = A)),
   data = bidon2,
   family = gaussian(),
   data2 = list(A = Ah),
   chains = 3,cores=3,iter =nit)
   
 model_hovs_null <- brm(
-  trend | mi(sde) ~ 1+(1|region_50)+(1|region_50)+(1|gr(phylo, cov = A)),
+  trend | mi(sde) ~ 1+(1|region_50)+(1|gr(phylo, cov = A)),
   data = bidon2,
   family = gaussian(),
   data2 = list(A = Ah),
   chains = 3,cores=3,iter =nit)
   
-
 models=list(model_bees,model_hovs,model_bees_null,model_hovs_null)
 
-save(models,file=paste0(project_folder,"data/model traits/traits_models_brms_taxo.RData"))
+save(models,file=paste0(project_folder,"data/model traits/traits_models_brms_hoverflies.RData"))
 
 ###############################################################################
 pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse","ape","brms") 

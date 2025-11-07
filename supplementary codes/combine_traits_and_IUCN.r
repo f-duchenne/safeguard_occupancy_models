@@ -154,10 +154,12 @@ Traits4 <- Traits4 %>%
                                   "Zoophagous" ="zoophagous")
   )
 
-Traits4$taxo_group="bees"
-Traits4$taxo_group[Traits4$Order=="Diptera"]="hoverflies"
 
 Traits4$Larval_diet_breadth[Traits4$Larval_diet_breadth=="na"]=NA
+
+
+Traits4$taxo_group="bees"
+Traits4$taxo_group[Traits4$Order=="Diptera"]="hoverflies"
 
 fwrite(Traits4,paste0(project_folder,"data/traits_table.csv"))
 
