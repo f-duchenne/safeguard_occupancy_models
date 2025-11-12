@@ -1,0 +1,13 @@
+[![](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+# [Code] Historical trends show more losers than winners among European pollinators
+
+This Repo contains the code to reproduce all analysis and figures from "Historical trends show more losers than winners among European pollinators. 2026. C Martinez-Nuñez, F Duchenne N de Manincor, G Ghisbain, A Vujic, A Sentil, M Miličić, D Michez, I Bartomeus. Submitted"
+
+You can cite as "Duchenne, Martinez-Nuñez and Bartomeus 2025. Code for Historical trends show more losers than winners among European pollinators. [DOI and Link Zenodo]"
+
+Note that the raw data is only available through the Zenodo repository due to its large size: [Link Zenodo].
+
+Scripts are numbered following the logical order to create first all needed inputs for subsequent analysis. For code requiring large computing time, intermediate outupts are stored in `/intermediary_data` folder. Supplementary material scripts can be found in `/supplementary_codes`
+
+If you want to use the exact same environment we used to run the analysis (i.e. same package versions) you can restore it using: `renv::restore()`. The folder `/maintenance_scrips` contains the scripts to set up `Renv` and create metadata.
