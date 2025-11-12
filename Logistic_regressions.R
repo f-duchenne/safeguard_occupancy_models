@@ -1,8 +1,10 @@
 ## Logistic regressions----
 
 library(emmeans)
-library(ggplot2)
 library(tidyverse)
+library(lme4)
+library(MuMIn)
+
 
 species <- read.csv("database_clean_filtered.csv", stringsAsFactors = T) # 4158540 records.
 
@@ -15,23 +17,14 @@ species_by_region <- as.data.frame(spread (data_filtered, key=scientificName, va
 # Identify species columns
 species_cols <- setdiff(names(species_by_region), c("endYear", "region_50"))
 
-# Compute proportional abundance by year × region
 species_matrix <- species_by_region %>%
   group_by(endYear, region_50) %>%
-  summarise(
-    across(all_of(species_cols), ~ . / sum(., na.rm = TRUE)),
-    .groups = "drop"
-  )
+  mutate(total_abundance = rowSums(across(all_of(species_cols)), na.rm = TRUE)) %>%
+  mutate(across(all_of(species_cols), ~ . / total_abundance)) %>%
+  select(-total_abundance) %>%
+  ungroup()
 
 species_matrix$endYear <- as.factor(as.character(species_matrix$endYear))
-
-species_matrix <- species_matrix %>%
-  mutate(row_sum = rowSums(across(where(is.numeric)), na.rm = TRUE)) %>%
-  mutate(across(where(is.numeric), ~ .x / row_sum))
-
-species_matrix <- species_matrix %>% dplyr::select (-row_sum)
-
-str(species_matrix)
 
 species_matrix_alpine <- species_matrix %>% filter (region_50 == "alpine")
 
@@ -139,7 +132,7 @@ species_matrix_mediterranean$endYear <- as.numeric(as.character(species_matrix_m
 species_matrix_continental$endYear <- as.numeric(as.character(species_matrix_continental$endYear))
 
 
-# Modelos logísticos por especie.
+# Logistic models per species.
 
 ## Iterate across all species.
 
@@ -276,37 +269,36 @@ Results_continental$region_50 <- "continental"
 Logistic_models <- rbind (Results_alpine, Results_atlantic, 
                           Results_boreal, Results_mediterranean, Results_continental)
 
+#Load_trends
+
+Trends <- read.csv("all_trends.csv")
+
+colnames(Trends)[1]<- "Species"
+
+Trends_1921 <- Trends %>% filter (baseline == "1921")
+
+
+# Merge occupancy trends with trends estimated from logistic models by species and bioregion.
+
 Trends_logistic_occupancy_1921 <- left_join (Logistic_models, Trends_1921, by = c("Species", "region_50"))
 
-model_log_oc <- lmer(data = Trends_logistic_occupancy_1921, formula = Estimate ~ trend + (1|region_50) + (1|Species))
+#write.csv(Trends_logistic_occupancy_1921, "Trends_logistic_occupancy_1921.csv")
 
-summary(model_log_oc)
 
-r.squaredGLMM(model_log_oc)
+pearson <- cor.test(scale(Trends_logistic_occupancy_1921$trend), scale(Trends_logistic_occupancy_1921$Estimate),
+    use = "complete.obs", method = "pearson") 
 
-effects <- ggpredict (model_log_oc, "trend")
+pearson
 
-p1 <- ggplot(data = effects, aes(x = x, y = predicted)) +
-  geom_point(data = Trends_logistic_occupancy_1921, aes(x = trend, y = Estimate), alpha = 0.22) +
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), fill = "lightblue", alpha = 0.2) +
-  geom_smooth(method = "lm") +
-  theme_minimal() +
-  xlim (values = c(-0.5,0.5))+
-  labs(
-    y = "Predicted logistic trend",
-    x = "Predicted occupancy trend"
-  ) +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(hjust = 0.5, margin = margin(b = 25)),
-    plot.title.position = "panel"
-  )
+spearman <- cor.test(scale(Trends_logistic_occupancy_1921$trend), scale(Trends_logistic_occupancy_1921$Estimate),
+         use = "complete.obs", method = "spearman")
 
-p1
+spearman
 
-p2 <- ggplot(Trends_logistic_occupancy_1921, aes(x = scale(trend), y = scale(Estimate))) +
+
+p1 <- ggplot(Trends_logistic_occupancy_1921, aes(x = scale(trend), y = scale(Estimate))) +
   geom_point(alpha=0.22) +
-  xlim(values = c(-2,2))+
+  #xlim(values = c(-2,2))+
   geom_smooth(method="lm", fill = "lightblue") +
   labs(
     x = "Standardized raw occupancy trend",
@@ -319,6 +311,26 @@ p2 <- ggplot(Trends_logistic_occupancy_1921, aes(x = scale(trend), y = scale(Est
     plot.title.position = "panel"
   )
 
-p1+p2
+p1
 
 
+## Confusion matrix.
+
+Trends_logistic_occupancy_1921 <- Trends_logistic_occupancy_1921 %>%
+  mutate(
+    trend_class = case_when(
+      Estimate > 0 ~ "log. positive",
+      Estimate < 0 ~ "log. negative",
+      TRUE ~ "occ. nonsignificant"
+      ),
+    model_class = case_when(
+      trend > 0  ~ "occ. positive",
+      trend < 0  ~ "occ. negative",
+      TRUE ~ "occ. nonsignificant"
+    )
+  )
+
+confusion_full <- table(Trends_logistic_occupancy_1921$trend_class,
+                        Trends_logistic_occupancy_1921$model_class)
+
+confusion_full
