@@ -75,7 +75,7 @@ model_hovs_null <- brm(
   
 models=list(model_bees,model_hovs,model_bees_null,model_hovs_null)
 
-save(models,file=paste0(project_folder,"data/model traits/traits_models_brms.RData"))
+save(models,file=paste0(project_folder,"final_and_intermediate_outputs/model_traits/model traits/traits_models_brms.RData"))
 
 ###############################################################################
 pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse","ape","brms") 
