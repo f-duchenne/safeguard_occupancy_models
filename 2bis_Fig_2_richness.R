@@ -1,12 +1,18 @@
 ## Fig 2_changes in richness.
 
-## Falta agregar los datasets.
+#Install and load required packages
+rm(list=ls())
+pkgs <- c("ggplot2", "stringr") 
+
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 ### Plot change in bee richness at n = 100----
 
-plot_data <- read.csv("Plot_data_bees_100.csv")
+plot_data <- read.csv("data/final_and_intermediate_outputs/Plot_data_bees_100.csv")
 
-Dataset_Richness_bees <- read.csv("Dataset_Richness_bees_100.csv")
+Dataset_Richness_bees <- read.csv("data/final_and_intermediate_outputs/Dataset_Richness_bees_100.csv")
 
 ## Plot richness bees n = 100.
 
@@ -61,8 +67,8 @@ bee_plot_100
 
 ### Plot change in hoverfly richness at n = 100----
 
-plot_data <- read.csv("Plot_data_hover_100.csv")
-Dataset_Richness_hover <- read.csv("Dataset_Richness_hover_100.csv")
+plot_data <- read.csv("data/final_and_intermediate_outputs/Plot_data_hover_100.csv")
+Dataset_Richness_hover <- read.csv("data/final_and_intermediate_outputs/Dataset_Richness_hover_100.csv")
 
 hoverfly_plot_100 <- ggplot(plot_data, aes(x = endYear, y = .estimate)) +
   # Raw points
@@ -104,8 +110,8 @@ hoverfly_plot_100
 
 ### Plot of bees richness at n = 200----
 
-plot_data_bee_200 <- read.csv("Plot_data_bees_200.csv")
-Dataset_Richness_bees <- read.csv("Dataset_Richness_bees_200.csv")
+plot_data_bee_200 <- read.csv("data/final_and_intermediate_outputs/Plot_data_bees_200.csv")
+Dataset_Richness_bees <- read.csv("data/final_and_intermediate_outputs/Dataset_Richness_bees_200.csv")
 
 bee_plot_200 <- ggplot(plot_data_bee_200, aes(x = endYear, y = .estimate)) +
   
@@ -149,8 +155,8 @@ bee_plot_200
 
 ### Plot change in hoverfly richness at n = 200----
 
-plot_data <- read.csv("Plot_data_hover_200.csv")
-Dataset_Richness_hover <- read.csv("Dataset_Richness_hover_200.csv")
+plot_data <- read.csv("data/final_and_intermediate_outputs/Plot_data_hover_200.csv")
+Dataset_Richness_hover <- read.csv("data/final_and_intermediate_outputs/Dataset_Richness_hover_200.csv")
 
 hoverfly_plot_200 <- ggplot(plot_data, aes(x = endYear, y = .estimate)) +
   # Raw points

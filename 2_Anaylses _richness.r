@@ -2,7 +2,7 @@
 
 #Install and load required packages
 rm(list=ls())
-pkgs <- c("vegan", "dplyr","ggplot2","mgcv", "gratia","ggeffects", "iNEXT") 
+pkgs <- c("vegan", "dplyr","ggplot2","mgcv", "gratia","ggeffects", "iNEXT", "textshape", "tidyr") 
 
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
@@ -11,7 +11,7 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 select <- dplyr::select
 
 #Load dataset
-species <- read.csv("database_clean_filtered.csv", stringsAsFactors = T) ## 4158540 records.
+species <- read.csv("data/final_and_intermediate_outputs/database_clean_filtered.csv", stringsAsFactors = T) ## 4158540 records.
 
 species_summary <- species %>%
   group_by(taxo_group) %>%
@@ -90,7 +90,7 @@ Dataset_Richness_bees <- Dataset
 
 colnames(Dataset_Richness_bees)[2] <- "Estimator"
 
-#write.csv(Dataset_Richness_bees, "Dataset_Richness_bees_100.csv")
+#write.csv(Dataset_Richness_bees, "data/final_and_intermediate_outputs/Dataset_Richness_bees_100.csv")
 
 ### GAM models for richness
 
@@ -137,7 +137,7 @@ deriv_bees$endYear <- round (deriv_bees$endYear)
 plot_data <- left_join(pred_full, deriv_bees, 
                        by = c("endYear", "region_100"))
 
-#write.csv(plot_data, "Plot_data_bees_100.csv")
+#write.csv(plot_data, "data/final_and_intermediate_outputs/Plot_data_bees_100.csv")
 
 ## Bees: n = 200----
 
@@ -179,7 +179,7 @@ Dataset_Richness_bees <- Dataset
 
 colnames(Dataset_Richness_bees)[2] <- "Estimator"
 
-#write.csv(Dataset_Richness_bees, "Dataset_Richness_bees_200.csv")
+#write.csv(Dataset_Richness_bees, "data/final_and_intermediate_outputs/Dataset_Richness_bees_200.csv")
 
 ### GAM models for richness
 
@@ -227,12 +227,12 @@ deriv_bees$endYear <- round (deriv_bees$endYear)
 plot_data_200 <- left_join(pred_full, deriv_bees, 
                        by = c("endYear", "region_100"))
 
-#write.csv(plot_data_200, "Plot_data_bees_200.csv")
+#write.csv(plot_data_200, "data/final_and_intermediate_outputs/Plot_data_bees_200.csv")
 
 
 # Hoverflies----
 
-species <- read.csv("database_clean_filtered.csv", stringsAsFactors = T) # 4158540 records.
+species <- read.csv("data/final_and_intermediate_outputs/database_clean_filtered.csv", stringsAsFactors = T) # 4158540 records.
 
 species <- species %>% filter (region_100 %in% c("alpine", "mediterranean", "continental", "atlantic", "boreal")) # 4135152 records.
 
@@ -311,7 +311,7 @@ colnames(Dataset_Richness_hover)[2] <- "Estimator"
 Dataset_Richness_hover <- Dataset_Richness_hover %>%
   filter(!(region_100 == "continental" & endYear == 1938)) ## Remove temporal outlier.
 
-#write.csv(Dataset_Richness_hover, "Dataset_Richness_hover_100.csv")
+#write.csv(Dataset_Richness_hover, "data/final_and_intermediate_outputs/Dataset_Richness_hover_100.csv")
 
 #Fit the GAM
 gam_model_hover <- gam(
@@ -366,7 +366,7 @@ deriv_hover$endYear <- round (deriv_hover$endYear)
 plot_data <- left_join(pred_trimmed, deriv_hover, 
                        by = c("endYear", "region_100"))
 
-#write.csv(plot_data, "Plot_data_hover_100.csv")
+#write.csv(plot_data, "data/final_and_intermediate_outputs/Plot_data_hover_100.csv")
 
 
 ## Hoverflies: n=200 ----
@@ -413,7 +413,7 @@ colnames(Dataset_Richness_hover)[2] <- "Estimator"
 Dataset_Richness_hover <- Dataset_Richness_hover %>%
   filter(!(region_100 == "continental" & endYear == 1938)) ## Remove temporal outlier.
 
-#write.csv(Dataset_Richness_hover, "Dataset_Richness_hover_200.csv")
+#write.csv(Dataset_Richness_hover, "data/final_and_intermediate_outputs/Dataset_Richness_hover_200.csv")
 
 #Fit the GAM
 gam_model_hover <- gam(
@@ -468,4 +468,4 @@ deriv_hover$endYear <- round (deriv_hover$endYear)
 plot_data <- left_join(pred_trimmed, deriv_hover, 
                        by = c("endYear", "region_100"))
 
-#write.csv(plot_data, "Plot_data_hover_200.csv")
+#write.csv(plot_data, "data/final_and_intermediate_outputs/Plot_data_hover_200.csv")
