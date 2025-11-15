@@ -6,6 +6,6 @@
 *.html
 /data/raw_data/Bee_DB_2025-09-03.rds
 /data/raw_data/Hoverfly_DB_2025-09-03.rds
+/data/raw_data/grids_shapefiles
 /data/final_and_intermediate_outputs/database_clean_filtered.csv
-/data/final_and_intermediate_outputs/grids_shapefiles
 /data/final_and_intermediate_outputs/traits_models_brms.RData

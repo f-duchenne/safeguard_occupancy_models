@@ -8,7 +8,7 @@ You can cite as "Duchenne, Martinez-Nuñez and Bartomeus 2025. Code for Historic
 
 Note that the raw data is only available through the Zenodo repository due to its large size: [Link Zenodo]. In particular, the following files are not uploaded to github:
 
-`/data/raw_data/Bee_DB_2025-09-03.rds/data/raw_data/Hoverfly_DB_2025-09-03.rds /data/final_and_intermediate_outputs/database_clean_filtered.csv /data/final_and_intermediate_outputs/grids_shapefiles``/data/final_and_intermediate_outputs/traits_models_brms.RData`
+`/data/raw_data/Bee_DB_2025-09-03.rds/data/raw_data/Hoverfly_DB_2025-09-03.rds``/data/raw_data/grids_shapefiles``/data/final_and_intermediate_outputs/database_clean_filtered.csv/data/final_and_intermediate_outputs/traits_models_brms.RData`
 
 Scripts are numbered following the logical order to create first all needed inputs for subsequent analysis. For code requiring large computing time, intermediate outupts are stored in `/intermediary_data` folder. Supplementary material scripts can be found in `/supplementary_codes`
 
