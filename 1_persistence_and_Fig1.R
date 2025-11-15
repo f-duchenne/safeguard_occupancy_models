@@ -1,17 +1,18 @@
 #this script explores the database for descriptive analysis.
-pkgs <- c("data.table", "dplyr","ggplot2","cowplot","gridExtra") 
+pkgs <- c("data.table", "dplyr","ggplot2","cowplot","gridExtra", "sf") 
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
-pkg_out <- lapply(pkgs, require, character.only = TRUE)
+ypkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #colors for regions:
 colo2=c("#44AA99","#117733","#332288","#CC6677","#DDCC77")
 
 #defining working folder:
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder=""
 
 # Loading data
-datf=fread(paste0(project_folder,"data/database_clean_filtered.csv"))
+datf=fread(paste0(project_folder,"data/final_and_intermediate_outputs/database_clean_filtered.csv"))
 datf %>% group_by(taxo_group) %>% count()
 datf %>% group_by(taxo_group) %>% summarise(length(unique(scientificName)))
 
@@ -50,7 +51,7 @@ top=plot_grid(p1a,p1b,ncol=1,align="v")
 ############# MAP:
 # Define the UTM projection for a suitable UTM zone
 utm_crs <- st_crs("+proj=utm +zone=32 +ellps=WGS84")
-hex_grid=st_read(paste0(project_folder,"data/grid_",50,"KM.shp"),crs=utm_crs,quiet =TRUE)
+hex_grid=st_read(paste0(project_folder,"data/raw_data/grids_shapefiles/grid_",50,"KM.shp"),crs=utm_crs,quiet =TRUE)
 
 sites=datf %>% group_by(gridID_50,region_50) %>% count()
 sites$region_50[!(sites$region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean"))]="other regions"
@@ -65,6 +66,6 @@ p1c=ggplot()+theme_bw()+
   theme(plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=14),panel.border = element_blank(),axis.title=element_blank(),axis.ticks=element_blank(),axis.line=element_blank(),axis.text=element_blank(),legend.position="bottom",legend.box="vertical")+scale_x_continuous(n.breaks=3)+ coord_sf(ylim = c( 3210000,10008220),xlim = c(NA,4700000),clip = "on",expand = F)+ggtitle("c")
 
 
-pdf(paste0(project_folder,"Figure_1.pdf"),width=8,height=6)
+pdf(paste0(project_folder,"figures/Figure_1.pdf"),width=8,height=6)
 grid.arrange(top,p1c,widths=c(1,1.5))
-dev.off();
+dev.off()

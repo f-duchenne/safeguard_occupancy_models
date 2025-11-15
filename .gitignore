@@ -9,3 +9,4 @@
 /data/raw_data/grids_shapefiles
 /data/final_and_intermediate_outputs/database_clean_filtered.csv
 /data/final_and_intermediate_outputs/traits_models_brms.RData
+figures
