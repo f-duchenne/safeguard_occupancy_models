@@ -14,7 +14,7 @@ project_folder="C:/Users/Duchenne/Documents/safeguard/"
 # Loading data
 dat=fread(paste0(project_folder,"data/database_clean_filtered.csv"))
 nb_records_initial=nrow(dat)
-hex_grid=st_read(paste0(project_folder,"data/grid_",50,"KM.shp"),crs="+proj=utm +zone=32 +ellps=WGS84")
+hex_grid=st_read(paste0(project_folder,"data/grids_shapefiles/grid_",50,"KM.shp"),crs="+proj=utm +zone=32 +ellps=WGS84")
 hex_grid_p=st_centroid(hex_grid)
 gride=cbind(data.frame(gridID_50=hex_grid_p$gridID_50),st_coordinates(hex_grid_p))
 names(gride)[2:3]=c("long_50","lat_50")

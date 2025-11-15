@@ -9,6 +9,7 @@ trends=fread(paste0(project_folder,"data/all_trends.csv"))
 traits=fread(paste0(project_folder,"data/traits_table.csv"))
 traits[traits==""]=NA
 trends=merge(trends,traits,by.x=c("species","taxo_group"),by.y=c("Species","taxo_group"),all.x=TRUE,all.y=FALSE)
+trends=subset(trends,abs(trend)<1)
 
 #### RUNNING MODELS (MODELS TAKE FEW HOURS TO RUN, YOU CAN SKIP THAT SCRIPT AND LOAD THEM DIRECTLY TO DO FIGURE 4)
 
@@ -76,3 +77,4 @@ model_hovs_null <- brm(
 models=list(model_bees,model_hovs,model_bees_null,model_hovs_null)
 
 save(models,file=paste0(project_folder,"final_and_intermediate_outputs/model_traits/model traits/traits_models_brms.RData"))
+#

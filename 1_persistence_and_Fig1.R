@@ -13,15 +13,19 @@ project_folder="C:/Users/Duchenne/Documents/safeguard/"
 # Loading data
 datf=fread(paste0(project_folder,"data/database_clean_filtered.csv"))
 datf %>% group_by(taxo_group) %>% count()
-datf %>% group_by(taxo_group) %>% summarise(length(unique(TAXON)))
+datf %>% group_by(taxo_group) %>% summarise(length(unique(scientificName)))
 
 #define the total number of species expected, accoridng to Reverte:
 datf$ntot_spec_europe_tax=2138
 datf$ntot_spec_europe_tax[datf$taxo_group=="hoverflies"]=913
 datf$ntot_spec_europe=3051
 
+###
+datf %>% group_by(taxo_group) %>% summarise(length(unique(scientificName))/max(ntot_spec_europe_tax))
+
+
 #proportion of species detected in each period
-dat=datf %>% group_by(time_period,taxo_group) %>% summarise(prop_sp=length(unique(TAXON))/unique(ntot_spec_europe_tax))
+dat=datf %>% group_by(time_period,taxo_group) %>% summarise(prop_sp=length(unique(scientificName))/unique(ntot_spec_europe_tax))
 
 p1a=ggplot(data=dat,aes(x=time_period,y=prop_sp,fill=taxo_group))+geom_bar(stat="identity",position=position_dodge())+theme_bw()+
 scale_fill_manual(values=c("gold3","dodgerblue3"))+
@@ -32,10 +36,10 @@ panel.grid.minor = element_blank(),panel.background = element_blank(),axis.text.
 
 
 
-#proportion of species detected in each period
-dat2=datf %>% group_by(YEAR_2,taxo_group) %>% count()
+#nb records per group per year
+dat2=datf %>% group_by(endYear,taxo_group) %>% count()
 
-p1b=ggplot(data=dat2,aes(x=YEAR_2,y=n,color=taxo_group))+geom_line(size=1.2)+
+p1b=ggplot(data=dat2,aes(x=endYear,y=n,color=taxo_group))+geom_line(size=1.2)+
 scale_color_manual(values=c("gold3","dodgerblue3"))+
 theme_bw()+ theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
 panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=16,face="bold",hjust = 0),plot.subtitle=element_text(size=12),legend.position="none")+xlab("Years")+ylab("Number of records")+labs(color="region")+ggtitle("b")+
