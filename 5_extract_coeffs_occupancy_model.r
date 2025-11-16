@@ -17,7 +17,8 @@ args_contents <- strsplit(args, ' ')
 i <- as.numeric(args_contents[[1]])
 
 #defining working folder:
-setwd(dir="/home/duchenne/safeguard/")
+#setwd(dir="/home/duchenne/safeguard/")
+
 #import data:
 if(i<=1364){
 	taxo_group="bees"

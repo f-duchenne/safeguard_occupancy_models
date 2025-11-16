@@ -5,7 +5,8 @@ inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder <- ""
 
 setwd(dir=paste0(project_folder,"/predicts_linear"))
 lifile=list.files( pattern ="predicts_")
@@ -44,19 +45,23 @@ fwrite(trendsf,paste0(project_folder,"data/all_trends.csv"))
 
 
 ############# CALCULATE AVERAGE TREND PER REGION:
-pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse") 
+pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse", "metafor") 
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
 
-trendsf=fread(paste0(project_folder,"data/all_trends.csv"))
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder <- ""
+
+trendsf=fread(paste0(project_folder,"data/final_and_intermediate_outputs/all_trends.csv"))
 
 bidon=subset(trendsf,baseline>=1921)
 nb_weird=nrow(subset(bidon,abs(trend)>=1))
 bidon=subset(bidon,abs(trend)<1)
 baselines_vec=unique(trendsf$baseline)
 
+
+######warning######### rma not working
 for(jj in unique(bidon$taxo_group)){
 	for(j in 1:length(baselines_vec)){
 		bidon2=subset(bidon,convergence==0 & !is.na(acim) & baseline==baselines_vec[j] & !is.na(sde) & taxo_group==jj)
