@@ -9,12 +9,13 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder=""
 
 # Loading data
-dat=fread(paste0(project_folder,"data/database_clean_filtered.csv"))
+dat=fread(paste0(project_folder,"data/final_and_intermediate_outputs/database_clean_filtered.csv"))
 nb_records_initial=nrow(dat)
-hex_grid=st_read(paste0(project_folder,"data/grids_shapefiles/grid_",50,"KM.shp"),crs="+proj=utm +zone=32 +ellps=WGS84")
+hex_grid=st_read(paste0(project_folder,"data/raw_data/grids_shapefiles/grid_",50,"KM.shp"),crs="+proj=utm +zone=32 +ellps=WGS84")
 hex_grid_p=st_centroid(hex_grid)
 gride=cbind(data.frame(gridID_50=hex_grid_p$gridID_50),st_coordinates(hex_grid_p))
 names(gride)[2:3]=c("long_50","lat_50")
@@ -37,8 +38,8 @@ dat$site=dat$gridID_50
 b=dat %>% dplyr::group_by(gridID_50,region_50,taxo_group) %>% dplyr::summarise(nyear=length(unique(endYear)),
 nyear_b70=sum(unique(endYear)<=1970),nyear_a70=sum(unique(endYear)>1970),nb_records=length(endYear))
 
-fwrite(b,paste0(project_folder,"data/sites_studied_tot.csv"))
-
+#commented to revent overwrite
+#fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/sites_studied_tot.csv"))
 
 nr_month=subset(dat,is.na(endMonth))
 nr_month %>% group_by(taxo_group) %>% count()
@@ -87,7 +88,8 @@ bb=bb %>% dplyr::group_by(region_50,taxo_group) %>% dplyr::mutate(nsurv=length(u
 b= bb %>% dplyr::group_by(region_50,scientificName,family,taxo_group) %>% dplyr::summarise(occupancy_obs=sum(occupied>0)/mean(nsurv),nb_records=sum(occupied),nb_detect=sum(occupied>0))
 b=b %>% group_by(scientificName,taxo_group,family) %>% mutate(nb_records_tot=sum(nb_records))
 
-fwrite(b,paste0(project_folder,"data/species_nb_records.csv"))
+#commented to prevent overwritting
+#fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/species_nb_records.csv"))
 
 nb_sp_common=subset(count_table,N>=1000) %>% group_by(taxo_group) %>% count() %>%  deframe()
 nb_sp=subset(b,nb_records_tot>=10 & nb_detect>=5) %>% group_by(taxo_group) %>% summarise(n=length(unique(scientificName))) %>%  deframe()
@@ -95,17 +97,20 @@ nsp_tot=b %>% group_by(taxo_group) %>% summarise(n=length(unique(scientificName)
 length(unique(dat$scientificName))
 
 list_filtering=list(nb_records_initial,nr_regions,nb_records,nr_month,nr_sites,nb_surveys,nb_sp_common,nb_sp,nsp_tot)
-save(list_filtering,file=paste0(project_folder,"data/list_filtering.RData"))
+#commented to avoid overwrite
+#save(list_filtering,file=paste0(project_folder,"data/final_and_intermediate_outputs/list_filtering.RData"))
 
 b=dat %>% dplyr::group_by(gridID_50,region_50,taxo_group) %>% dplyr::summarise(nyear=length(unique(endYear)),
 nyear_b70=sum(unique(endYear)<=1970),nyear_a70=sum(unique(endYear)>1970))
 
-fwrite(b,paste0(project_folder,"data/sites_studied.csv"))
+#commented to avoid overwrite
+#fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/sites_studied.csv"))
 
 bb=dat %>% dplyr::group_by(region_50,endYear,gridID_50,taxo_group) %>% dplyr::summarise(nsurveys=length(unique(survey)),nrec=length(survey))
 b=bb %>% dplyr::group_by(region_50,endYear,taxo_group) %>% dplyr::summarise(nsites=length(unique(gridID_50)),mean_nsurv=mean(nsurveys),nrec=sum(nrec))
 
-fwrite(b,paste0(project_folder,"data/regions_sampling.csv"))
+#commented to avoid overwrite
+#fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/regions_sampling.csv"))
 
 ######################################### PREPARE MATRIX OF DETECTION AND NON DETECTION FOR EACH GROUP
 taxo_group_vec=c("bees","hoverflies")
@@ -131,7 +136,7 @@ for(j in taxo_group_vec){
 		# fwrite(mat1,"det_nondet_matrix_species_test.csv")
 
 		#export matrix
-		fwrite(mat1,paste0(project_folder,"data/",j,"_det_nondet_matrix_common.csv"))
+		fwrite(mat1,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix_common.csv"))
 
 		#focusing on rare species
 		count_table=dat2[, .N,by=c("scientificName","family")] #count number of records per species
@@ -143,7 +148,7 @@ for(j in taxo_group_vec){
 		mat2=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+region_50~species)
 
 		#export second matrix
-		fwrite(mat2,paste0(project_folder,"data/",j,"_det_nondet_matrix_rare.csv"))
+		fwrite(mat2,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix_rare.csv"))
 	}else{
 		dat2[,species:=scientificName] #new species column
 		#create the matrix
@@ -155,16 +160,16 @@ for(j in taxo_group_vec){
 		# fwrite(mat1,"det_nondet_matrix_species_test.csv")
 
 		#export matrix
-		fwrite(mat1,paste0(project_folder,"data/",j,"_det_nondet_matrix.csv"))
+		fwrite(mat1,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix.csv"))
 	}
 
 }
 
 
 
-dat1=fread(paste0(project_folder,"data/bees_det_nondet_matrix_common.csv"))
-dat2=fread(paste0(project_folder,"data/bees_det_nondet_matrix_rare.csv"))
-dat3=fread(paste0(project_folder,"data/hoverflies_det_nondet_matrix.csv"))
+dat1=fread(paste0(project_folder,"data/final_and_intermediate_outputs/bees_det_nondet_matrix_common.csv"))
+dat2=fread(paste0(project_folder,"data/final_and_intermediate_outputs/bees_det_nondet_matrix_rare.csv"))
+dat3=fread(paste0(project_folder,"data/final_and_intermediate_outputs/hoverflies_det_nondet_matrix.csv"))
 
 
 length((which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1))
@@ -173,4 +178,4 @@ liste_species=rbind(
 data.frame(species=names(dat1)[(which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1)],taxo_group="bees",matrix="common"),
 data.frame(species=names(dat2)[(which(names(dat2)=="region_50")+1):(which(names(dat2)=="others")-1)],taxo_group="bees",matrix="rare"),
 data.frame(species=names(dat3)[(which(names(dat3)=="region_50")+1):ncol(dat3)],taxo_group="hoverflies",matrix=NA))
-fwrite(liste_species,paste0(project_folder,"data/liste_total_species_occupancy.csv"))
+fwrite(liste_species,paste0(project_folder,"data/final_and_intermediate_outputs/liste_total_species_occupancy.csv"))
