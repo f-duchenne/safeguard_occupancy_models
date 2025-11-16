@@ -1,11 +1,14 @@
-### Fig_5.
+############# FIRST ASSEMBLE ALL SPECIES TOGETHER
+pkgs <- c("patchwork", "tidyverse", "brms") 
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
-library(patchwork)
-library(tidyverse)
-
+### Fig_4.
 #### Traits modelled with brms----
-
-load("traits_models_brms_phylo.RData")
+###############warning#############
+#The code used traits_models_brms_phylo.RData
+load("data/final_and_intermediate_outputs/traits_models_brms.RData") 
 model_bees=models[[1]]
 model_hovs=models[[2]]
 
@@ -22,6 +25,8 @@ pred_STI <- as.data.frame(me_STI[[1]])
 pred_Soc <- as.data.frame(me_Soc[[1]])
 pred_LDB <- as.data.frame(me_LDB[[1]])
 
+###warning: Data "Bee_Traits" not loaded##########
+#Same for Hoverfly_Traits
 
 plot_ITD_bee <- ggplot(pred_ITD, aes(x = effect1__, y = estimate__)) +
   geom_point(data = Bee_Traits %>% filter(!is.na(ITD_F_mm), !is.na(trend)),
