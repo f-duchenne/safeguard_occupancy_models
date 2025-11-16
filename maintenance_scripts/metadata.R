@@ -1,12 +1,9 @@
 #How to set up metadata follwoing https://annakrystalli.me/dataspice-tutorial/
 
-rm(list=ls())
-pkgs <- c("devtools", "dataspice") 
-
-inst <- pkgs %in% installed.packages()
-if (any(inst)) install.packages(pkgs[!inst])
-pkg_out <- lapply(pkgs, require, character.only = TRUE)
-
+#Get last version on Github
+install.packages("devtools")
+devtools::install_github("ropenscilabs/dataspice")
+library(dataspice)
 
 #create basic .csv metadata files and folders.
 create_spice()
