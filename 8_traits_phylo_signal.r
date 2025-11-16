@@ -2,11 +2,12 @@ pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot",
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder=""
 
 #MERGE TRENDS AND TRAITS
-trends=fread(paste0(project_folder,"data/all_trends.csv"))
-traits=fread(paste0(project_folder,"data/traits_table.csv"))
+trends=fread(paste0(project_folder,"data/final_and_intermediate_outputs/all_trends.csv"))
+traits=fread(paste0(project_folder,"data/final_and_intermediate_outputs/traits_table.csv"))
 traits[traits==""]=NA
 trends=merge(trends,traits,by.x=c("species","taxo_group"),by.y=c("Species","taxo_group"),all.x=TRUE,all.y=FALSE)
 trends=subset(trends,abs(trend)<1)
@@ -21,7 +22,7 @@ trends_bee=subset(trends_bee,!is.na(Larval_diet_breadth) & !is.na(ITD_F_mm) & !i
 trends_bee$phylo=gsub(" ","_",trends_bee$species)
 trends_bee$genus=sapply(str_split(trends_bee$species," "),"[",1)
 
-bp=read.tree(paste0(project_folder,"data/phylo_bees_safeguard.tree"))
+bp=read.tree(paste0(project_folder,"data/raw_data/phylo_bees_safeguard.tree"))
 bp=makeNodeLabel(bp)
 
 bp=drop.tip(bp,bp$tip.label[!(bp$tip.label %in% trends_bee$phylo)])
@@ -52,7 +53,7 @@ trends_hov=subset(trends_hov,!is.na(Larval_nutrition) & !is.na(Adult_Body_size_n
 trends_hov$phylo=gsub(" ","_",trends_hov$species)
 trends_hov$genus=sapply(str_split(trends_hov$species," "),"[",1)
 
-hp=read.tree(paste0(project_folder,"data/phylo_hovs_safeguard.tree"))
+hp=read.tree(paste0(project_folder,"data/raw_data/phylo_hovs_safeguard.tree"))
 
 hp=drop.tip(hp,hp$tip.label[!(hp$tip.label %in% trends_hov$phylo)])
 
@@ -76,5 +77,5 @@ model_hovs_null <- brm(
   
 models=list(model_bees,model_hovs,model_bees_null,model_hovs_null)
 
-save(models,file=paste0(project_folder,"final_and_intermediate_outputs/model_traits/model traits/traits_models_brms.RData"))
+save(models,file=paste0(project_folder,"data/final_and_intermediate_outputs/traits_models_brms.RData"))
 #
