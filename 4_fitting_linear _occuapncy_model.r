@@ -17,7 +17,7 @@ args_contents <- strsplit(args, ' ')
 i <- as.numeric(args_contents[[1]])
 
 #defining working folder:
-setwd(dir="/home/duchenne/safeguard/")
+#setwd(dir="/home/duchenne/safeguard/")
 
 print(i)
 
@@ -37,14 +37,13 @@ if(i<=1364){
   dat$others=NA
 }
 
-#todo=fread("species_to_repeat.csv", sep=",")
 #combinations
 tab=expand.grid(species=names(dat)[(which(names(dat)=="region_50")+1):(which(names(dat)=="others")-1)])
 index=names(dat)[names(dat)==tab$species[i]]
 
 print(index)
 
-
+#######WARNING!#########
 files=list.files("/home/duchenne/safeguard/results/")
 
 #if(!(paste0("model_",tab$species[i],".RData") %in% files)){
