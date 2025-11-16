@@ -2,7 +2,8 @@ pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot",
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder=""
 
 colo2=c("#44AA99","#117733","#332288","#CC6677","#DDCC77")
 
@@ -10,7 +11,7 @@ inv.logit=function(x){exp(x)/(1+exp(x))}
 logit=function(x){log(x/(1-x))}
 
 #load trends
-trendsf=fread(paste0(project_folder,"data/all_trends.csv"))
+trendsf=fread(paste0(project_folder,"data/final_and_intermediate_outputs/all_trends.csv"))
 
 ####### FOCUS ON THE OVERALL PERIOD; BASELINE = 1921
 bidon=subset(trendsf,baseline==1921)
