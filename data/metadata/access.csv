@@ -1,0 +1,4 @@
+fileName,name,contentUrl,encodingFormat
+database_clean_filtered.csv,database_clean_filtered,TBA,csv
+Table_S1.csv,Table_S1,https://github.com/f-duchenne/safeguard_occupancy_models/blob/main/data/final_and_intermediate_outputs/Table_S1.csv,csv
+traits_table.csv,traits_table,https://github.com/f-duchenne/safeguard_occupancy_models/blob/main/data/final_and_intermediate_outputs/traits_table.csv,csv

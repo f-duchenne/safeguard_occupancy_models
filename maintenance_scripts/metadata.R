@@ -1,15 +1,12 @@
 #How to set up metadata follwoing https://annakrystalli.me/dataspice-tutorial/
 
-# Get the last version of dataspice and load it
-#install.packages("readr")
-install.packages("devtools")
-devtools::install_github("ropenscilabs/dataspice")
-library(readr)
-library(dataspice)
+rm(list=ls())
+pkgs <- c("devtools", "dataspice") 
 
-#load data (see demo.qmd for details)
-githubURL <- "https://github.com/Joemillard/GlitrsDynametaLocal/raw/refs/heads/master/inst/shiny_data/prior_data.rds"
-d <- readRDS(url(githubURL))
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
+
 
 #create basic .csv metadata files and folders.
 create_spice()
@@ -24,15 +21,15 @@ edit_access()
 #Add metadata
 
 #useful to get ranges before adding those:
-range(d$Year) 
-range(d$Latitude, na.rm = T)
-range(d$Longitude, na.rm = T)
+#species <- read.csv("data/final_and_intermediate_outputs/database_clean_filtered.csv", stringsAsFactors = T) ## 4158540 records.
+range(species$endYear) 
+range(species$decimalLatitude, na.rm = T)
+range(species$decimalLongitude, na.rm = T)
 
 edit_biblio()
 
 #Describe variables
 prep_attributes()
-colnames(d)
 edit_attributes()
 
 #create a json file

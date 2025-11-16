@@ -1,0 +1,430 @@
+{
+  "@context": "http://schema.org",
+  "type": "Dataset",
+  "name": "Historical records, traits and trends for EU bees",
+  "creator": [
+    {
+      "type": "Person",
+      "id": "0000-0001-7814-4985",
+      "email": null,
+      "affiliation": "EBD-CSIC",
+      "name": "Carlos Martinez-Nuñez"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0002-6917-8013",
+      "email": null,
+      "affiliation": "EBD-CSIC",
+      "name": "François Duchenne"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0001-9696-125X",
+      "email": null,
+      "affiliation": "University of Mons",
+      "name": "Natasha de Manincor"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0003-2032-8081",
+      "email": null,
+      "affiliation": "University of Mons",
+      "name": "Guillaume Ghisbain"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0002-8819-8079",
+      "email": null,
+      "affiliation": "University of Novi Sad",
+      "name": "Ante Vujic"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0001-7118-428X",
+      "email": null,
+      "affiliation": "University of Mons",
+      "name": "Ahlam Sentil"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0002-3154-660X",
+      "email": null,
+      "affiliation": "BioSense Institute",
+      "name": "Marija Miličić"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0001-8880-1838",
+      "email": null,
+      "affiliation": "University of Mons",
+      "name": "Denis Michez"
+    },
+    {
+      "type": "Person",
+      "id": "0000-0001-7893-4389",
+      "email": null,
+      "affiliation": "EBD-CSIC",
+      "name": "Ignasi Bartomeus"
+    }
+  ],
+  "description": "Code for Historical trends show more losers than winners among European pollinators.",
+  "datePublished": 2026,
+  "keywords": ["bees", "hoverflies", "pollinators"],
+  "funder": "EU-H2020 (SAFEGUARD)",
+  "temporalCoverage": "1921/2020",
+  "license": "CC-by",
+  "spatialCoverage": {
+    "type": "Place",
+    "name": "Europe",
+    "geo": {
+      "type": "GeoShape",
+      "box": "7997274 3496846 3934330 -1112336"
+    }
+  },
+  "variableMeasured": [
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "scientificName",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "endYear",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "endMonth",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "endDay",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "country",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "genus",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "family",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "occurrenceID",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "datasetProvider",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "institutionName",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "scientificNameAuthorship",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "taxo_group",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "gridID_20",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "region_20",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "gridID_50",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "region_50",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "gridID_100",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "region_100",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "gridID_200",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "region_200",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "geometry",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "decimalLongitude",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "decimalLatitude",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "time_period",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "family",
+      "description": "Taxonomic family"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "scientificName",
+      "description": "Accepted full species name"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "Group",
+      "description": "Taxonomic groups: Either bees or hoverflies"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "1921-1940",
+      "description": "Total number of records of the species in scientificName in this period (years 1921 to 1940)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "1941-1960",
+      "description": "Total number of records of the species in scientificName in this period (years 1941 to 1960)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "1961-1980",
+      "description": "Total number of records of the species in scientificName in this period (years 1961 to 1980)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "1981-2000",
+      "description": "Total number of records of the species in scientificName in this period (years 1981 to 2000)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "2001-2020",
+      "description": "Total number of records of the species in scientificName in this period (years 2001 to 2020)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "mediterranean",
+      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Mediterranean biogeoregion (for the full study time, 1921- 2020)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "alpine",
+      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Alpine biogeoregion (for the full study time, 1921- 2020)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "atlantic",
+      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Atlantic biogeoregion (for the full study time, 1921- 2020)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "continental",
+      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Continental biogeoregion (for the full study time, 1921- 2020)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "boreal",
+      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Boreal biogeoregion (for the full study time, 1921- 2020)"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Species",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Order",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "Family",
+      "description": "Taxonomic family"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Genus",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Sociality",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "STI_Species_temperature_index",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Larval_diet_breadth",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "ITD_F_mm",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Adult_Body_size",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Larval_nutrition",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Flight_ability",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Flight_height",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "year_description",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "European_Category",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "European_Category_2025",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Sociality_simplified",
+      "description": null
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": null,
+      "name": "Adult_Body_size_num",
+      "description": null
+    }
+  ],
+  "distribution": [
+    {
+      "type": "DataDownload",
+      "name": "database_clean_filtered",
+      "contentUrl": "TBA",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "Table_S1",
+      "contentUrl": "https://github.com/f-duchenne/safeguard_occupancy_models/blob/main/data/final_and_intermediate_outputs/Table_S1.csv",
+      "encodingFormat": "csv"
+    },
+    {
+      "type": "DataDownload",
+      "name": "traits_table",
+      "contentUrl": "https://github.com/f-duchenne/safeguard_occupancy_models/blob/main/data/final_and_intermediate_outputs/traits_table.csv",
+      "encodingFormat": "csv"
+    }
+  ]
+}
