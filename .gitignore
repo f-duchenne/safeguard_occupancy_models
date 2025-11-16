@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 .DS_Store
-*.html
 /data/raw_data/Bee_DB_2025-09-03.rds
 /data/raw_data/Hoverfly_DB_2025-09-03.rds
 /data/raw_data/grids_shapefiles
