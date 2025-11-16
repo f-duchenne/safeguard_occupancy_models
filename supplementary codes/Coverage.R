@@ -1,10 +1,14 @@
+############# FIRST ASSEMBLE ALL SPECIES TOGETHER
+pkgs <- c("tidyverse", "iNEXT") 
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
+
+
 ## Check coverage for richness analyses.
 
-library(tidyverse)
-library(iNEXT)
-
 # Load dataset
-species <- read.csv("database_clean_filtered.csv", stringsAsFactors = T) ## 4158540 records.
+species <- read.csv("data/final_and_intermediate_outputs/database_clean_filtered.csv", stringsAsFactors = T) ## 4158540 records.
 
 # Filter regions of the study
 species <- species %>% filter (region_100 %in% c("alpine", "mediterranean", "continental", "atlantic", "boreal"))
@@ -58,6 +62,7 @@ estimate_coverage_fixed <- function(abundances, n = sample_size) {
   return(out$iNextEst[[1]])  # Extract coverage value at n individuals
 }
 
+#slow
 coverage_100 <- apply(
   abundance_transposed_filtered, 
   1, 
@@ -99,7 +104,7 @@ p_coverage_bees_100 <- ggplot(coverage_summary, aes(x = endYear, y = SC, color =
 
 p_coverage_bees_100
 
-#write.csv(coverage_summary, "Coverage_bees_100.csv")
+#write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_bees_100.csv")
 
 ## Check coverage for bees at n = 200----
 
@@ -107,6 +112,7 @@ sample_size <- 200
 
 abundance_transposed_filtered <- abundance_transposed[rowSums(abundance_transposed) >= sample_size, ]
 
+#slow to run
 coverage_200 <- apply(
   abundance_transposed_filtered, 
   1, 
@@ -127,7 +133,7 @@ coverage_summary_200 <- bind_rows(coverage_200, .id = "sample") %>%
 
 coverage_summary_200 %>% group_by(region_100) %>% summarise(mean = mean(SC))
 
-#write.csv(coverage_summary, "Coverage_bees_200.csv")
+#write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_bees_200.csv")
 
 p_coverage_bees_200 <- ggplot(coverage_summary_200, aes(x = endYear, y = SC, color = region_100)) +
   geom_point() +
@@ -145,7 +151,7 @@ p_coverage_bees_200
 
 ### Coverage for hoverflies at n = 100----
 
-species <- read.csv("database_clean_filtered.csv", stringsAsFactors = T) # 4158540 records.
+species <- read.csv("data/final_and_intermediate_outputs/database_clean_filtered.csv", stringsAsFactors = T) # 4158540 records.
 
 species <- species %>% filter (region_100 %in% c("alpine", "mediterranean", "continental", "atlantic", "boreal")) # 4135152 records.
 
@@ -180,6 +186,7 @@ sample_size <- 100
 
 abundance_transposed_filtered <- abundance_transposed[rowSums(abundance_transposed) >= sample_size, ]
 
+#slow
 coverage_100 <- apply(
   abundance_transposed_filtered, 
   1, 
@@ -200,7 +207,7 @@ coverage_summary <- bind_rows(coverage_100, .id = "sample") %>%
 
 coverage_summary %>% group_by(region_100) %>% summarise(mean = mean(SC))
 
-#write.csv(coverage_summary, "Coverage_hoverflies_100.csv")
+#write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_hoverflies_100.csv")
 
 p_coverage_hoverflies_100 <- ggplot(coverage_summary, aes(x = endYear, y = SC, color = region_100)) +
   geom_point() +
@@ -221,6 +228,7 @@ sample_size <- 200
 
 abundance_transposed_filtered <- abundance_transposed[rowSums(abundance_transposed) >= sample_size, ]
 
+#slow
 coverage_200 <- apply(
   abundance_transposed_filtered, 
   1, 
@@ -241,7 +249,7 @@ coverage_summary_200 <- bind_rows(coverage_200, .id = "sample") %>%
 
 coverage_summary_200 %>% group_by(region_100) %>% summarise(mean = mean(SC))
 
-#write.csv(coverage_summary_200, "Coverage_hoverflies_200.csv")
+#write.csv(coverage_summary_200, "data/final_and_intermediate_outputs/Coverage_hoverflies_200.csv")
 
 p_coverage_hoverflies_200 <- ggplot(coverage_summary_200, aes(x = endYear, y = SC, color = region_100)) +
   geom_point() +

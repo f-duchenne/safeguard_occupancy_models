@@ -1,9 +1,12 @@
+############# FIRST ASSEMBLE ALL SPECIES TOGETHER
+pkgs <- c("tidyr", "dplyr") 
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
+
+
 ## Table S1
-
-library(dplyr)
-library(tidyr)
-
-species <- read.csv("database_clean_filtered.csv", stringsAsFactors = T) ## 4158540 records.
+species <- read.csv("data/final_and_intermediate_outputs/database_clean_filtered.csv", stringsAsFactors = T) ## 4158540 records.
 
 summary_table <- species %>%
   group_by(family, scientificName, taxo_group,time_period) %>%
@@ -18,7 +21,7 @@ summary_table
 
 colnames(summary_table)[3] <- "Group"
 
-Trends <- read.csv("all_trends.csv", stringsAsFactors = T)
+Trends <- read.csv("data/final_and_intermediate_outputs/all_trends.csv", stringsAsFactors = T)
 
 Trends_1921 <- Trends %>% filter( baseline == "1921")
 
@@ -32,19 +35,18 @@ Trends_1921_clean <- Trends_1921 %>%
   )
 
 trend_summary <- Trends_1921_clean %>%
-  select(Species, region_50, trend) %>%
+  select(species, region_50, trend) %>%
   pivot_wider(
     names_from = region_50,
     values_from = trend
   )
 
-library(dplyr)
 
 # Merge with the previous summary table
 final_summary <- summary_table %>%
-  left_join(trend_summary, by = c("scientificName" = "Species"))
+  left_join(trend_summary, by = c("scientificName" = "species"))
 
 final_summary
 
-write_csv(final_summary, "Table_S1.csv")
+#write_csv(final_summary, "data/final_and_intermediate_outputs/Table_S1.csv")
 

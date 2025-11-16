@@ -1,12 +1,12 @@
+############# FIRST ASSEMBLE ALL SPECIES TOGETHER
+pkgs <- c("emmeans", "tidyverse", "lme4", "MuMIn") 
+inst <- pkgs %in% installed.packages()
+if (any(inst)) install.packages(pkgs[!inst])
+pkg_out <- lapply(pkgs, require, character.only = TRUE)
+
 ## Logistic regressions----
 
-library(emmeans)
-library(tidyverse)
-library(lme4)
-library(MuMIn)
-
-
-species <- read.csv("database_clean_filtered.csv", stringsAsFactors = T) # 4158540 records.
+species <- read.csv("data/final_and_intermediate_outputs/database_clean_filtered.csv", stringsAsFactors = T) # 4158540 records.
 
 data_filtered <- species %>%
   group_by(endYear, scientificName, region_50) %>%
@@ -271,7 +271,7 @@ Logistic_models <- rbind (Results_alpine, Results_atlantic,
 
 #Load_trends
 
-Trends <- read.csv("all_trends.csv")
+Trends <- read.csv("data/final_and_intermediate_outputs/all_trends.csv")
 
 colnames(Trends)[1]<- "Species"
 
@@ -282,7 +282,7 @@ Trends_1921 <- Trends %>% filter (baseline == "1921")
 
 Trends_logistic_occupancy_1921 <- left_join (Logistic_models, Trends_1921, by = c("Species", "region_50"))
 
-#write.csv(Trends_logistic_occupancy_1921, "Trends_logistic_occupancy_1921.csv")
+#write.csv(Trends_logistic_occupancy_1921, "data/final_and_intermediate_outputs/Trends_logistic_occupancy_1921.csv")
 
 
 pearson <- cor.test(scale(Trends_logistic_occupancy_1921$trend), scale(Trends_logistic_occupancy_1921$Estimate),

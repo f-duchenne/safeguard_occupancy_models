@@ -10,6 +10,7 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
 project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder=""
 
 # LOAD SOME BASIC SHAPEFILES THAT WILL USE TO DEFINE THE AREA
 # Define the UTM projection for a suitable UTM zone
@@ -19,11 +20,12 @@ utm_crs <- st_crs("+proj=utm +zone=32 +ellps=WGS84")
 bbox <- st_bbox(c(xmin = -1200000, xmax = 3500000, ymin = 3500000, ymax = 8000000), crs = utm_crs)
 bboxsf=st_as_sf(st_as_sfc(st_bbox(bbox)))
 
-bioregions <- st_read ("D:/land use change/biogeographic_regions/BiogeoRegions2016.shp")
+bioregions <- st_read ("data/raw_data/grids_shapefiles/BiogeoRegions2016.shp")
 bioregions <- st_transform(bioregions, crs = utm_crs)
 
 bioregions2 <- st_crop(bioregions, bbox)
 
+######warning##### not shp file.
 continents <- st_read ("D:/land use change/continents/continents-of-the-world-merged.shp")
 
 bioregions2 <- st_transform(bioregions2, crs = st_crs(continents))

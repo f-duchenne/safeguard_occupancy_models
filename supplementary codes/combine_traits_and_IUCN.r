@@ -7,11 +7,12 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 
 #defining working folder:
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
+project_folder <- ""
 
 select <- dplyr::select
 
-Traits <- fread(paste0(project_folder,"data/hoverfly_bee_traits_2025_04_01.csv"))
+Traits <- fread(paste0(project_folder,"data/raw_data/hoverfly_bee_traits_2025_04_01.csv"))
 #correct a small mistake of names:
 Traits$Species[Traits$Species=="Syrphus niditifrons"]="Syrphus nitidifrons"
 
@@ -20,7 +21,7 @@ Traits2 <- Traits %>% select(Species,Order,Family,Genus, Sociality, STI_Species_
 								Adult_Body_size, Larval_nutrition,Flight_ability,Flight_height)
 								
 # ADDING DESCRIPTION DATE FOR EACH SPECIES AND KEEP ONLY SPECIES THAT WE HAVE IN OUR DATASET
-datf=fread(paste0(project_folder,"data/database_clean_filtered.csv"))
+datf=fread(paste0(project_folder,"data/final_and_intermediate_outputs/database_clean_filtered.csv"))
 spec_li=datf[,c("scientificNameAuthorship","scientificName")]
 spec_li=unique(spec_li)
 spec_li$year_description=as.numeric(unlist(regmatches(spec_li$scientificNameAuthorship, gregexpr("[[:digit:]]+", spec_li$scientificNameAuthorship))))
@@ -31,7 +32,7 @@ Traits2=merge(Traits2,spec_li,by.x="Species",by.y="scientificName",all.x=FALSE,a
 
 
 ## Include IUCN Status.
-IUCN_status <- fread(paste0(project_folder,"data/Pollinators_IUCN.csv"))
+IUCN_status <- fread(paste0(project_folder,"data/raw_data/Pollinators_IUCN.csv"))
 
 #check that all species match
 Traits2$Species[!(Traits2$Species %in% IUCN_status$TAXON)]
@@ -89,7 +90,7 @@ nrow(Traits3)
 
 
 ### Create a new column with the updated category (IUCN_2025).
-New_IUCN_2025 <- fread(paste0(project_folder,"data/BEES_UICN_EUROPE_2025.csv"))
+New_IUCN_2025 <- fread(paste0(project_folder,"data/raw_data/BEES_UICN_EUROPE_2025.csv"))
 
 sort(Traits3$Species[Traits3$Order=="Hymenoptera"][!(Traits3$Species[Traits3$Order=="Hymenoptera"] %in% New_IUCN_2025$TAXON)])
 #automatic check against GBIF
@@ -161,7 +162,8 @@ Traits4$Larval_diet_breadth[Traits4$Larval_diet_breadth=="na"]=NA
 Traits4$taxo_group="bees"
 Traits4$taxo_group[Traits4$Order=="Diptera"]="hoverflies"
 
-fwrite(Traits4,paste0(project_folder,"data/traits_table.csv"))
+#commented to avoid overwritting
+#fwrite(Traits4,paste0(project_folder,"data/final_and_intermediate_outputs/traits_table.csv"))
 
 
 
