@@ -25,8 +25,8 @@ Trends <- read.csv("data/final_and_intermediate_outputs/all_trends.csv", strings
 
 Trends_1921 <- Trends %>% filter( baseline == "1921")
 
+Trends_1921$sde
 # Pivot the trends table so each region is a column
-
 Trends_1921_clean <- Trends_1921 %>%
   filter(
     convergence == 0,        # keep only converged models
@@ -41,12 +41,60 @@ trend_summary <- Trends_1921_clean %>%
     values_from = trend
   )
 
+# Keep only clean, converged rows
+Trends_1921_clean <- Trends_1921 %>% 
+  filter(
+    convergence == 0,
+    !is.na(trend),
+    trend >= -1 & trend <= 1
+  )
+
+# Pivot trends
+trend_wide <- Trends_1921_clean %>% 
+  select(species, region_50, trend) %>% 
+  pivot_wider(
+    names_from = region_50,
+    values_from = trend,
+    names_prefix = "trend_"
+  )
+
+# Pivot sde
+sde_wide <- Trends_1921_clean %>% 
+  select(species, region_50, sde) %>% 
+  pivot_wider(
+    names_from = region_50,
+    values_from = sde,
+    names_prefix = "sde_"
+  )
+
+# Join trend and sde tables
+trend_summary <- left_join(trend_wide, sde_wide, by = "species")
 
 # Merge with the previous summary table
 final_summary <- summary_table %>%
   left_join(trend_summary, by = c("scientificName" = "species"))
 
-final_summary
+str(final_summary)
 
-#write_csv(final_summary, "data/final_and_intermediate_outputs/Table_S1.csv")
+#Reorder columns:
+# Base columns before trends
+base_cols <- c(
+  "family", "scientificName", "Group",
+  "1921-1940", "1941-1960", "1961-1980", "1981-2000", "2001-2020"
+)
+
+# Detect regions automatically
+regions <- gsub("trend_", "", grep("^trend_", names(final_summary), value = TRUE))
+
+# Build order: trend_region1, sde_region1, trend_region2, sde_region2, ...
+paired_cols <- as.vector(rbind(
+  paste0("trend_", regions),
+  paste0("sde_", regions)
+))
+
+# Reorder columns
+final_summary <- final_summary %>% 
+  select(all_of(base_cols), all_of(paired_cols))
+
+#write.csv(final_summary, "data/final_and_intermediate_outputs/Table_S1.csv")
 
