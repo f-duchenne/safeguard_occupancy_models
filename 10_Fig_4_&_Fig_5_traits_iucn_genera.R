@@ -1,5 +1,5 @@
 ############# FIRST ASSEMBLE ALL SPECIES TOGETHER
-pkgs <- c("patchwork", "tidyverse", "brms") 
+pkgs <- c("patchwork", "tidyverse", "brms", "stringr") 
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
@@ -19,14 +19,22 @@ me_STI <- conditional_effects(model_bees, effects = "STI_Species_temperature_ind
 me_Soc <- conditional_effects(model_bees, effects = "Sociality_simplified", method = "posterior_epred")
 me_LDB <- conditional_effects(model_bees, effects = "Larval_diet_breadth", method = "posterior_epred")
 
-
 pred_ITD <- as.data.frame(me_ITD[[1]])
 pred_STI <- as.data.frame(me_STI[[1]])
 pred_Soc <- as.data.frame(me_Soc[[1]])
 pred_LDB <- as.data.frame(me_LDB[[1]])
 
-###warning: Data "Bee_Traits" not loaded##########
-#Same for Hoverfly_Traits
+#Load traits to plot raw points.
+Traits <- read.csv("data/final_and_intermediate_outputs/traits_table.csv")
+Trends <- read.csv("data/final_and_intermediate_outputs/all_trends.csv")
+colnames(Trends)[which(names(Trends) == "species")] <- "Species"
+Trends <- Trends %>% filter (baseline == "1921")
+
+Bee_Traits <- Traits %>% filter (taxo_group == "bees", Species %in% Trends$Species)
+Bee_Traits <- Bee_Traits %>% left_join(Trends, by = "Species")
+
+Hoverfly_Traits <- Traits %>% filter (taxo_group == "hoverflies", Species %in% Trends$Species)
+Hoverfly_Traits <- Hoverfly_Traits %>% left_join(Trends, by = "Species")
 
 plot_ITD_bee <- ggplot(pred_ITD, aes(x = effect1__, y = estimate__)) +
   geom_point(data = Bee_Traits %>% filter(!is.na(ITD_F_mm), !is.na(trend)),
@@ -190,3 +198,123 @@ plot_traits <- top_row /
   plot_layout(heights = c(1, 0.2, 1))  # 0.05 is the spacer height
 
 plot_traits
+
+
+### Fig_5. Trends by IUCN Status and Genera.
+
+Bee_IUCN <- Bee_Traits %>%
+  filter(European_Category_2025 != "" & !is.na(European_Category_2025))
+
+Bee_IUCN <- Bee_IUCN %>%
+  mutate(IUCN_2025 = factor(European_Category_2025,
+                            levels = c("DD","LC","NT","VU","EN","CR")))
+
+plot_IUCN_bee <- ggplot(Bee_IUCN, aes(x = IUCN_2025, y = trend)) +
+  geom_jitter(width = 0.2, alpha = 0.2) +
+  geom_boxplot(fill = "lightblue", alpha = 0.7, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "black",linewidth=0.5) +
+  labs(x = "Bee IUCN Category", y = "Trend") +
+  coord_cartesian(ylim = c(-0.33, 0.2)) +   # Adjust these limits to your data
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+plot_IUCN_bee
+
+
+# Boxplot for selected genera
+
+genus_trend_summary <- Bee_Traits %>%
+  group_by(Genus) %>%
+  dplyr::summarise(
+    median_trend = median(trend, na.rm = TRUE),
+    sd_trend = sd(trend, na.rm = TRUE),
+    n = n()) %>%
+  arrange(desc(median_trend))  # Optional: Sort by trend
+
+target_genera <- c("Hoplitis", "Tetralonia", "Osmia","Anthidium", "Amegilla",
+                   "Sphecodes", "Seladonia","Dufourea", "Panurgus", "Melecta")
+
+Bee_subset <- Bee_Traits %>% 
+  filter(Genus %in% target_genera)
+
+plot_genus_bee <- ggplot(Bee_subset, aes(x = fct_reorder(Genus, trend, .fun = median, .desc = TRUE), y = trend))+ 
+  geom_jitter(width = 0.2, alpha = 0.2) +
+  geom_boxplot(fill = "#fc8d62", alpha = 0.7, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "black",size=0.5) +
+  coord_cartesian(ylim = c(-0.2, 0.2)) +   # Adjust these limits to your data
+  labs(x = "Bee genus", y = "Trend") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, face="italic"))
+
+plot_genus_bee
+
+
+# Same for hoverflies
+
+Hoverfly_IUCN <- Hoverfly_Traits %>%
+  filter(European_Category != "" & !is.na(European_Category))
+
+Hoverfly_IUCN <- Hoverfly_IUCN %>%
+  mutate(European_Category = factor(European_Category,
+                            levels = c("DD","LC","NT","VU","EN","CR")))
+
+plot_IUCN_hover <- ggplot(Hoverfly_IUCN, aes(x = European_Category, y = trend)) +
+  geom_jitter(width = 0.2, alpha = 0.2) +
+  geom_boxplot(fill = "lightblue", alpha = 0.7, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "black",size=0.5) +
+  labs(x = "Hoverfly IUCN Category", y = "") +
+  coord_cartesian(ylim = c(-0.25, 0.3)) +   # Adjust these limits to your data
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+plot_IUCN_hover
+
+
+# Boxplot for selected genera
+
+#Identify genera with more information.
+Hoverfly_Traits %>%
+  filter(!is.na(trend)) %>%
+  count(Genus, sort = TRUE) %>%
+  slice_max(n, n = 20)
+
+top_bottom_genera <- Hoverfly_Traits %>%
+  filter(!is.na(trend)) %>%
+  group_by(Genus) %>%
+  summarise(
+    mean_trend = median(trend, na.rm = TRUE),
+    n = n()
+  ) %>%
+  arrange(desc(mean_trend))
+
+target_genera <- c("Syrphus", "Philhelius", "Dasysyrphus", "Melanostoma", "Chalcosyrphus",
+                   "Melangyna", "Merodon", "Pipiza", "Parasyrphus", "Brachyopa")
+
+Hoverfly_subset <- Hoverfly_Traits %>% 
+  filter(Genus %in% target_genera)
+
+plot_genus_hover <- ggplot(Hoverfly_subset, aes(x = fct_reorder(Genus, trend, .fun = median, .desc = TRUE), y = trend)) +
+  geom_jitter(width = 0.2, alpha = 0.2) +
+  geom_boxplot(fill = "#fc8d62", alpha = 0.7, outlier.shape = NA) +
+  geom_hline(yintercept = 0, linetype = "dashed", colour = "black",size=0.5) +
+  coord_cartesian(ylim = c(-0.15, 0.25)) +
+  labs(x = "Hoverfly genus", y = "") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,face="italic"))
+
+plot_genus_hover
+
+
+###Fig:5. Plot trends by IUCN Status and genera.
+
+plot_iucn_and_genera <- (plot_IUCN_bee + plot_IUCN_hover) /
+  (plot_genus_bee + plot_genus_hover) +
+  plot_layout(heights = c(1, 1.2))
+
+plot_iucn_and_genera
+
+dev.off()
+
+
+
+
