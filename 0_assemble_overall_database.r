@@ -299,8 +299,7 @@ Traits4$Larval_diet_breadth[Traits4$Larval_diet_breadth=="na"]=NA
 Traits4$taxo_group="bees"
 Traits4$taxo_group[Traits4$Order=="Diptera"]="hoverflies"
 
-#commented to avoid overwritting
-#fwrite(Traits4,paste0(project_folder,"data/final_and_intermediate_outputs/traits_table.csv"))
+fwrite(Traits4,paste0(project_folder,"data/final_and_intermediate_outputs/traits_table.csv"))
 
 
 
