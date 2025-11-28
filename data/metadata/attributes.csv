@@ -1,57 +1,57 @@
-fileName,variableName,description,unitText,,
-database_clean_filtered.csv,scientificName,Taxonomic species,text,,
-database_clean_filtered.csv,endYear,Year of the sampling,numeric,,
-database_clean_filtered.csv,endMonth,Month of the sampling,numeric,,
-database_clean_filtered.csv,endDay,Day of the sampling,numeric,,
-database_clean_filtered.csv,country,Country where the data was collected,text,,
-database_clean_filtered.csv,genus,Taxonomic genera,text,,
-database_clean_filtered.csv,family,Taxonomic family,text,,
-database_clean_filtered.csv,occurrenceID,Occurrence identifier,numeric,,
-database_clean_filtered.csv,datasetProvider,The provider of the original dataset,text,,
-database_clean_filtered.csv,institutionName,The institution of the author sharinf the data,text,,
-database_clean_filtered.csv,scientificNameAuthorship,The name of the author sharing the data,text,,
-database_clean_filtered.csv,taxo_group,Either bees or hoverflies,text,,
-database_clean_filtered.csv,gridID_20,Identifier of grid cell at 20 km-side resolution,numeric,,
-database_clean_filtered.csv,region_20,Name of the region of the grid cell at 20 km-side resolution,text,,
-database_clean_filtered.csv,gridID_50,Identifier of grid cell at 50 km-side resolution,numeric,,
-database_clean_filtered.csv,region_50,Name of the region of the grid cell at 50 km-side resolution,text,,
-database_clean_filtered.csv,gridID_100,Identifier of grid cell at 100 km-side resolution,numeric,,
-database_clean_filtered.csv,region_100,Name of the region of the grid cellat 100 km-side resolution,text,,
-database_clean_filtered.csv,gridID_200,Identifier of grid cell at 200 km-side resolution,numeric,,
-database_clean_filtered.csv,region_200,Name of the region of the grid at 20 km-side resolution,text,,
-database_clean_filtered.csv,geometry,Latitude and Longitude combined in an object,geometry,,
-database_clean_filtered.csv,decimalLongitude,Longitude in ETRS89 / LAEA Europe (EPSG:3035) coordinate system,numeric,,
-database_clean_filtered.csv,decimalLatitude,Latitude in ETRS89 / LAEA Europe (EPSG:3035) coordinate system,numeric,,
-database_clean_filtered.csv,time_period,Twenty-year period of the sampling (e.g., 1961-1981),category,
-Table_S1.csv,family,Taxonomic family,text,,
-Table_S1.csv,scientificName,Accepted full species name,text,,
-Table_S1.csv,Group,Taxonomic groups: Either bees or hoverflies,text,,
-Table_S1.csv,1921-1940,Total number of records of the species in scientificName in this period (years 1921 to 1940),numeric,,
-Table_S1.csv,1941-1960,Total number of records of the species in scientificName in this period (years 1941 to 1960),numeric,,
-Table_S1.csv,1961-1980,Total number of records of the species in scientificName in this period (years 1961 to 1980),numeric,,
-Table_S1.csv,1981-2000,Total number of records of the species in scientificName in this period (years 1981 to 2000),numeric,,
-Table_S1.csv,2001-2020,Total number of records of the species in scientificName in this period (years 2001 to 2020),numeric,,
-Table_S1.csv,mediterranean,Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Mediterranean biogeoregion (for the full study time, 1921- 2020),numeric
-Table_S1.csv,alpine,Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Alpine biogeoregion (for the full study time, 1921- 2020),numeric
-Table_S1.csv,atlantic,Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Atlantic biogeoregion (for the full study time, 1921- 2020),numeric
-Table_S1.csv,continental,Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Continental biogeoregion (for the full study time, 1921- 2020),numeric
-Table_S1.csv,boreal,Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Boreal biogeoregion (for the full study time, 1921- 2020),numeric
-traits_table.csv,Species,Taxonomic species,text,,
-traits_table.csv,Order,Taxonomic order,text,,
-traits_table.csv,Family,Taxonomic family,text,,
-traits_table.csv,Genus,Taxonomic genera,text,,
-traits_table.csv,Sociality,Bee category of sociality (7 categories).,text,,
-traits_table.csv,STI_Species_temperature_index,Species temperature index retrieved from their distribution (centroid),numeric,,
-traits_table.csv,Larval_diet_breadth,Breadth of the diet in bees (2 categories, oligolectic or polylectic),text,
-traits_table.csv,ITD_F_mm,Inter-tegular distance measured in mm in females of each bee species,numeric,,
-traits_table.csv,Adult_Body_size,Hoverfly body size (5 categories),text,,
-traits_table.csv,Larval_nutrition,Type of nutrition in hoverfly larvae (5 categories),text,,
-traits_table.csv,Flight_ability,Capacity to flight (2 categories),text,,
-traits_table.csv,Flight_height,Category of hoverfly flight height (3 categories),text,,
-traits_table.csv,scientificNameAuthorship,Authorship of the species description,text,,
-traits_table.csv,year_description,Year of species description,numeric,,
-traits_table.csv,European_Category,IUCN redlist conservation status,text,,
-traits_table.csv,European_Category_2025,IUCN Bee status according to the new report,text,,
-traits_table.csv,Sociality_simplified,Bee category of sociality simplified into (Social, parasite, or solitary),text
-traits_table.csv,Adult_Body_size_num,Body size of hoherflies as a category (from 1 to 5),numeric,,
-traits_table.csv,taxo_group,Either bees or hoverflies,text,,
+fileName,variableName,description,unitText
+database_clean_filtered.csv,scientificName,Taxonomic species,text
+database_clean_filtered.csv,endYear,Year of the sampling,numeric
+database_clean_filtered.csv,endMonth,Month of the sampling,numeric
+database_clean_filtered.csv,endDay,Day of the sampling,numeric
+database_clean_filtered.csv,country,Country where the data was collected,text
+database_clean_filtered.csv,genus,Taxonomic genera,text
+database_clean_filtered.csv,family,Taxonomic family,text
+database_clean_filtered.csv,occurrenceID,Occurrence identifier,numeric
+database_clean_filtered.csv,datasetProvider,The provider of the original dataset,text
+database_clean_filtered.csv,institutionName,The institution of the author sharinf the data,text
+database_clean_filtered.csv,scientificNameAuthorship,The name of the author sharing the data,text
+database_clean_filtered.csv,taxo_group,Either bees or hoverflies,text
+database_clean_filtered.csv,gridID_20,Identifier of grid cell at 20 km-side resolution,numeric
+database_clean_filtered.csv,region_20,Name of the region of the grid cell at 20 km-side resolution,text
+database_clean_filtered.csv,gridID_50,Identifier of grid cell at 50 km-side resolution,numeric
+database_clean_filtered.csv,region_50,Name of the region of the grid cell at 50 km-side resolution,text
+database_clean_filtered.csv,gridID_100,Identifier of grid cell at 100 km-side resolution,numeric
+database_clean_filtered.csv,region_100,Name of the region of the grid cellat 100 km-side resolution,text
+database_clean_filtered.csv,gridID_200,Identifier of grid cell at 200 km-side resolution,numeric
+database_clean_filtered.csv,region_200,Name of the region of the grid at 20 km-side resolution,text
+database_clean_filtered.csv,geometry,Latitude and Longitude combined in an object,geometry
+database_clean_filtered.csv,decimalLongitude,Longitude in ETRS89 / LAEA Europe (EPSG:3035) coordinate system,numeric
+database_clean_filtered.csv,decimalLatitude,Latitude in ETRS89 / LAEA Europe (EPSG:3035) coordinate system,numeric
+database_clean_filtered.csv,time_period,Twenty-year period of the sampling (e.g. 1961-1981),category
+Table_S1.csv,family,Taxonomic family,text
+Table_S1.csv,scientificName,Accepted full species name,text
+Table_S1.csv,Group,Taxonomic groups: Either bees or hoverflies,text
+Table_S1.csv,1921-1940,Total number of records of the species in scientificName in this period (years 1921 to 1940),numeric
+Table_S1.csv,1941-1960,Total number of records of the species in scientificName in this period (years 1941 to 1960),numeric
+Table_S1.csv,1961-1980,Total number of records of the species in scientificName in this period (years 1961 to 1980),numeric
+Table_S1.csv,1981-2000,Total number of records of the species in scientificName in this period (years 1981 to 2000),numeric
+Table_S1.csv,2001-2020,Total number of records of the species in scientificName in this period (years 2001 to 2020),numeric
+Table_S1.csv,mediterranean,Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Mediterranean biogeoregion (for the full study time  1921- 2020),numeric
+Table_S1.csv,alpine,Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Alpine biogeoregion (for the full study time 1921- 2020),numeric
+Table_S1.csv,atlantic,Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Atlantic biogeoregion (for the full study time 1921- 2020),numeric
+Table_S1.csv,continental,Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Continental biogeoregion (for the full study time 1921- 2020),numeric
+Table_S1.csv,boreal,Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Boreal biogeoregion (for the full study time 1921- 2020),numeric
+traits_table.csv,Species,Taxonomic species,text
+traits_table.csv,Order,Taxonomic order,text
+traits_table.csv,Family,Taxonomic family,text
+traits_table.csv,Genus,Taxonomic genera,text
+traits_table.csv,Sociality,Bee category of sociality (7 categories).,text
+traits_table.csv,STI_Species_temperature_index,Species temperature index retrieved from their distribution (centroid),numeric
+traits_table.csv,Larval_diet_breadth,Breadth of the diet in bees (2 categories: oligolectic or polylectic),text
+traits_table.csv,ITD_F_mm,Inter-tegular distance measured in mm in females of each bee species,numeric
+traits_table.csv,Adult_Body_size,Hoverfly body size (5 categories),text
+traits_table.csv,Larval_nutrition,Type of nutrition in hoverfly larvae (5 categories),text
+traits_table.csv,Flight_ability,Capacity to flight (2 categories),text
+traits_table.csv,Flight_height,Category of hoverfly flight height (3 categories),text
+traits_table.csv,scientificNameAuthorship,Authorship of the species description,text
+traits_table.csv,year_description,Year of species description,numeric
+traits_table.csv,European_Category,IUCN redlist conservation status,text
+traits_table.csv,European_Category_2025,IUCN Bee status according to the new report,text
+traits_table.csv,Sociality_simplified,"Bee category of sociality simplified into (Social, parasite, solitary) ",text
+traits_table.csv,Adult_Body_size_num,Body size of hoherflies as a category (from 1 to 5),numeric
+traits_table.csv,taxo_group,Either bees or hoverflies,text
