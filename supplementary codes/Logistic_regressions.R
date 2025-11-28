@@ -282,7 +282,7 @@ Trends_1921 <- Trends %>% filter (baseline == "1921")
 
 Trends_logistic_occupancy_1921 <- left_join (Logistic_models, Trends_1921, by = c("Species", "region_50"))
 
-#write.csv(Trends_logistic_occupancy_1921, "data/final_and_intermediate_outputs/Trends_logistic_occupancy_1921.csv")
+write.csv(Trends_logistic_occupancy_1921, "data/final_and_intermediate_outputs/Trends_logistic_occupancy_1921.csv")
 
 
 pearson <- cor.test(scale(Trends_logistic_occupancy_1921$trend), scale(Trends_logistic_occupancy_1921$Estimate),

@@ -4,7 +4,7 @@ library(tidyverse)
 ### Fig_S2_Test trends of alpine vs. non-alpine species in the alpine region.
 
 #Load trends for species and rename first column.
-Trends <- read.csv("all_trends.csv")
+Trends <- read.csv("data/final_and_intermediate_outputs/all_trends.csv")
 colnames(Trends)[1]<- "Species"
 
 library(tidyverse)

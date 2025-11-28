@@ -96,5 +96,5 @@ paired_cols <- as.vector(rbind(
 final_summary <- final_summary %>% 
   select(all_of(base_cols), all_of(paired_cols))
 
-#write.csv(final_summary, "data/final_and_intermediate_outputs/Table_S1.csv")
+write.csv(final_summary, "data/final_and_intermediate_outputs/Table_S1.csv")
 

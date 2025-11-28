@@ -104,7 +104,7 @@ p_coverage_bees_100 <- ggplot(coverage_summary, aes(x = endYear, y = SC, color =
 
 p_coverage_bees_100
 
-#write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_bees_100.csv")
+write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_bees_100.csv")
 
 ## Check coverage for bees at n = 200----
 
@@ -133,7 +133,7 @@ coverage_summary_200 <- bind_rows(coverage_200, .id = "sample") %>%
 
 coverage_summary_200 %>% group_by(region_100) %>% summarise(mean = mean(SC))
 
-#write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_bees_200.csv")
+write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_bees_200.csv")
 
 p_coverage_bees_200 <- ggplot(coverage_summary_200, aes(x = endYear, y = SC, color = region_100)) +
   geom_point() +
@@ -207,7 +207,7 @@ coverage_summary <- bind_rows(coverage_100, .id = "sample") %>%
 
 coverage_summary %>% group_by(region_100) %>% summarise(mean = mean(SC))
 
-#write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_hoverflies_100.csv")
+write.csv(coverage_summary, "data/final_and_intermediate_outputs/Coverage_hoverflies_100.csv")
 
 p_coverage_hoverflies_100 <- ggplot(coverage_summary, aes(x = endYear, y = SC, color = region_100)) +
   geom_point() +
@@ -249,7 +249,7 @@ coverage_summary_200 <- bind_rows(coverage_200, .id = "sample") %>%
 
 coverage_summary_200 %>% group_by(region_100) %>% summarise(mean = mean(SC))
 
-#write.csv(coverage_summary_200, "data/final_and_intermediate_outputs/Coverage_hoverflies_200.csv")
+write.csv(coverage_summary_200, "data/final_and_intermediate_outputs/Coverage_hoverflies_200.csv")
 
 p_coverage_hoverflies_200 <- ggplot(coverage_summary_200, aes(x = endYear, y = SC, color = region_100)) +
   geom_point() +
