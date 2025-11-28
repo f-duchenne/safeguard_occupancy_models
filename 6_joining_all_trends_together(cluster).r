@@ -19,8 +19,6 @@ for(i in lifile){
 	trendsf=rbind(trendsf,trends)
 }
 
-fwrite(trendsf,paste0(project_folder,"data/results_TMB_trends_with_counts.csv"))
-
 inv.logit=function(x){exp(x)/(1+exp(x))}
 logit=function(x){log(x/(1-x))}
 
