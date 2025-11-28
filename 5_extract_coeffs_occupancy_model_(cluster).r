@@ -1,3 +1,6 @@
+#DO NOT RUN#
+#This script is prepared to be run in a cluster, as it contains computationally demanding models.
+
 ###########################################
 ###########################################
 #' Check for packages and if necessary install into library 
@@ -19,19 +22,20 @@ i <- as.numeric(args_contents[[1]])
 #defining working folder:
 #setwd(dir="/home/duchenne/safeguard/")
 
+#you can use i = 1 to run a sample test
 #import data:
 if(i<=1364){
 	taxo_group="bees"
 	if(i<=317){
-		dat=fread(paste0("bees_det_nondet_matrix_common.csv"))
+		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_common.csv"))
 	}else{
-		dat=fread(paste0("bees_det_nondet_matrix_rare.csv"))
+		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_rare.csv"))
 		i=i-317
 	}
 }else{
   i=i-1364
 	taxo_group="hoverflies"
-  dat=fread(paste0("hoverflies_det_nondet_matrix.csv"))
+  dat=fread(paste0("data/final_and_intermediate_outputs/hoverflies_det_nondet_matrix.csv"))
   dat$others=NA
 }
 #combinations
@@ -46,10 +50,6 @@ nonlf=NULL
 
 #combinations
 index=names(dat)[names(dat)==tab1$species[i]]
-
-files=list.files("/home/duchenne/safeguard/results/",pattern="predicts_")
-
-#if(!(paste0("predicts_",tab1$species[i],".RData") %in% files)){
 
 dat$Y=dat[,index,with=F]
 dat$Y[dat$Y>1]=1 #if many dets, put one

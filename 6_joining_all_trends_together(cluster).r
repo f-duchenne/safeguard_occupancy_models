@@ -10,7 +10,7 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 #project_folder="C:/Users/Duchenne/Documents/safeguard/"
 project_folder <- ""
 
-setwd(dir=paste0(project_folder,"results/"))
+setwd(dir=paste0(project_folder,"results/predicts_linear/"))
 lifile=list.files( pattern ="predicts_")
 lifile=lifile[grep("non_linear",lifile,invert=TRUE)]
 
