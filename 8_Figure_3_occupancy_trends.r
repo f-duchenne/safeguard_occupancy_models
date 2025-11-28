@@ -28,7 +28,7 @@ bidon_hov=subset(bidon,taxo_group=="hoverflies")
 bf=NULL
 bf2=NULL
 for(jj in unique(bidon$taxo_group)){
-    load(paste0(project_folder,"data/model_",1921,"_",jj,".RData"))
+    load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_",1921,"_",jj,".RData"))
 	model_1=lis_bas[[1]]
 	model_2=lis_bas[[2]]
 	sav <- emmprep(model_1)
@@ -51,7 +51,7 @@ for(jj in unique(bidon$taxo_group)){
 	b$subset_species="excluding rare"
 	bf=rbind(bf,b)
 	
-	load(paste0(project_folder,"data/model_total_",1921,"_",jj,".RData"))
+	load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_total_",1921,"_",jj,".RData"))
 	model_1=lis_bas[[1]]
 	model_2=lis_bas[[2]]
 	sav <- emmprep(model_1)
@@ -61,7 +61,7 @@ for(jj in unique(bidon$taxo_group)){
 	b$n_trends=model_1$k
 	b$subset_species="all"
 	bf2=rbind(bf2,b)
-	load(paste0(project_folder,"data/model_total_",1971,"_",jj,".RData"))
+	load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_total_",1971,"_",jj,".RData"))
 	model_1=lis_bas[[1]]
 	model_2=lis_bas[[2]]
 	sav <- emmprep(model_1)
@@ -94,7 +94,7 @@ bf$region2[bf$region2=="continental"]="conti."
 table_S2=subset(bf, subset_species=="all")
 n_tab=bidon %>% group_by(taxo_group,region_50) %>% count()
 table_S2=merge(table_S2,n_tab,by=c("taxo_group","region_50"))
-fwrite(table_S2,paste0(project_folder,"data/table_S2.csv"))
+fwrite(table_S2,paste0(project_folder,"data/final_and_intermediate_outputs/table_S2.csv"))
 
 nrow(subset(bidon_bee,abs(trend)>0.2))/nrow(bidon_bee)
 nrow(subset(bidon_hov,abs(trend)>0.2))/nrow(bidon_hov)
@@ -172,7 +172,7 @@ scale_color_manual(values=c("black","grey"))
 grid.arrange(p1,pl5,ncol=2,widths=c(2,0.75))
 
 
-pdf(paste0(project_folder,"/Figure_3.pdf"),width=8,height=5)
+pdf(paste0(project_folder,"figures/Figure_3.pdf"),width=8,height=5)
 grid.arrange(p1,pl5,ncol=2,widths=c(2,1))
 dev.off();
 
@@ -181,7 +181,7 @@ bf=NULL
 bf2=NULL
 for(jj in unique(bidon$taxo_group)){
 for(base in c(1921,1971)){
-load(paste0(project_folder,"data/model_",base,"_",jj,".RData"))
+load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_",base,"_",jj,".RData"))
 model_1=lis_bas[[1]]
 sav <- emmprep(model_1)
 b=as.data.frame(emmeans(sav,specs="region_50"))

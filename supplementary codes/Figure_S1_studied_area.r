@@ -9,7 +9,7 @@ if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
-project_folder="C:/Users/Duchenne/Documents/safeguard/"
+#project_folder="C:/Users/Duchenne/Documents/safeguard/"
 project_folder=""
 
 # LOAD SOME BASIC SHAPEFILES THAT WILL USE TO DEFINE THE AREA
@@ -25,8 +25,7 @@ bioregions <- st_transform(bioregions, crs = utm_crs)
 
 bioregions2 <- st_crop(bioregions, bbox)
 
-######warning##### not shp file.
-continents <- st_read ("D:/land use change/continents/continents-of-the-world-merged.shp")
+continents <- st_read("data/raw_data/continents-of-the-world-merged.shp")
 
 bioregions2 <- st_transform(bioregions2, crs = st_crs(continents))
 bioregions2=subset(bioregions2,short_name!="outside")

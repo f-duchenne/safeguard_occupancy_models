@@ -38,8 +38,7 @@ dat$site=dat$gridID_50
 b=dat %>% dplyr::group_by(gridID_50,region_50,taxo_group) %>% dplyr::summarise(nyear=length(unique(endYear)),
 nyear_b70=sum(unique(endYear)<=1970),nyear_a70=sum(unique(endYear)>1970),nb_records=length(endYear))
 
-#commented to revent overwrite
-#fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/sites_studied_tot.csv"))
+fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/sites_studied_tot.csv"))
 
 nr_month=subset(dat,is.na(endMonth))
 nr_month %>% group_by(taxo_group) %>% count()
@@ -88,8 +87,7 @@ bb=bb %>% dplyr::group_by(region_50,taxo_group) %>% dplyr::mutate(nsurv=length(u
 b= bb %>% dplyr::group_by(region_50,scientificName,family,taxo_group) %>% dplyr::summarise(occupancy_obs=sum(occupied>0)/mean(nsurv),nb_records=sum(occupied),nb_detect=sum(occupied>0))
 b=b %>% group_by(scientificName,taxo_group,family) %>% mutate(nb_records_tot=sum(nb_records))
 
-#commented to prevent overwritting
-#fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/species_nb_records.csv"))
+fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/species_nb_records.csv"))
 
 nb_sp_common=subset(count_table,N>=1000) %>% group_by(taxo_group) %>% count() %>%  deframe()
 nb_sp=subset(b,nb_records_tot>=10 & nb_detect>=5) %>% group_by(taxo_group) %>% summarise(n=length(unique(scientificName))) %>%  deframe()
@@ -97,8 +95,7 @@ nsp_tot=b %>% group_by(taxo_group) %>% summarise(n=length(unique(scientificName)
 length(unique(dat$scientificName))
 
 list_filtering=list(nb_records_initial,nr_regions,nb_records,nr_month,nr_sites,nb_surveys,nb_sp_common,nb_sp,nsp_tot)
-#commented to avoid overwrite
-#save(list_filtering,file=paste0(project_folder,"data/final_and_intermediate_outputs/list_filtering.RData"))
+save(list_filtering,file=paste0(project_folder,"data/final_and_intermediate_outputs/list_filtering.RData"))
 
 b=dat %>% dplyr::group_by(gridID_50,region_50,taxo_group) %>% dplyr::summarise(nyear=length(unique(endYear)),
 nyear_b70=sum(unique(endYear)<=1970),nyear_a70=sum(unique(endYear)>1970))
@@ -109,8 +106,7 @@ nyear_b70=sum(unique(endYear)<=1970),nyear_a70=sum(unique(endYear)>1970))
 bb=dat %>% dplyr::group_by(region_50,endYear,gridID_50,taxo_group) %>% dplyr::summarise(nsurveys=length(unique(survey)),nrec=length(survey))
 b=bb %>% dplyr::group_by(region_50,endYear,taxo_group) %>% dplyr::summarise(nsites=length(unique(gridID_50)),mean_nsurv=mean(nsurveys),nrec=sum(nrec))
 
-#commented to avoid overwrite
-#fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/regions_sampling.csv"))
+fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/regions_sampling.csv"))
 
 ######################################### PREPARE MATRIX OF DETECTION AND NON DETECTION FOR EACH GROUP
 taxo_group_vec=c("bees","hoverflies")

@@ -78,159 +78,153 @@
     "name": "Europe",
     "geo": {
       "type": "GeoShape",
-      "box": "79.97274 34.96846 39.3433 -11.12336"
+      "box": "79.97274 34.96846 35.06846 -11.12336"
     }
   },
   "variableMeasured": [
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "scientificName",
-      "description": null
+      "description": "Taxonomic species"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "numeric",
       "name": "endYear",
-      "description": null
+      "description": "Year of the sampling"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "numeric",
       "name": "endMonth",
-      "description": null
+      "description": "Month of the sampling"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "numeric",
       "name": "endDay",
-      "description": null
+      "description": "Day of the sampling"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "country",
-      "description": null
+      "description": "Country where the data was collected"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "genus",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "family",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "occurrenceID",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "datasetProvider",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "institutionName",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "scientificNameAuthorship",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "taxo_group",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "gridID_20",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "region_20",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "gridID_50",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "region_50",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "gridID_100",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "region_100",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "gridID_200",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "region_200",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "geometry",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "decimalLongitude",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "decimalLatitude",
-      "description": null
-    },
-    {
-      "type": "PropertyValue",
-      "unitText": null,
-      "name": "time_period",
-      "description": null
+      "description": "Taxonomic genera"
     },
     {
       "type": "PropertyValue",
       "unitText": "text",
       "name": "family",
       "description": "Taxonomic family"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "occurrenceID",
+      "description": "Occurrence identifier"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "datasetProvider",
+      "description": "The provider of the original dataset"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "institutionName",
+      "description": "The institution of the author sharinf the data"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "scientificNameAuthorship",
+      "description": "The name of the author sharing the data"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "taxo_group",
+      "description": "Either bees or hoverflies"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "gridID_20",
+      "description": "Identifier of grid cell at 20 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "region_20",
+      "description": "Name of the region of the grid cell at 20 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "gridID_50",
+      "description": "Identifier of grid cell at 50 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "region_50",
+      "description": "Name of the region of the grid cell at 50 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "gridID_100",
+      "description": "Identifier of grid cell at 100 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "region_100",
+      "description": "Name of the region of the grid cellat 100 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "gridID_200",
+      "description": "Identifier of grid cell at 200 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "text",
+      "name": "region_200",
+      "description": "Name of the region of the grid at 20 km-side resolution"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "geometry",
+      "name": "geometry",
+      "description": "Latitude and Longitude combined in an object"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "decimalLongitude",
+      "description": "Longitude in ETRS89 / LAEA Europe (EPSG:3035) coordinate system"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
+      "name": "decimalLatitude",
+      "description": "Latitude in ETRS89 / LAEA Europe (EPSG:3035) coordinate system"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "category",
+      "name": "time_period",
+      "description": "Twenty-year period of the sampling (e.g. 1961-1981)"
     },
     {
       "type": "PropertyValue",
@@ -278,43 +272,43 @@
       "type": "PropertyValue",
       "unitText": "numeric",
       "name": "mediterranean",
-      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Mediterranean biogeoregion (for the full study time, 1921- 2020)"
+      "description": "Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Mediterranean biogeoregion (for the full study time  1921- 2020)"
     },
     {
       "type": "PropertyValue",
       "unitText": "numeric",
       "name": "alpine",
-      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Alpine biogeoregion (for the full study time, 1921- 2020)"
+      "description": "Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Alpine biogeoregion (for the full study time 1921- 2020)"
     },
     {
       "type": "PropertyValue",
       "unitText": "numeric",
       "name": "atlantic",
-      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Atlantic biogeoregion (for the full study time, 1921- 2020)"
+      "description": "Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Atlantic biogeoregion (for the full study time 1921- 2020)"
     },
     {
       "type": "PropertyValue",
       "unitText": "numeric",
       "name": "continental",
-      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Continental biogeoregion (for the full study time, 1921- 2020)"
+      "description": "Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Continental biogeoregion (for the full study time 1921- 2020)"
     },
     {
       "type": "PropertyValue",
       "unitText": "numeric",
       "name": "boreal",
-      "description": "Occupancy trend (logit scale, log(growth rate)) for the species in scientificName in the Boreal biogeoregion (for the full study time, 1921- 2020)"
+      "description": "Occupancy trend (logit scale: log(growth rate)) for the species in scientificName in the Boreal biogeoregion (for the full study time 1921- 2020)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Species",
-      "description": null
+      "description": "Taxonomic species"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Order",
-      "description": null
+      "description": "Taxonomic order"
     },
     {
       "type": "PropertyValue",
@@ -324,87 +318,93 @@
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Genus",
-      "description": null
+      "description": "Taxonomic genera"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Sociality",
-      "description": null
+      "description": "Bee category of sociality (7 categories)."
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "numeric",
       "name": "STI_Species_temperature_index",
-      "description": null
+      "description": "Species temperature index retrieved from their distribution (centroid)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Larval_diet_breadth",
-      "description": null
+      "description": "Breadth of the diet in bees (2 categories: oligolectic or polylectic)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "numeric",
       "name": "ITD_F_mm",
-      "description": null
+      "description": "Inter-tegular distance measured in mm in females of each bee species"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Adult_Body_size",
-      "description": null
+      "description": "Hoverfly body size (5 categories)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Larval_nutrition",
-      "description": null
+      "description": "Type of nutrition in hoverfly larvae (5 categories)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Flight_ability",
-      "description": null
+      "description": "Capacity to flight (2 categories)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Flight_height",
-      "description": null
+      "description": "Category of hoverfly flight height (3 categories)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
+      "name": "scientificNameAuthorship",
+      "description": "Authorship of the species description"
+    },
+    {
+      "type": "PropertyValue",
+      "unitText": "numeric",
       "name": "year_description",
-      "description": null
+      "description": "Year of species description"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "European_Category",
-      "description": null
+      "description": "IUCN redlist conservation status"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "European_Category_2025",
-      "description": null
+      "description": "IUCN Bee status according to the new report"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "text",
       "name": "Sociality_simplified",
-      "description": null
+      "description": "Bee category of sociality simplified into (Social, parasite, solitary)"
     },
     {
       "type": "PropertyValue",
-      "unitText": null,
+      "unitText": "numeric",
       "name": "Adult_Body_size_num",
-      "description": null
+      "description": "Body size of hoherflies as a category (from 1 to 5)"
     }
   ],
   "distribution": [
