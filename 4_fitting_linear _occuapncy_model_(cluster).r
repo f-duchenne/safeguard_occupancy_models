@@ -1,5 +1,15 @@
-###########################################
-###########################################
+#############################################################
+#############################################################
+#															#
+# THIS CODE HAS BEEN DONE TO RUN ON A HPC PLATEFORM,        #
+# NOT TO RUN ON A NORMAL COMPUTER. IT RUNS THE MODEL,       #
+# WHILE SCRITP 5 EXTRACT THE COEFFICIENTS AND OTHER USEFUL  #
+# INFORMATION FROM THE MODELS. BOTH TASKS HAVE BEEN         #
+# SEPARATED TO BE ABLE TO EXTRACT NEW INFORMATION FROM THE  #
+# MODELS WITHOUT HAVING TO RE-RUN THEM.                     #  
+#															#
+#############################################################
+#############################################################
 #' Check for packages and if necessary install into library 
 #+ message = FALSE
 rm(list=ls())
