@@ -14,6 +14,11 @@ data_filtered <- species %>%
 
 species_by_region <- as.data.frame(spread (data_filtered, key=scientificName, value = Freq))
 
+# total records per year in alpine (from raw observations)
+obs_by_year <- species %>%
+  group_by(region_50,endYear) %>%
+  summarise(total = n(), .groups = "drop")
+
 # Identify species columns
 species_cols <- setdiff(names(species_by_region), c("endYear", "region_50"))
 
@@ -131,19 +136,21 @@ species_matrix_boreal$endYear <- as.numeric(as.character(species_matrix_boreal$e
 species_matrix_mediterranean$endYear <- as.numeric(as.character(species_matrix_mediterranean$endYear))
 species_matrix_continental$endYear <- as.numeric(as.character(species_matrix_continental$endYear))
 
-
-# Logistic models per species.
-
+##Alpine region----
 ## Iterate across all species.
+
+# join totals into your species_matrix_alpine (which has one row per year)
+species_matrix_alpine <- species_matrix_alpine %>%
+  left_join(obs_by_year, by = c("endYear","region_50"))
 
 Results <- data.frame(Estimate= NA, Std_error = NA, Estimate_emm = NA, 
                       LCI = NA, UCI = NA, Species = NA)
 
 # Iterate through each response variable column and fit models
-for (i in 3:(ncol(species_matrix_alpine))) {  
+for (i in 3:(ncol(species_matrix_alpine)-1)) {  
   i
   # Fit the model for each response variable
-  model <- glm(formula = species_matrix_alpine[[i]] ~ endYear, data = species_matrix_alpine, family = binomial)
+  model <- glm(formula = species_matrix_alpine[[i]] ~ endYear, data = species_matrix_alpine, family = binomial, weights = total)
   
   # Print the summary of each model
   cat("\nSummary for model with", names(species_matrix_alpine)[i], "as response variable:\n")
@@ -166,11 +173,14 @@ Results_alpine$region_50 <- "alpine"
 Results <- data.frame(Estimate= NA, Std_error = NA, Estimate_emm = NA, 
                       LCI = NA, UCI = NA, Species = NA)
 
+species_matrix_atlantic <- species_matrix_atlantic %>%
+  left_join(obs_by_year, by = c("endYear","region_50"))
+
 # Iterate through each response variable column and fit models
-for (i in 3:(ncol(species_matrix_atlantic))) {  
+for (i in 3:(ncol(species_matrix_atlantic)-1)) {  
   i
   # Fit the model for each response variable
-  model <- glm(formula = species_matrix_atlantic[[i]] ~ endYear, data = species_matrix_atlantic, family = binomial)
+  model <- glm(formula = species_matrix_atlantic[[i]] ~ endYear, data = species_matrix_atlantic, family = binomial, weights = total)
   
   # Print the summary of each model
   cat("\nSummary for model with", names(species_matrix_atlantic)[i], "as response variable:\n")
@@ -183,7 +193,7 @@ for (i in 3:(ncol(species_matrix_atlantic))) {
 
 Results_atlantic <- Results[-1,]
 
-Results_atlantic <- Results_alpine[order(Results_atlantic$Estimate, decreasing = TRUE), ]
+Results_atlantic <- Results_atlantic[order(Results_atlantic$Estimate, decreasing = TRUE), ]
 
 Results_atlantic$region_50 <- "atlantic"
 
@@ -193,11 +203,14 @@ Results_atlantic$region_50 <- "atlantic"
 Results <- data.frame(Estimate= NA, Std_error = NA, Estimate_emm = NA, 
                       LCI = NA, UCI = NA, Species = NA)
 
+species_matrix_boreal <- species_matrix_boreal %>%
+  left_join(obs_by_year, by = c("endYear","region_50"))
+
 # Iterate through each response variable column and fit models
-for (i in 3:(ncol(species_matrix_boreal))) {  
+for (i in 3:(ncol(species_matrix_boreal)-1)) {  
   i
   # Fit the model for each response variable
-  model <- glm(formula = species_matrix_boreal[[i]] ~ endYear, data = species_matrix_boreal, family = binomial)
+  model <- glm(formula = species_matrix_boreal[[i]] ~ endYear, data = species_matrix_boreal, family = binomial, weights = total)
   
   # Print the summary of each model
   cat("\nSummary for model with", names(species_matrix_boreal)[i], "as response variable:\n")
@@ -219,11 +232,14 @@ Results_boreal$region_50 <- "boreal"
 Results <- data.frame(Estimate= NA, Std_error = NA, Estimate_emm = NA, 
                       LCI = NA, UCI = NA, Species = NA)
 
+species_matrix_mediterranean <- species_matrix_mediterranean %>%
+  left_join(obs_by_year, by = c("endYear","region_50"))
+
 # Iterate through each response variable column and fit models
-for (i in 3:(ncol(species_matrix_mediterranean))) {  
+for (i in 3:(ncol(species_matrix_mediterranean)-1)) {  
   i
   # Fit the model for each response variable
-  model <- glm(formula = species_matrix_mediterranean[[i]] ~ endYear, data = species_matrix_mediterranean, family = binomial)
+  model <- glm(formula = species_matrix_mediterranean[[i]] ~ endYear, data = species_matrix_mediterranean, family = binomial, weights = total)
   
   # Print the summary of each model
   cat("\nSummary for model with", names(species_matrix_mediterranean)[i], "as response variable:\n")
@@ -245,11 +261,14 @@ Results_mediterranean$region_50 <- "mediterranean"
 Results <- data.frame(Estimate= NA, Std_error = NA, Estimate_emm = NA, 
                       LCI = NA, UCI = NA, Species = NA)
 
+species_matrix_continental <- species_matrix_continental %>%
+  left_join(obs_by_year, by = c("endYear","region_50"))
+
 # Iterate through each response variable column and fit models
-for (i in 3:(ncol(species_matrix_continental))) {  
+for (i in 3:(ncol(species_matrix_continental)-1)) {  
   i
   # Fit the model for each response variable
-  model <- glm(formula = species_matrix_continental[[i]] ~ endYear, data = species_matrix_continental, family = binomial)
+  model <- glm(formula = species_matrix_continental[[i]] ~ endYear, data = species_matrix_continental, family = binomial, weights = total)
   
   # Print the summary of each model
   cat("\nSummary for model with", names(species_matrix_continental)[i], "as response variable:\n")
@@ -271,18 +290,21 @@ Logistic_models <- rbind (Results_alpine, Results_atlantic,
 
 #Load_trends
 
-Trends <- read.csv("data/final_and_intermediate_outputs/all_trends.csv")
+Trends <- read.csv("all_trends.csv")
 
 colnames(Trends)[1]<- "Species"
 
 Trends_1921 <- Trends %>% filter (baseline == "1921")
 
+Trends_1921 <- Trends_1921 %>% filter (trend >=-1, trend <=1)
 
 # Merge occupancy trends with trends estimated from logistic models by species and bioregion.
 
 Trends_logistic_occupancy_1921 <- left_join (Logistic_models, Trends_1921, by = c("Species", "region_50"))
 
-write.csv(Trends_logistic_occupancy_1921, "data/final_and_intermediate_outputs/Trends_logistic_occupancy_1921.csv")
+#write.csv(Trends_logistic_occupancy_1921, "Trends_logistic_occupancy_1921.csv")
+
+#Trends_logistic_occupancy_1921 <- read.csv("Trends_logistic_occupancy_1921.csv")
 
 
 pearson <- cor.test(scale(Trends_logistic_occupancy_1921$trend), scale(Trends_logistic_occupancy_1921$Estimate),
@@ -298,7 +320,7 @@ spearman
 
 p1 <- ggplot(Trends_logistic_occupancy_1921, aes(x = scale(trend), y = scale(Estimate))) +
   geom_point(alpha=0.22) +
-  #xlim(values = c(-2,2))+
+  xlim(values = c(-5,5))+
   geom_smooth(method="lm", fill = "lightblue") +
   labs(
     x = "Standardized raw occupancy trend",
@@ -306,13 +328,12 @@ p1 <- ggplot(Trends_logistic_occupancy_1921, aes(x = scale(trend), y = scale(Est
   )+
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_text(),
     plot.title = element_text(hjust = 0.5, margin = margin(b = 25)),
     plot.title.position = "panel"
   )
 
 p1
-
 
 ## Confusion matrix.
 

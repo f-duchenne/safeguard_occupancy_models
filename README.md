@@ -18,8 +18,10 @@ Note that the raw data is only available through the Zenodo repository due to it
 
 `/data/final_and_intermediate_outputs/traits_models_brms.RData`
 
-Metadata (.json and .csv) for the three key datasets (inputs: `database_clean_filtered.csv, traits_table.csv` and output:`Table_S1.csv`) lives here: `/data/metadata` and can be visualized in html here: `/doc/index.html`
+Some large intermediate files are also not uploaded to GitHub, but will be created upon running the code.
 
-Scripts are numbered following the logical order to create first all needed inputs for subsequent analysis. For code requiring large computing time, intermediate outupts are stored in `/intermediary_data` folder. Supplementary material scripts can be found in `/supplementary_codes`
+Metadata (.json and .csv) for the three key datasets (inputs: `database_clean_filtered.csv, traits_table.csv` and output:`Table_S1.csv`) lives here: `/data/metadata` and can be visualized in html here: <https://f-duchenne.github.io/safeguard_occupancy_models/>
+
+Scripts are numbered following the logical order to create first all needed inputs for subsequent analysis. For code requiring large computing time, intermediate outputs are stored in `/``final_and_intermediate_outputs` folder. Supplementary material scripts can be found in `/supplementary_codes`
 
 If you want to use the exact same environment we used to run the analysis (i.e. same package versions) you can restore it using: `renv::restore()`. The folder `/maintenance_scrips` contains the scripts to set up `Renv` and create metadata.
