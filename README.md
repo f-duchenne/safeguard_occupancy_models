@@ -4,7 +4,7 @@
 
 This Repo contains the code to reproduce all analysis and figures from "Historical trends show more losers than winners among European pollinators. 2026. C Martinez-Nuñez, F Duchenne N de Manincor, G Ghisbain, A Vujic, A Sentil, M Miličić, D Michez, I Bartomeus. Submitted"
 
-You can cite as "Duchenne, Martinez-Nuñez and Bartomeus 2025. Code for Historical trends show more losers than winners among European pollinators. [**10.5281/zenodo.17772148**]"
+You can cite as "Duchenne, Martinez-Nuñez and Bartomeus 2025. Code for Historical trends show more losers than winners among European pollinators. <https://zenodo.org/records/17772148>"
 
 Note that the raw data is only available through the Zenodo repository due to its large size: [Link Zenodo]. In particular, the following files are not uploaded to github:
 
