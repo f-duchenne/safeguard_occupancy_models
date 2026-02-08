@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #############################################################
 #############################################################
 #															#
@@ -10,6 +11,13 @@
 #															#
 #############################################################
 #############################################################
+=======
+#DO NOT RUN#
+#This script is prepared to be run in a cluster, as it contains computationally demanding models.
+
+###########################################
+###########################################
+>>>>>>> 2cdac896ec2a69bd924409c87b79e032448446d7
 #' Check for packages and if necessary install into library 
 #+ message = FALSE
 rm(list=ls())
@@ -31,19 +39,20 @@ i <- as.numeric(args_contents[[1]])
 
 print(i)
 
+#you can use i = 1 to run a sample test
 #import data:
 if(i<=1364){
 	taxo_group="bees"
 	if(i<=317){
-		dat=fread(paste0("bees_det_nondet_matrix_common.csv"))
+		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_common.csv"))
 	}else{
-		dat=fread(paste0("bees_det_nondet_matrix_rare.csv"))
+		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_rare.csv"))
 		i=i-317
 	}
 }else{
   i=i-1364
 	taxo_group="hoverflies"
-  dat=fread(paste0("hoverflies_det_nondet_matrix.csv"))
+  dat=fread(paste0("data/final_and_intermediate_outputs/hoverflies_det_nondet_matrix.csv"))
   dat$others=NA
 }
 
@@ -52,11 +61,6 @@ tab=expand.grid(species=names(dat)[(which(names(dat)=="region_50")+1):(which(nam
 index=names(dat)[names(dat)==tab$species[i]]
 
 print(index)
-
-#######WARNING!#########
-files=list.files("/home/duchenne/safeguard/results/")
-
-#if(!(paste0("model_",tab$species[i],".RData") %in% files)){
 
 dat$Y=dat[,index,with=F]
 dat$Y[dat$Y>1]=1 #if many dets, put one

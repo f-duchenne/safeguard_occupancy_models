@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #############################################################
 #############################################################
 #															#
@@ -8,6 +9,10 @@
 #															#
 #############################################################
 #############################################################
+=======
+#DO NOT RUN#
+#This script is prepared to be run in a cluster, as it contains computationally demanding models.
+>>>>>>> 2cdac896ec2a69bd924409c87b79e032448446d7
 
 ############# FIRST ASSEMBLE ALL SPECIES TOGETHER
 pkgs <- c("data.table", "dplyr") 
@@ -18,7 +23,7 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 #project_folder="C:/Users/Duchenne/Documents/safeguard/"
 project_folder <- ""
 
-setwd(dir=paste0(project_folder,"/predicts_linear"))
+setwd(dir=paste0(project_folder,"results/predicts_linear/"))
 lifile=list.files( pattern ="predicts_")
 lifile=lifile[grep("non_linear",lifile,invert=TRUE)]
 
@@ -33,7 +38,7 @@ for(i in lifile){
 inv.logit=function(x){exp(x)/(1+exp(x))}
 logit=function(x){log(x/(1-x))}
 
-tab_spec=fread(paste0(project_folder,"data/species_nb_records.csv"))
+tab_spec=fread(paste0(project_folder,"data/final_and_intermediate_outputs/species_nb_records.csv"))
 tab_spec=subset(tab_spec,nb_detect>=5 & nb_records_tot>=10) %>% group_by(scientificName) %>% mutate(nb_detect_tot=sum(nb_detect),occ_min=min(occupancy_obs))
 
 nrow(trendsf)
@@ -49,4 +54,4 @@ trendsf$significant[trendsf$trend>0 & (trendsf$trend-1.96*trendsf$sde)>0]="yes"
 trendsf$growth.rate=100*(exp(trendsf$trend)-1)
 trendsf=subset(trendsf,convergence==0 & !is.na(acim) & !is.na(sde))
 
-fwrite(trendsf,paste0(project_folder,"data/all_trends.csv"))
+fwrite(trendsf,paste0(project_folder,"data/final_and_intermediate_outputs/all_trends.csv"))
