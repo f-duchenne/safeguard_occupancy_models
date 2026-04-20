@@ -3,9 +3,6 @@
 #+ message = FALSE
 rm(list=ls())
 pkgs <- c("data.table", "dplyr","sf","tidyverse") 
-
-inst <- pkgs %in% installed.packages()
-if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
@@ -147,6 +144,8 @@ for(j in taxo_group_vec){
 		fwrite(mat2,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix_rare.csv"))
 	}else{
 		dat2[,species:=scientificName] #new species column
+	  count_table=dat2[, .N,by=c("scientificName","family")] #count number of records per species
+	  dat2[dat2$species %in% subset(count_table,N<10)$scientificName,species:="others"]
 		#create the matrix
 		mat1=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+region_50~species)
 

@@ -24,17 +24,16 @@ print(i)
 #import data:
 if(i<=1364){
 	taxo_group="bees"
-	if(i<=317){
+	if(i<=316){
 		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_common.csv"))
 	}else{
 		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_rare.csv"))
-		i=i-317
+		i=i-316
 	}
 }else{
   i=i-1364
 	taxo_group="hoverflies"
   dat=fread(paste0("data/final_and_intermediate_outputs/hoverflies_det_nondet_matrix.csv"))
-  dat$others=NA
 }
 
 #combinations
@@ -62,7 +61,7 @@ dat=subset(dat,region_50 %in% subset(count.table,n_records>=5)$region_50)
 nsurvey_used=nrow(dat)
 
 #list length standardization
-dat=dat %>% group_by(region_50) %>% mutate(list.length.c=list_length-mean(list_length))
+dat=dat %>% group_by(region_50) %>% mutate(log.list.length.c=log(list_length)-log(mean(list_length)))
 
 #list count standardization
 dat$log.list.count=log(dat$record_number)
@@ -76,8 +75,7 @@ dat$period.num2=numFactor(dat$period.num)
 dat$group <- factor(rep(1,nrow(dat)))
 dat$period.num_s=scale(dat$period.num)
 dat$log.list.count_s=scale(dat$log.list.count)
-dat$log.list.length.c=log(dat$list.length.c)
-dat$log.list.length.c_s=scale(dat$list.length.c)
+dat$log.list.length.c_s=scale(dat$log.list.length.c)
 
 Nperiod=length(unique(dat$period.num))
 
@@ -111,9 +109,9 @@ for(j in 1:length(baselines_vec)){
     formula_zi=as.formula(~period.num_s+(1|site))
   }
 
-  if(year_des>1925 & year_des<=2015){
+  if(year_des>=1960 & year_des<=2015){
     v <- as.character(formula_det)
-    as.formula(paste0(v[2],v[1],v[3], "+described"))
+    formula_det=as.formula(paste0(v[2],v[1],v[3], "+described"))
   }
     
   modelt=glmmTMB(formula_det,family=binomial,data=dat2,ziformula=formula_zi,control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))

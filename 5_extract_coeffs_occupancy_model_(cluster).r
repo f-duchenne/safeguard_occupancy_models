@@ -25,23 +25,23 @@ i <- as.numeric(args_contents[[1]])
 #you can use i = 1 to run a sample test
 #import data:
 if(i<=1364){
-	taxo_group="bees"
-	if(i<=317){
-		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_common.csv"))
-	}else{
-		dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_rare.csv"))
-		i=i-317
-	}
+  taxo_group="bees"
+  if(i<=316){
+    dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_common.csv"))
+  }else{
+    dat=fread(paste0("data/final_and_intermediate_outputs/bees_det_nondet_matrix_rare.csv"))
+    i=i-316
+  }
 }else{
   i=i-1364
-	taxo_group="hoverflies"
+  taxo_group="hoverflies"
   dat=fread(paste0("data/final_and_intermediate_outputs/hoverflies_det_nondet_matrix.csv"))
-  dat$others=NA
 }
 #combinations
 tab1=expand.grid(species=names(dat)[(which(names(dat)=="region_50")+1):(which(names(dat)=="others")-1)])
 
 logit=function(x){log(x/(1-x))}
+inv.logit=function(x){exp(x)/(1+exp(x))}
 func=function(x,y){zi_vcov[x,y]}
 func2=function(x,y){vc[x,y]}
 
@@ -79,9 +79,10 @@ dat$log.list.length.c_s=scale(dat$log.list.length.c)
 print(index)
 load(paste0("results/","model_",tab1$species[i],".RData"))
 
-baselines_vec=lili2[[8]]
+baselines_vec=lili2[[3]]
 regions=lili2[[length(lili2)]]
 trendsf=NULL
+scalers=lili2[[7]]
 
 for(j in 1:length(baselines_vec)){
   dat2=as.data.frame(subset(dat,year_grouped>=baselines_vec[j]))
@@ -105,9 +106,30 @@ for(j in 1:length(baselines_vec)){
   resume=newdat %>% group_by(region_50) %>% summarise(max.occ=max(pred),min.occ=min(pred))
   
   trends=data.frame(region_50=regions,trend=-1*trend,sde=sqrt(errors),species=tab1$species[i],convergence=modelt$fit$convergence,acim=AIC(modelt),max.occ=resume$max.occ,min.occ=resume$min.occ,taxo_group=taxo_group)
-  trends$trend=trends$trend/lili2[[12]][1,"std"]
-  trends$sde=trends$sde/lili2[[12]][1,"std"]
+  trends$trend=trends$trend/scalers[1,"std"]
+  trends$sde=trends$sde/scalers[1,"std"]
   trends$baseline=baselines_vec[j]
+  trends$det_inter=fixef(modelt)$cond[1]
+  trends$det_count_eff=fixef(modelt)$cond["log.list.count_s"]/scalers$std[scalers$varia=="log.list.count"]
+  trends$det_length_eff=fixef(modelt)$cond["log.list.length.c_s"]/scalers$std[scalers$varia=="log.list.length.c"]
+  
+  #detection probability for average sampling
+   pred.data=data.frame(log.list.count_s=(log(c(3))-scalers$moy[scalers$varia=="log.list.count"])/scalers$std[scalers$varia=="log.list.count"],
+                           log.list.length.c_s=(log(c(0.6))-scalers$moy[scalers$varia=="log.list.length.c"])/scalers$std[scalers$varia=="log.list.length.c"],
+                           region=regions,endMonth=NA,period.num_s=(2000-scalers[1,"moy"])/scalers[1,"std"],site=NA)
+  fifit=predict(modelt,newdata=pred.data,type="link",se.fit=TRUE)
+  trends$det_prob=inv.logit(fifit$fit)
+  trends$det_prob_lwr=inv.logit(fifit$fit-1.96*fifit$se.fit)
+  trends$det_prob_upr=inv.logit(fifit$fit+1.96*fifit$se.fit)
+  
+  #detection probability for high sampling 
+  pred.data=data.frame(log.list.count_s=(log(c(15))-scalers$moy[scalers$varia=="log.list.count"])/scalers$std[scalers$varia=="log.list.count"],
+                       log.list.length.c_s=(log(c(1.5))-scalers$moy[scalers$varia=="log.list.length.c"])/scalers$std[scalers$varia=="log.list.length.c"],
+                       region=regions,endMonth=NA,period.num_s=(2000-scalers[1,"moy"])/scalers[1,"std"],site=NA)
+  fifit=predict(modelt,newdata=pred.data,type="link",se.fit=TRUE)
+  trends$det_prob_high_sampling=inv.logit(fifit$fit)
+  trends$det_prob_lwr_high_sampling=inv.logit(fifit$fit-1.96*fifit$se.fit)
+  trends$det_prob_upr_high_sampling=inv.logit(fifit$fit+1.96*fifit$se.fit)
   
   trendsf=rbind(trendsf,trends)
 }
