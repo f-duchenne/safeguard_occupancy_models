@@ -1,0 +1,20 @@
+#run a job:
+kubectl apply -f example-job.yaml
+
+### look at the pods open
+kubectl get pod 
+
+#### have a look at the memory
+kubectl top pod trial-bayes-0-mn9pb --namespace=francois-namespace
+
+###
+kubectl top pod -n francois-namespace --selector=job-name=trial-bayes
+
+### look at the log files
+kubectl logs trial-bayes-1-wjgph   
+
+#### delete the pods of a job
+kubectl delete -f example-job.yaml
+
+###open the container in an interctive way
+kubectl exec -it francois-r-scripts -n francois-namespace -- bash

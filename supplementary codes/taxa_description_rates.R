@@ -2,8 +2,8 @@ pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot",
 inst <- pkgs %in% installed.packages()
 if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
-#project_folder="C:/Users/Duchenne/Documents/safeguard/"
-project_folder <- ""
+#project_folder="C:\Users\francois.duchenne\Downloads\EU_Bee_trends\EU_Bee_trends\data\final_and_intermediate_outputs"
+
 
 colo2=c("#44AA99","#117733","#332288","#CC6677","#DDCC77")
 

@@ -1,32 +1,13 @@
-<<<<<<< HEAD
-#############################################################
-#############################################################
-#															#
-# THIS CODE HAS BEEN DONE TO RUN ON A HPC PLATEFORM,        #
-# NOT TO RUN ON A NORMAL COMPUTER. IT RUNS THE MODEL,       #
-# WHILE SCRITP 5 EXTRACT THE COEFFICIENTS AND OTHER USEFUL  #
-# INFORMATION FROM THE MODELS. BOTH TASKS HAVE BEEN         #
-# SEPARATED TO BE ABLE TO EXTRACT NEW INFORMATION FROM THE  #
-# MODELS WITHOUT HAVING TO RE-RUN THEM.                     #  
-#															#
-#############################################################
-#############################################################
-=======
 #DO NOT RUN#
 #This script is prepared to be run in a cluster, as it contains computationally demanding models.
 
 ###########################################
 ###########################################
->>>>>>> 2cdac896ec2a69bd924409c87b79e032448446d7
 #' Check for packages and if necessary install into library 
 #+ message = FALSE
 rm(list=ls())
 pkgs <- c("data.table", "dplyr","glmmTMB") 
-
-inst <- pkgs %in% installed.packages()
-if (any(inst)) install.packages(pkgs[!inst])
 pkg.out <- lapply(pkgs, require, character.only = TRUE)
-
 
 # Collect command arguments
 args <- commandArgs(trailingOnly = TRUE)
@@ -62,11 +43,18 @@ index=names(dat)[names(dat)==tab$species[i]]
 
 print(index)
 
+year_descriptions=fread(paste0("data/final_and_intermediate_outputs/species_year_of_description.csv"))
+year_des=year_descriptions$year_description[year_descriptions$scientificName==index]
+
 dat$Y=dat[,index,with=F]
 dat$Y[dat$Y>1]=1 #if many dets, put one
 #det/nondet of the focal species
 Y=dat$Y
 count.table=dat[,.(n_records=sum(Y)),by=region_50] #count number of records per region
+
+dat$described=0
+dat$described[dat$year_grouped>=year_des]=1
+dat$described=as.factor(dat$described)
 
 nsurvey_tot=nrow(dat)
 #exclude region with less than 5 record of the focal species
@@ -74,8 +62,7 @@ dat=subset(dat,region_50 %in% subset(count.table,n_records>=5)$region_50)
 nsurvey_used=nrow(dat)
 
 #list length standardization
-dat$log.list.length=log(dat$list_length)
-dat=dat %>% group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
+dat=dat %>% group_by(region_50) %>% mutate(list.length.c=list_length-mean(list_length))
 
 #list count standardization
 dat$log.list.count=log(dat$record_number)
@@ -89,7 +76,8 @@ dat$period.num2=numFactor(dat$period.num)
 dat$group <- factor(rep(1,nrow(dat)))
 dat$period.num_s=scale(dat$period.num)
 dat$log.list.count_s=scale(dat$log.list.count)
-dat$log.list.length.c_s=scale(dat$log.list.length.c)
+dat$log.list.length.c=log(dat$list.length.c)
+dat$log.list.length.c_s=scale(dat$list.length.c)
 
 Nperiod=length(unique(dat$period.num))
 
@@ -112,26 +100,30 @@ optim_vec=c("Nelder-Mead", "BFGS", "CG")
 lili=list()
 baselines_vec=c(1921,1951,1961,1971,1981,1991,2001)
 for(j in 1:length(baselines_vec)){
+  
+  dat2=subset(dat,year_grouped>=baselines_vec[j])
+  
+  if(length(unique(dat$region_50))>1){
+    formula_det=as.formula(Y~log.list.length.c_s+log.list.count_s+(1|region_50/endMonth))
+    formula_zi=as.formula(~period.num_s*region_50+(1|site))
+  }else{
+    formula_det=as.formula(Y~log.list.length.c_s+log.list.count_s+(1|endMonth))
+    formula_zi=as.formula(~period.num_s+(1|site))
+  }
 
-dat2=subset(dat,year_grouped>=baselines_vec[j])
-
-if(length(unique(dat$region_50))>1){
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/endMonth),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
-}else{
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|endMonth),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
-}
-
-### If it did not converge try to change the solver
-b=0
-while((modelt$fit$convergence!=0 | is.na(AIC(modelt))) & b<3){
-b=b+1
-if(length(unique(dat$region_50))>1){
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|region_50/endMonth),family=binomial,data=dat2,ziformula=~period.num_s*region_50+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
-}else{
-modelt=glmmTMB(Y~log.list.length.c_s+log.list.count_s+(1|endMonth),family=binomial,data=dat2,ziformula=~period.num_s+(1|site),control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
-}
-}
-lili[[j]]=modelt
+  if(year_des>1925 & year_des<=2015){
+    v <- as.character(formula_det)
+    as.formula(paste0(v[2],v[1],v[3], "+described"))
+  }
+    
+  modelt=glmmTMB(formula_det,family=binomial,data=dat2,ziformula=formula_zi,control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
+  ### If it did not converge try to change the solver
+  b=0
+  while((modelt$fit$convergence!=0 | is.na(AIC(modelt))) & b<3){
+    b=b+1
+      modelt=glmmTMB(formula_det,family=binomial,data=dat2,ziformula=formula_zi,control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
+  }
+  lili[[j]]=modelt
 }
 
 #b=ggpredict(model,c("period.num2","region_50"),type="re.zi")

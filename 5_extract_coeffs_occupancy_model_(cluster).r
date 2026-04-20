@@ -1,24 +1,8 @@
-<<<<<<< HEAD
-#############################################################
-#############################################################
-#															#
-# THIS CODE HAS BEEN DONE TO RUN ON A HPC PLATEFORM,        #
-# NOT TO RUN ON A NORMAL COMPUTER. IT IS THE FOLLOWING      #
-# PART OF THE SCRIPT 4, WHICH RAN THE MODEL, WHILE THIS     #
-# CODE EXTRACT THE COEFFICIENTS AND OTHER USEFUL INFORMATION#
-# FROM THE MODEL. BOTH TASKS HAVE BEEN SEPARATED TO BE ABLE #
-# TO EXTRACT NEW INFORMATION FROM THE MODELS WITHOUT HAVING #
-# TO RE-RUN THEM.                                           #  
-#															#
-#############################################################
-#############################################################
-=======
 #DO NOT RUN#
 #This script is prepared to be run in a cluster, as it contains computationally demanding models.
 
 ###########################################
 ###########################################
->>>>>>> 2cdac896ec2a69bd924409c87b79e032448446d7
 #' Check for packages and if necessary install into library 
 #+ message = FALSE
 rm(list=ls())
@@ -103,7 +87,6 @@ for(j in 1:length(baselines_vec)){
   dat2=as.data.frame(subset(dat,year_grouped>=baselines_vec[j]))
   modelt=up2date(lili2[[j]])
   zi_vcov=vcov(modelt)[[2]]
-  trend=fixef(modelt)[[2]]["period.num_s"]+c(0,fixef(modelt)[[2]][grep("period.num_s:",names(fixef(modelt)[[2]]))])
   
   if(length(regions)>1){
 	  trend=fixef(modelt)[[2]]["period.num_s"]+c(0,fixef(modelt)[[2]][grep("period.num_s:",names(fixef(modelt)[[2]]))])

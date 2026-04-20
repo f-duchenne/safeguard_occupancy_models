@@ -1,18 +1,5 @@
-<<<<<<< HEAD
-#############################################################
-#############################################################
-#															#
-# THIS CODE HAS FOR ONLY FUNCTION TO GROUP THE RESULTS OF   #
-# SCRIPT 5 TOGETHER. SINCE SCRIPT 5 HAS BEEN RUN ON A HPC   #
-# PLATEFORM, WE OBTAINED ONE OUTPUT PER CORE. HERE WE GROUP #
-# ALL THESE OUTPUTS TOGETHER.                               #  
-#															#
-#############################################################
-#############################################################
-=======
 #DO NOT RUN#
 #This script is prepared to be run in a cluster, as it contains computationally demanding models.
->>>>>>> 2cdac896ec2a69bd924409c87b79e032448446d7
 
 ############# FIRST ASSEMBLE ALL SPECIES TOGETHER
 pkgs <- c("data.table", "dplyr") 
