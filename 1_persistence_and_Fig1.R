@@ -1,7 +1,5 @@
 #this script explores the database for descriptive analysis.
 pkgs <- c("data.table", "dplyr","ggplot2","cowplot","gridExtra", "sf") 
-inst <- pkgs %in% installed.packages()
-if (any(inst)) install.packages(pkgs[!inst])
 ypkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #colors for regions:

@@ -1,6 +1,4 @@
 pkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse","gridExtra") 
-inst <- pkgs %in% installed.packages()
-if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 #project_folder="C:/Users/Duchenne/Documents/safeguard/"
 project_folder=""
@@ -28,7 +26,7 @@ bidon_hov=subset(bidon,taxo_group=="hoverflies")
 bf=NULL
 bf2=NULL
 for(jj in unique(bidon$taxo_group)){
-    load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_",1921,"_",jj,".RData"))
+  load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_",1921,"_",jj,".RData"))
 	model_1=lis_bas[[1]]
 	model_2=lis_bas[[2]]
 	sav <- emmprep(model_1)
@@ -60,7 +58,9 @@ for(jj in unique(bidon$taxo_group)){
 	b$taxo_group=jj
 	b$n_trends=model_1$k
 	b$subset_species="all"
+	names(b)[1]="X1"
 	bf2=rbind(bf2,b)
+	
 	load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_total_",1971,"_",jj,".RData"))
 	model_1=lis_bas[[1]]
 	model_2=lis_bas[[2]]
@@ -70,6 +70,7 @@ for(jj in unique(bidon$taxo_group)){
 	b$taxo_group=jj
 	b$n_trends=model_1$k
 	b$subset_species="all"
+	names(b)[1]="X1"
 	bf2=rbind(bf2,b)
 }
 
@@ -176,7 +177,7 @@ pdf(paste0(project_folder,"figures/Figure_3.pdf"),width=8,height=5)
 grid.arrange(p1,pl5,ncol=2,widths=c(2,1))
 dev.off();
 
-##################### FIGURE S3
+##################### FIGURE S6
 bf=NULL
 bf2=NULL
 for(jj in unique(bidon$taxo_group)){
@@ -200,7 +201,6 @@ bf$region2=as.character(bf$region_50)
 bf$region2[bf$region2=="mediterranean"]="medit."
 bf$region2[bf$region2=="continental"]="conti."
 
-### PANEL A-B
 pl1=ggplot(data=bf,aes(y=emmean,x=region2,fill=region2,color=region2))+
 geom_point(size=1.5)+
 geom_errorbar(aes(ymax=emmean+1.96*SE,ymin=emmean-1.96*SE),width=0,size=1)+
@@ -211,19 +211,8 @@ strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
 scale_color_manual(values=colo2)+scale_fill_manual(values=colo2)+xlab("Biogeographic region")+ylab(expression(paste("Species trend (log of growth rate)")))+
 facet_grid(cols=vars(taxo_group),rows=vars(baseline))
 
-pl2=ggplot()+
-geom_density_ridges(data=bidon_hov,aes(x=trend,y=region2,fill=region2,color=region2),alpha=0.3,scale = 0.9)+
-xlim(c(-0.2,0.2))+
-geom_point(data=subset(bf,taxo_group=="hoverflies" & subset_species=="all"),aes(x=emmean,y=as.numeric(as.factor(region2))+dodgi,fill=region2,color=region2),size=1.5)+
-geom_errorbarh(data=subset(bf,taxo_group=="hoverflies" & subset_species=="all"),aes(x=emmean,xmax=emmean+1.96*SE,xmin=emmean-1.96*SE,y=as.numeric(as.factor(region2))+dodgi,fill=region2,color=region2),height = 0,size=1)+
-theme_bw()+geom_vline(xintercept=0,linetype="dashed")+
-theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
-panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
-strip.background=element_rect(fill=NA,color=NA),legend.position="none")+
-scale_color_manual(values=colo2)+scale_fill_manual(values=colo2)+ylab("Biogeographic region")+xlab(expression(paste("Species trend (log of growth rate)")))+coord_cartesian(expand=FALSE)+ggtitle("b")
 
-
-
+pl1
 
 
 

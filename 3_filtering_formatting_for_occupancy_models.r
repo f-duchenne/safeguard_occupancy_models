@@ -91,6 +91,8 @@ nb_sp=subset(b,nb_records_tot>=10 & nb_detect>=5) %>% group_by(taxo_group) %>% s
 nsp_tot=b %>% group_by(taxo_group) %>% summarise(n=length(unique(scientificName))) %>%  deframe()
 length(unique(dat$scientificName))
 
+list_sp_to_model=unique(subset(b,nb_records_tot>=10 & nb_detect>=5)$scientificName)
+
 list_filtering=list(nb_records_initial,nr_regions,nb_records,nr_month,nr_sites,nb_surveys,nb_sp_common,nb_sp,nsp_tot)
 save(list_filtering,file=paste0(project_folder,"data/final_and_intermediate_outputs/list_filtering.RData"))
 
@@ -136,7 +138,8 @@ for(j in taxo_group_vec){
 		dat2[,species:=scientificName] #new species column
 		dat2[dat2$species %in% subset(count_table,N>=1000)$scientificName,species:="others"] #all species with more than 999 records are classified as "others"
 		dat2[dat2$species %in% subset(count_table,N<10)$scientificName,species:="others"] #all species with less than 10 records are classified as "others"
-
+		dat2[!(dat2$species %in% list_sp_to_model),species:="others"]
+		
 		#create the matrix
 		mat2=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+region_50~species)
 
@@ -144,8 +147,7 @@ for(j in taxo_group_vec){
 		fwrite(mat2,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix_rare.csv"))
 	}else{
 		dat2[,species:=scientificName] #new species column
-	  count_table=dat2[, .N,by=c("scientificName","family")] #count number of records per species
-	  dat2[dat2$species %in% subset(count_table,N<10)$scientificName,species:="others"]
+	  dat2[!(dat2$species %in% list_sp_to_model),species:="others"]
 		#create the matrix
 		mat1=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+region_50~species)
 

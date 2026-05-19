@@ -116,7 +116,7 @@ for(j in 1:length(baselines_vec)){
   #detection probability for average sampling
    pred.data=data.frame(log.list.count_s=(log(c(3))-scalers$moy[scalers$varia=="log.list.count"])/scalers$std[scalers$varia=="log.list.count"],
                            log.list.length.c_s=(log(c(0.6))-scalers$moy[scalers$varia=="log.list.length.c"])/scalers$std[scalers$varia=="log.list.length.c"],
-                           region=regions,endMonth=NA,period.num_s=(2000-scalers[1,"moy"])/scalers[1,"std"],site=NA)
+                           region=regions,endMonth=NA,period.num_s=(2000-scalers[1,"moy"])/scalers[1,"std"],site=NA,described=1)
   fifit=predict(modelt,newdata=pred.data,type="link",se.fit=TRUE)
   trends$det_prob=inv.logit(fifit$fit)
   trends$det_prob_lwr=inv.logit(fifit$fit-1.96*fifit$se.fit)
@@ -125,7 +125,7 @@ for(j in 1:length(baselines_vec)){
   #detection probability for high sampling 
   pred.data=data.frame(log.list.count_s=(log(c(15))-scalers$moy[scalers$varia=="log.list.count"])/scalers$std[scalers$varia=="log.list.count"],
                        log.list.length.c_s=(log(c(1.5))-scalers$moy[scalers$varia=="log.list.length.c"])/scalers$std[scalers$varia=="log.list.length.c"],
-                       region=regions,endMonth=NA,period.num_s=(2000-scalers[1,"moy"])/scalers[1,"std"],site=NA)
+                       region=regions,endMonth=NA,period.num_s=(2000-scalers[1,"moy"])/scalers[1,"std"],site=NA,described=1)
   fifit=predict(modelt,newdata=pred.data,type="link",se.fit=TRUE)
   trends$det_prob_high_sampling=inv.logit(fifit$fit)
   trends$det_prob_lwr_high_sampling=inv.logit(fifit$fit-1.96*fifit$se.fit)

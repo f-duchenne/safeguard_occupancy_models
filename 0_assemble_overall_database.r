@@ -3,9 +3,6 @@
 #+ message = FALSE
 rm(list=ls())
 pkgs <- c("data.table", "dplyr","sf","spatialEco") 
-
-inst <- pkgs %in% installed.packages()
-if (any(inst)) install.packages(pkgs[!inst])
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder if needed:

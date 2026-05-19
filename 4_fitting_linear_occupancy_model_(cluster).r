@@ -42,7 +42,7 @@ index=names(dat)[names(dat)==tab$species[i]]
 
 print(index)
 
-year_descriptions=fread(paste0("data/final_and_intermediate_outputs/species_year_of_description.csv"))
+year_descriptions=fread(paste0(project_folder,"data/final_and_intermediate_outputs/species_year_of_description.csv"))
 year_des=year_descriptions$year_description[year_descriptions$scientificName==index]
 
 dat$Y=dat[,index,with=F]
@@ -96,7 +96,8 @@ optim_vec=c("Nelder-Mead", "BFGS", "CG")
 
 ######## LINEAR TREND
 lili=list()
-baselines_vec=c(1921,1951,1961,1971,1981,1991,2001)
+lili=list()
+baselines_vec=c(1921,1971)
 for(j in 1:length(baselines_vec)){
   
   dat2=subset(dat,year_grouped>=baselines_vec[j])
@@ -108,18 +109,18 @@ for(j in 1:length(baselines_vec)){
     formula_det=as.formula(Y~log.list.length.c_s+log.list.count_s+(1|endMonth))
     formula_zi=as.formula(~period.num_s+(1|site))
   }
-
-  if(year_des>=1960 & year_des<=2015){
+  
+  if(year_des>=1960 & year_des<=2018 & year_des>baselines_vec[j]){
     v <- as.character(formula_det)
     formula_det=as.formula(paste0(v[2],v[1],v[3], "+described"))
   }
-    
+  
   modelt=glmmTMB(formula_det,family=binomial,data=dat2,ziformula=formula_zi,control=glmmTMBControl(optCtrl =list(iter.max=1e5,eval.max=1e3)))
   ### If it did not converge try to change the solver
   b=0
   while((modelt$fit$convergence!=0 | is.na(AIC(modelt))) & b<3){
     b=b+1
-      modelt=glmmTMB(formula_det,family=binomial,data=dat2,ziformula=formula_zi,control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
+    modelt=glmmTMB(formula_det,family=binomial,data=dat2,ziformula=formula_zi,control=glmmTMBControl(optimizer=optim,optArgs=list(method=optim_vec[b])))
   }
   lili[[j]]=modelt
 }
