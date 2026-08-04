@@ -33,6 +33,21 @@ data1h$taxo_group="hoverflies"
 ## Integrate hoverflies with bees
 data2 <- rbind(data1b[,-which(names(data1b)=="isPseudodata")], data1h)
 
+rm(datb,dath,data1b,data1h)
+
+dim(data2)
+data2=data2[grep("GBIF",data2$occurrenceID,invert=TRUE),]
+dim(data2)
+########################### LOADING GBIF DATA
+datgbif = fread(paste0("data/final_and_intermediate_outputs/extraction_gbif.csv"))
+datgbif$institutionName = "GBIF" 
+datgbif <- datgbif %>% dplyr::select(scientificName,endYear,endMonth,endDay,decimalLongitude,decimalLatitude,country,genus,family,occurrenceID,datasetProvider,institutionName,scientificNameAuthorship)
+datgbif$taxo_group="bees"
+datgbif$taxo_group[datgbif$family=="Syrphidae"]="hoverflies"
+
+dim(data2)
+data2 <- rbind(data2, datgbif)
+dim(data2)
 ############################ FILTERS THE RECORDS TO KEEP ONLY THE ONE WITH YEAR AND COORDINATES
 data2_subset=subset(data2, !is.na(endYear) & !is.na(decimalLongitude) & !is.na(decimalLatitude))
 
@@ -126,9 +141,9 @@ dataf=subset(data4_filtered,!is.na(time_period) & !is.na(region_50))
 
 filter5=nrow(data4_filtered)-nrow(dataf)
 
-fwrite(dataf,paste0(project_folder,"data/final_and_intermediate_outputs/database_clean_filtered.csv"))
+fwrite(dataf,paste0(project_folder,"data/final_and_intermediate_outputs/database_clean_filtered_with_GBIF.csv"))
 filters=data.frame(filters=c("year and coordinates","geographical extent","duplicated","not in a region","not in a period"),nb_removed=c(filter1,filter2,filter3,filter4,filter5))
-fwrite(filters,paste0(project_folder,"data/final_and_intermediate_outputs/nb_records_removed_during _filtering.csv"))
+fwrite(filters,paste0(project_folder,"data/final_and_intermediate_outputs/nb_records_removed_during _filtering_with_GBIF.csv"))
 
 ########################### ASSEMBLING TRAITS
 

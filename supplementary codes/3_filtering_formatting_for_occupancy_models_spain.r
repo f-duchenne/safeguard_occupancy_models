@@ -2,7 +2,7 @@
 #' Check for packages and if necessary install into library 
 #+ message = FALSE
 rm(list=ls())
-pkgs <- c("data.table", "dplyr","sf","tidyverse") 
+pkgs <- c("data.table", "dplyr","sf","tidyverse","geodata") 
 pkg_out <- lapply(pkgs, require, character.only = TRUE)
 
 #defining working folder:
@@ -10,12 +10,40 @@ pkg_out <- lapply(pkgs, require, character.only = TRUE)
 project_folder=""
 
 # Loading data
-dat=fread(paste0(project_folder,"data/final_and_intermediate_outputs/database_clean_filtered.csv"))
+dat=fread(paste0(project_folder,"data/final_and_intermediate_outputs/database_clean_filtered_with_GBIF.csv"))
 nb_records_initial=nrow(dat)
 hex_grid=st_read(paste0(project_folder,"data/raw_data/grids_shapefiles/grid_",50,"KM.shp"),crs="+proj=utm +zone=32 +ellps=WGS84")
-hex_grid_p=st_centroid(hex_grid)
-gride=cbind(data.frame(gridID_50=hex_grid_p$gridID_50),st_coordinates(hex_grid_p))
-names(gride)[2:3]=c("long_50","lat_50")
+vec_ID=unique(dat$gridID_50)
+hex_grid=subset(hex_grid,gridID_50 %in% vec_ID)
+#load EUROPE
+Europe <- gadm(country = c("TUR",country_codes("Cyprus")$ISO3,country_codes("Europe")$ISO3),
+               level = 0, resolution = 2,path="data/final_and_intermediate_outputs/.")
+
+Europe$COUNTRY2=Europe$COUNTRY
+Europe$COUNTRY2[Europe$COUNTRY2=="Faroe Islands"]="Denmark"
+Europe$COUNTRY2[Europe$COUNTRY2=="Åland"]="Finland"
+Europe$COUNTRY2[Europe$COUNTRY2=="Andorra"]="Spain"
+Europe$COUNTRY2[Europe$COUNTRY2=="Vatican City"]="Italy"
+Europe$COUNTRY2[Europe$COUNTRY2=="San Marino"]="Italy"
+Europe$COUNTRY2[Europe$COUNTRY2=="Isle of Man"]="United Kingdom"
+Europe$COUNTRY2[Europe$COUNTRY2=="Jersey"]="United Kingdom"
+Europe$COUNTRY2[Europe$COUNTRY2=="Guernsey"]="United Kingdom"
+Europe$COUNTRY2[Europe$COUNTRY2=="Vatican City"]="United Kingdom"
+Europe$COUNTRY2[Europe$COUNTRY2=="Monaco"]="France"
+
+Europe_s=st_as_sf(Europe)
+Europe_s <- st_transform(Europe_s, crs = "+proj=utm +zone=32 +ellps=WGS84")
+
+hex_grid2=st_join(hex_grid,Europe_s,largest=TRUE)
+hex_grid2$val=0
+hex_grid2$val[is.na(hex_grid2$COUNTRY2)]=1
+plot(hex_grid2["val"])
+hex_grid2$COUNTRY2[is.na(hex_grid2$COUNTRY2)]="Cyprus"
+
+hex_grid_p=st_centroid(hex_grid2)
+gride=cbind(data.frame(gridID_50=hex_grid_p$gridID_50,COUNTRY=hex_grid2$COUNTRY,COUNTRY2=hex_grid2$COUNTRY2),st_coordinates(hex_grid_p))
+names(gride)[4:5]=c("long_50","lat_50")
+
 nrow(dat)
 dat=merge(dat,gride,by=c("gridID_50"))
 nrow(dat)
@@ -24,7 +52,7 @@ nrow(dat)
 subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean")) %>% group_by(taxo_group) %>% count()
 
 n1=nrow(dat)
-dat=subset(dat,region_50 %in% c("alpine","boreal","atlantic","continental","mediterranean"))
+dat=subset(dat,COUNTRY2 %in% c("Spain","Portugal"))
 nr_regions=n1-nrow(dat)
 nb_records=nrow(dat)
 dat %>% group_by(taxo_group) %>% count()
@@ -105,74 +133,36 @@ nyear_b70=sum(unique(endYear)<=1970),nyear_a70=sum(unique(endYear)>1970))
 bb=dat %>% dplyr::group_by(region_50,endYear,gridID_50,taxo_group) %>% dplyr::summarise(nsurveys=length(unique(survey)),nrec=length(survey))
 b=bb %>% dplyr::group_by(region_50,endYear,taxo_group) %>% dplyr::summarise(nsites=length(unique(gridID_50)),mean_nsurv=mean(nsurveys),nrec=sum(nrec))
 
-fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/regions_sampling.csv"))
+fwrite(b,paste0(project_folder,"data/final_and_intermediate_outputs/regions_sampling_with_GBIF.csv"))
 
 ######################################### PREPARE MATRIX OF DETECTION AND NON DETECTION FOR EACH GROUP
 taxo_group_vec=c("bees","hoverflies")
 for(j in taxo_group_vec){
 	dat2=subset(dat,taxo_group==j)
-	
-	if(j=="bees"){
-		count_table=dat2[, .N,by=c("scientificName","family")] #count number of records per species
-		#matrix is way too big, needs to be splitted in two parts
-		#focusing on common species first
-		## to avoid to get a too huge matrix, we can put all the rare species (that we can not study) together
-		dat2[,species:=scientificName] #new species column
-		dat2[dat2$species %in% subset(count_table,N<1000)$scientificName,species:="others"] #all species with less than 1000 records are classified as "others"
-		# sp_to_test=c("Andrena agilissima","Andrena strohmella","Halictus scabiosae","Lasioglossum minutulum","Bombus terrestris")
-		# dat[!(dat$species %in% sp_to_test),species:="others"]
+	dat2[,species:=scientificName] #new species column
+	dat2[!(dat2$species %in% list_sp_to_model),species:="others"]
+	#create the matrix
+	mat1=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+COUNTRY2+region_50~species)
 
-		#create the matrix
-		mat1=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+region_50~species)
+	# mat1$log.list.length=log(mat1$list_length)
+	# mat1=mat1 %>% dplyr::group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
 
-		# mat1$log.list.length=log(mat1$list_length)
-		# mat1=mat1 %>% dplyr::group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
+	# fwrite(mat1,"det_nondet_matrix_species_test.csv")
 
-		# fwrite(mat1,"det_nondet_matrix_species_test.csv")
-
-		#export matrix
-		fwrite(mat1,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix_common.csv"))
-
-		#focusing on rare species
-		count_table=dat2[, .N,by=c("scientificName","family")] #count number of records per species
-		dat2[,species:=scientificName] #new species column
-		dat2[dat2$species %in% subset(count_table,N>=1000)$scientificName,species:="others"] #all species with more than 999 records are classified as "others"
-		dat2[dat2$species %in% subset(count_table,N<10)$scientificName,species:="others"] #all species with less than 10 records are classified as "others"
-		dat2[!(dat2$species %in% list_sp_to_model),species:="others"]
-		
-		#create the matrix
-		mat2=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+region_50~species)
-
-		#export second matrix
-		fwrite(mat2,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix_rare.csv"))
-	}else{
-		dat2[,species:=scientificName] #new species column
-	  dat2[!(dat2$species %in% list_sp_to_model),species:="others"]
-		#create the matrix
-		mat1=dcast(dat2,survey+list_length+record_number+year_grouped+endMonth+time_period+site+long_50+lat_50+region_50~species)
-
-		# mat1$log.list.length=log(mat1$list_length)
-		# mat1=mat1 %>% dplyr::group_by(region_50) %>% mutate(log.list.length.c=log.list.length-mean(log.list.length))
-
-		# fwrite(mat1,"det_nondet_matrix_species_test.csv")
-
-		#export matrix
-		fwrite(mat1,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix.csv"))
-	}
-
+	#export matrix
+	fwrite(mat1,paste0(project_folder,"data/final_and_intermediate_outputs/",j,"_det_nondet_matrix_with_GBIF_spain.csv"))
 }
 
 
 
-dat1=fread(paste0(project_folder,"data/final_and_intermediate_outputs/bees_det_nondet_matrix_common.csv"))
-dat2=fread(paste0(project_folder,"data/final_and_intermediate_outputs/bees_det_nondet_matrix_rare.csv"))
-dat3=fread(paste0(project_folder,"data/final_and_intermediate_outputs/hoverflies_det_nondet_matrix.csv"))
+
+dat1=fread(paste0(project_folder,"data/final_and_intermediate_outputs/bees_det_nondet_matrix_with_GBIF_spain.csv"))
+dat2=fread(paste0(project_folder,"data/final_and_intermediate_outputs/hoverflies_det_nondet_matrix_with_GBIF_spain.csv"))
 
 
 length((which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1))
 
 liste_species=rbind(
-data.frame(species=names(dat1)[(which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1)],taxo_group="bees",matrix="common"),
-data.frame(species=names(dat2)[(which(names(dat2)=="region_50")+1):(which(names(dat2)=="others")-1)],taxo_group="bees",matrix="rare"),
-data.frame(species=names(dat3)[(which(names(dat3)=="region_50")+1):ncol(dat3)],taxo_group="hoverflies",matrix=NA))
-fwrite(liste_species,paste0(project_folder,"data/final_and_intermediate_outputs/liste_total_species_occupancy.csv"))
+data.frame(species=names(dat1)[(which(names(dat1)=="region_50")+1):(which(names(dat1)=="others")-1)],taxo_group="bees"),
+data.frame(species=names(dat2)[(which(names(dat2)=="region_50")+1):(which(names(dat2)=="others")-1)],taxo_group="hoverflies"))
+fwrite(liste_species,paste0(project_folder,"data/final_and_intermediate_outputs/liste_total_species_occupancy_with_GBIF.csv"))
