@@ -20,13 +20,6 @@ nrow(subset(bidon,baseline==1971))
 bidon %>% group_by(taxo_group,baseline) %>% summarise(length(unique(species)))
 
 baselines_vec=unique(trendsf$baseline)
-bidon$genus=sapply(strsplit(bidon$species, " "),function(x){x[[1]]})
-
-length(unique(bidon$species[bidon$baseline==1921]))
-
-ggplot(data=subset(bidon,taxo_group=="bees" & baseline==1921),aes(x=genus,y=det_prob))+geom_boxplot()+
-  coord_flip()+ylab("Detection probability")
-
 
 bidon$signi_des="non"
 bidon$signi_des[bidon$described_pval<0.05]="yes"

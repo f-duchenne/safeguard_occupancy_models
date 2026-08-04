@@ -28,7 +28,7 @@ bf2=NULL
 for(jj in unique(bidon$taxo_group)){
   load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_",1921,"_",jj,".RData"))
 	model_1=lis_bas[[1]]
-	model_2=lis_bas[[2]]
+	model_2=lis_bapkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse","gridExtra") s[[2]]
 	sav <- emmprep(model_1)
 	b=as.data.frame(emmeans(sav,specs="region_50"))
 	b$baseline=1921
@@ -214,22 +214,14 @@ facet_grid(cols=vars(taxo_group),rows=vars(baseline))
 
 pl1
 
+#################### FIGURE REVIEW
+trendsf$genus=sapply(strsplit(trendsf$species, " "),function(x){x[[1]]})
+
+length(unique(trendsf$species[bidon$baseline==1921]))
+
+ggplot(data=subset(trendsf,baseline==1921),aes(x=genus,y=det_prob))+geom_boxplot()+
+  coord_flip()+ylab("Detection probability")+facet_wrap(~taxo_group,scales="free_y")
 
 
 
 ########################################
-bidon_bee$group_abund=cut(log(bidon_bee$nb_records),10)
-ggplot(data=bidon_bee,aes(y=abs(trend),x=group_abund))+
-geom_boxplot()+
-theme_bw()+geom_vline(xintercept=0,linetype="dashed")+
-theme(axis.line = element_line(colour = "black"),panel.grid.major = element_blank(),panel.border=element_blank(),
-panel.grid.minor = element_blank(),panel.background = element_blank(),plot.title=element_text(size=14,face="bold",hjust = 0),
-strip.background=element_rect(fill=NA,color=NA),legend.position="right")+
-scale_color_manual(values=colo2)+xlab("Biogeographic region")+ylab(expression(paste("Species trend (log of growth rate)")))+ggtitle("a")
-
-
-ggplot()+
-geom_point(data=subset(bf,taxo_group=="hoverflies" & subset_species=="all"),aes(x=emmean,y=as.numeric(as.factor(region2)),fill=region2,color=region2),size=2)+
-geom_errorbar(data=subset(bf,taxo_group=="hoverflies" & subset_species=="all"),aes(x=emmean,xmax=emmean+1.96*SE,xmin=emmean-1.96*SE,y=as.numeric(as.factor(region2)),fill=region2,color=region2),height = 0,size=1)
-
-
