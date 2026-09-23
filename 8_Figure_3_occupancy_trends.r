@@ -28,7 +28,7 @@ bf2=NULL
 for(jj in unique(bidon$taxo_group)){
   load(paste0(project_folder,"data/final_and_intermediate_outputs/models/model_",1921,"_",jj,".RData"))
 	model_1=lis_bas[[1]]
-	model_2=lis_bapkgs <- c("data.table", "dplyr","lme4","ggplot2","ggridges","metafor","cowplot","emmeans","tidyverse","gridExtra") s[[2]]
+	model_2=lis_bas[[2]]
 	sav <- emmprep(model_1)
 	b=as.data.frame(emmeans(sav,specs="region_50"))
 	b$baseline=1921
